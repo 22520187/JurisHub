@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
     public User findOrCreateOAuth2User(String email, String name, String providerId, String picture) {
         Optional<User> existingUser = userRepository.findByEmail(email);
 
-        if (existingUser.isEmpty()) {
+        if (existingUser.isPresent()) {
             User user = existingUser.get();
             userMapper.updateUserFromOAuth2(user, name, providerId, picture);
             return userRepository.save(user);
