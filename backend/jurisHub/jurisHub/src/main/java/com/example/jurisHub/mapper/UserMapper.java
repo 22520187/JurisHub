@@ -14,6 +14,7 @@ public class UserMapper {
 
         return User.builder()
                 .email(registerRequest.getEmail())
+                .password(registerRequest.getPassword())
                 .fullName(registerRequest.getFullName())
                 .phoneNumber(registerRequest.getPhoneNumber())
                 .role(User.Role.USER)
