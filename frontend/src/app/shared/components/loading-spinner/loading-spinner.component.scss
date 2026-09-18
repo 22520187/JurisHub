@@ -1,0 +1,127 @@
+.spinner-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+.spinner-overlay:not(.inline) {
+  position: fixed;
+  inset: 0;
+  background: rgba(244, 247, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.spinner-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 48px;
+  background: none;
+  animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Brand Loading Style */
+.brand-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.brand-text {
+  font-family: 'Inter Variable', 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  background: linear-gradient(
+    90deg,
+    #00426F 0%,
+    #00426F 35%,
+    #00A3FF 50%,
+    #00426F 65%,
+    #00426F 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: brandShimmer 2.2s infinite linear;
+}
+
+.brand-progress-bar {
+  width: 160px;
+  height: 3px;
+  background: rgba(217, 226, 240, 0.4);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.brand-progress-glow {
+  width: 60px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, #018DE3, #00D2FF, #018DE3, transparent);
+  position: absolute;
+  top: 0;
+  left: -60px;
+  animation: progressSweep 2.2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.spinner-msg {
+  margin-top: 16px;
+  font-family: 'Inter Variable', 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: #00426F;
+  opacity: 0.8;
+  letter-spacing: -0.1px;
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+@keyframes brandShimmer {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes progressSweep {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(220px);
+  }
+}

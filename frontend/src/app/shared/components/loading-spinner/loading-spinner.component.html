@@ -1,0 +1,15 @@
+@if (visible) {
+  <div class="spinner-overlay" [class.inline]="inline">
+    <div class="spinner-card">
+      <div class="brand-loading-container">
+        <h1 class="brand-text">{{ brandText }}</h1>
+        <div class="brand-progress-bar">
+          <div class="brand-progress-glow"></div>
+        </div>
+      </div>
+      @if (message) {
+        <p class="spinner-msg">{{ message }}</p>
+      }
+    </div>
+  </div>
+}
