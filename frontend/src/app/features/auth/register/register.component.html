@@ -16,7 +16,7 @@
         <h2 class="auth-heading">Đăng ký tài khoản</h2>
         <p class="auth-subheading text-muted">
           Đã có tài khoản?
-          <a href="#" class="auth-link fw-semibold" (click)="$event.preventDefault()">
+          <a routerLink="/login" class="auth-link fw-semibold ms-1">
             Đăng nhập <i class="bi bi-arrow-right"></i>
           </a>
         </p>
@@ -26,124 +26,101 @@
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
         
         <!-- Họ và tên -->
-        <div class="mb-3">
-          <label class="form-label fw-semibold text-secondary small mb-1">
-            Họ và tên <span class="text-danger">*</span>
-          </label>
-          <div class="input-group-custom" [class.is-invalid]="submitted && registerForm.get('fullName')?.invalid">
-            <span class="input-icon">
-              <i class="bi bi-envelope"></i>
-            </span>
-            <input 
-              type="text" 
-              formControlName="fullName" 
-              class="form-control input-field" 
-              placeholder="Nguyễn Văn A">
-          </div>
-          @if (submitted && registerForm.get('fullName')?.errors?.['required']) {
-            <div class="text-danger small mt-1">Vui lòng nhập họ và tên</div>
-          }
-        </div>
+        <app-custom-input
+          label="Họ và tên"
+          placeholder="Nguyễn Văn A"
+          formControlName="fullName"
+          [required]="true"
+          [submitted]="submitted"
+          prefix='<i class="bi bi-person"></i>'
+          [validationMessages]="{
+            required: 'Vui lòng nhập họ và tên',
+            minlength: 'Họ và tên phải có ít nhất 2 ký tự'
+          }">
+        </app-custom-input>
 
         <!-- Email -->
-        <div class="mb-3">
-          <label class="form-label fw-semibold text-secondary small mb-1">
-            Email <span class="text-danger">*</span>
-          </label>
-          <div class="input-group-custom" [class.is-invalid]="submitted && registerForm.get('email')?.invalid">
-            <span class="input-icon">
-              <i class="bi bi-envelope"></i>
-            </span>
-            <input 
-              type="email" 
-              formControlName="email" 
-              class="form-control input-field" 
-              placeholder="name@example.com">
-          </div>
-          @if (submitted && registerForm.get('email')?.errors?.['required']) {
-            <div class="text-danger small mt-1">Vui lòng nhập email</div>
-          }
-          @if (submitted && registerForm.get('email')?.errors?.['email']) {
-            <div class="text-danger small mt-1">Email không đúng định dạng</div>
-          }
-        </div>
+        <app-custom-input
+          label="Email"
+          placeholder="name@example.com"
+          formControlName="email"
+          [required]="true"
+          [submitted]="submitted"
+          prefix='<i class="bi bi-envelope"></i>'
+          [validationMessages]="{
+            required: 'Vui lòng nhập email',
+            email: 'Email không đúng định dạng'
+          }">
+        </app-custom-input>
 
         <!-- Mật khẩu -->
-        <div class="mb-3">
-          <label class="form-label fw-semibold text-secondary small mb-1">
-            Mật khẩu <span class="text-danger">*</span>
-          </label>
-          <div class="input-group-custom" [class.is-invalid]="submitted && registerForm.get('password')?.invalid">
-            <span class="input-icon">
-              <i class="bi bi-lock"></i>
-            </span>
-            <input 
-              [type]="showPassword ? 'text' : 'password'" 
-              formControlName="password" 
-              class="form-control input-field" 
-              placeholder="Nhập mật khẩu">
-            <button 
-              type="button" 
-              class="btn-toggle-eye" 
-              (click)="togglePasswordVisibility()" 
-              tabindex="-1">
-              <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
-            </button>
-          </div>
-          @if (submitted && registerForm.get('password')?.errors?.['required']) {
-            <div class="text-danger small mt-1">Vui lòng nhập mật khẩu</div>
-          }
-          @if (submitted && registerForm.get('password')?.errors?.['minlength']) {
-            <div class="text-danger small mt-1">Mật khẩu phải có ít nhất 6 ký tự</div>
-          }
-        </div>
+        <app-custom-input
+          label="Mật khẩu"
+          placeholder="Nhập mật khẩu"
+          [type]="showPassword ? 'text' : 'password'"
+          formControlName="password"
+          [required]="true"
+          [submitted]="submitted"
+          prefix='<i class="bi bi-lock"></i>'
+          [suffix]='showPassword ? "<i class=\"bi bi-eye-slash\"></i>" : "<i class=\"bi bi-eye\"></i>"'
+          suffixAriaLabel="Ẩn/hiện mật khẩu"
+          (suffixClick)="togglePasswordVisibility()"
+          [validationMessages]="{
+            required: 'Vui lòng nhập mật khẩu',
+            minlength: 'Mật khẩu phải có ít nhất 6 ký tự'
+          }">
+        </app-custom-input>
 
         <!-- Xác nhận mật khẩu -->
-        <div class="mb-3">
-          <label class="form-label fw-semibold text-secondary small mb-1">
-            Xác nhận mật khẩu <span class="text-danger">*</span>
-          </label>
-          <div class="input-group-custom" [class.is-invalid]="submitted && registerForm.get('confirmPassword')?.invalid">
-            <span class="input-icon">
-              <i class="bi bi-lock"></i>
-            </span>
-            <input 
-              [type]="showConfirmPassword ? 'text' : 'password'" 
-              formControlName="confirmPassword" 
-              class="form-control input-field" 
-              placeholder="Nhập lại mật khẩu">
-            <button 
-              type="button" 
-              class="btn-toggle-eye" 
-              (click)="toggleConfirmPasswordVisibility()" 
-              tabindex="-1">
-              <i class="bi" [ngClass]="showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
-            </button>
-          </div>
-          @if (submitted && registerForm.get('confirmPassword')?.errors?.['passwordMismatch']) {
-            <div class="text-danger small mt-1">Mật khẩu xác nhận không khớp</div>
-          }
-        </div>
+        <app-custom-input
+          label="Xác nhận mật khẩu"
+          placeholder="Nhập lại mật khẩu"
+          [type]="showConfirmPassword ? 'text' : 'password'"
+          formControlName="confirmPassword"
+          [required]="true"
+          [submitted]="submitted"
+          prefix='<i class="bi bi-lock"></i>'
+          [suffix]='showConfirmPassword ? "<i class=\"bi bi-eye-slash\"></i>" : "<i class=\"bi bi-eye\"></i>"'
+          suffixAriaLabel="Ẩn/hiện mật khẩu xác nhận"
+          (suffixClick)="toggleConfirmPasswordVisibility()"
+          [validationMessages]="{
+            required: 'Vui lòng nhập lại mật khẩu',
+            passwordMismatch: 'Mật khẩu xác nhận không khớp'
+          }">
+        </app-custom-input>
 
         <!-- Checkbox Điều khoản -->
-        <div class="form-check mb-4 mt-2">
-          <input 
-            class="form-check-input custom-checkbox" 
-            type="checkbox" 
-            formControlName="agreeTerms" 
-            id="agreeTerms">
-          <label class="form-check-label text-muted small ms-1" for="agreeTerms">
-            Tôi đồng ý với các <a href="#" class="auth-link fw-semibold" (click)="$event.preventDefault()">điều khoản</a> và <a href="#" class="auth-link fw-semibold" (click)="$event.preventDefault()">chính sách bảo mật</a>
-          </label>
+        <div class="mb-4 mt-2">
+          <app-checkbox
+            formControlName="agreeTerms"
+            [boxOnlyClick]="true">
+            <span class="text-muted small ms-1">
+              Tôi đồng ý với các <a href="#" class="auth-link fw-semibold" (click)="$event.preventDefault()">điều khoản</a> và <a href="#" class="auth-link fw-semibold" (click)="$event.preventDefault()">chính sách bảo mật</a>
+            </span>
+          </app-checkbox>
           @if (submitted && registerForm.get('agreeTerms')?.invalid) {
             <div class="text-danger small mt-1">Bạn cần đồng ý với điều khoản dịch vụ</div>
           }
         </div>
 
         <!-- Submit Button -->
-        <button type="submit" class="btn btn-teal-submit w-100 py-2 fw-semibold mb-4 shadow-sm">
+        <app-button
+          class="w-100 mb-4"
+          type="submit"
+          variant="custom"
+          [customStyle]="{
+            width: '100%',
+            height: '48px',
+            backgroundColor: '#08544e',
+            backgroundColorHover: '#053b37',
+            borderRadius: '10px',
+            fontSize: '1rem',
+            fontWeight: '600',
+            color: '#ffffff',
+            boxShadow: '0 4px 12px rgba(8, 84, 78, 0.2)'
+          }">
           Đăng ký <i class="bi bi-arrow-right ms-1"></i>
-        </button>
+        </app-button>
 
         <!-- Divider -->
         <div class="divider-container mb-4">
