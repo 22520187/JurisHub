@@ -1,0 +1,21 @@
+@if (visible) {
+  <div class="toast-container" [style.top]="top" [class.success]="type === 'success'" [class.error]="type === 'error'" [class.warning]="type === 'warning'" [class.info]="type === 'info'">
+    <div class="toast-content">
+      <div class="toast-icon">
+        <img [src]="iconPath" alt="status icon">
+      </div>
+      <div class="toast-body">
+        @if (title) {
+          <div class="toast-title">{{ title }}</div>
+        }
+        <div class="toast-message">{{ message }}</div>
+      </div>
+    </div>
+    <div class="toast-actions">
+      <div class="divider"></div>
+      <button class="close-btn" (click)="onClose()">
+        <img src="assets/shared-ui/icon/icn-exit.svg" alt="close">
+      </button>
+    </div>
+  </div>
+}

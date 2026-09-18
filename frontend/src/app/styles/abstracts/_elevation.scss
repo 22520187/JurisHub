@@ -1,0 +1,13 @@
+@use 'colors' as c;
+
+// ============================================
+// SEMANTIC SHADOW
+// ============================================
+$elevation-color-black: c.$neutral-black;
+$elevation-focus-color: c.$brand-600;
+
+$shadow-none:  none;
+$shadow-sm:    0 2px 8px rgba($elevation-color-black, 0.12);   // card nhe, dropdown
+$shadow-md:    0 8px 24px rgba($elevation-color-black, 0.16);  // modal, popover
+$shadow-lg:    0 16px 40px rgba($elevation-color-black, 0.2);  // modal lon, drawer
+$shadow-focus: 0 0 0 3px rgba($elevation-focus-color, 0.24);   // focus ring thay outline

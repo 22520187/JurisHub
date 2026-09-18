@@ -1,0 +1,26 @@
+// ============================================
+// BORDER RADIUS
+// ============================================
+$radius-none: 0;
+$radius-xs:   2px;
+$radius-sm:   4px;
+$radius-md:   6px;
+$radius-lg:   8px;
+$radius-xl:   12px;
+$radius-2xl:  16px;
+$radius-full: 9999px;
+
+// ============================================
+// BORDER WIDTH
+// ============================================
+$border-width-stroke: 1px;
+$border-width-medium: 2px;
+$border-width-thick:  4px;
+
+// ============================================
+// BORDER OPACITY (Độ đậm nhạt)
+// ============================================
+$border-opacity-disabled: 0.12; 
+$border-opacity-default:  0.24; 
+$border-opacity-hover:    0.48; 
+$border-opacity-active:   0.80; 
