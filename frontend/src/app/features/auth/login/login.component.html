@@ -1,0 +1,145 @@
+<div class="auth-wrapper d-flex align-items-center justify-content-center min-vh-100 p-3 p-md-4">
+  <div class="auth-card d-flex flex-column flex-lg-row">
+    
+    <!-- LEFT SIDE: LOGIN FORM -->
+    <div class="auth-form-side d-flex flex-column justify-content-center">
+      
+      <!-- Top Badge Icon -->
+      <div class="text-center mb-3">
+        <div class="auth-icon-circle mx-auto">
+          <i class="bi bi-lock fs-4"></i>
+        </div>
+      </div>
+
+      <!-- Heading -->
+      <div class="text-center mb-4">
+        <h2 class="auth-heading">Chào mừng trở lại</h2>
+        <p class="auth-subheading text-muted">
+          Chưa có tài khoản?
+          <a routerLink="/register" class="auth-link fw-semibold ms-1">
+            Đăng ký ngay <i class="bi bi-arrow-right"></i>
+          </a>
+        </p>
+      </div>
+
+      <!-- Login Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+        
+        <!-- Email -->
+        <app-custom-input
+          label="Email"
+          placeholder="name@example.com"
+          formControlName="email"
+          [submitted]="submitted"
+          prefix='<i class="bi bi-envelope"></i>'
+          [validationMessages]="{
+            required: 'Vui lòng nhập email',
+            email: 'Email không đúng định dạng'
+          }">
+        </app-custom-input>
+
+        <!-- Mật khẩu -->
+        <app-custom-input
+          label="Mật khẩu"
+          placeholder="••••••••"
+          [type]="showPassword ? 'text' : 'password'"
+          formControlName="password"
+          [submitted]="submitted"
+          prefix='<i class="bi bi-lock"></i>'
+          [suffix]='showPassword ? "<i class=\"bi bi-eye-slash\"></i>" : "<i class=\"bi bi-eye\"></i>"'
+          suffixAriaLabel="Ẩn/hiện mật khẩu"
+          (suffixClick)="togglePasswordVisibility()"
+          [validationMessages]="{
+            required: 'Vui lòng nhập mật khẩu',
+            minlength: 'Mật khẩu phải có ít nhất 6 ký tự'
+          }">
+        </app-custom-input>
+
+        <!-- Remember me & Forgot password -->
+        <div class="d-flex align-items-center justify-content-between mb-4 mt-2">
+          <app-checkbox
+            formControlName="rememberMe"
+            label="Ghi nhớ đăng nhập">
+          </app-checkbox>
+          <a href="#" class="auth-link small fw-medium text-decoration-none" (click)="$event.preventDefault()">
+            Quên mật khẩu?
+          </a>
+        </div>
+
+        <!-- Submit Button -->
+        <app-button
+          class="w-100 mb-4"
+          type="submit"
+          variant="custom"
+          [customStyle]="{
+            width: '100%',
+            height: '48px',
+            backgroundColor: '#08544e',
+            backgroundColorHover: '#053b37',
+            borderRadius: '10px',
+            fontSize: '1rem',
+            fontWeight: '600',
+            color: '#ffffff',
+            boxShadow: '0 4px 12px rgba(8, 84, 78, 0.2)'
+          }">
+          Đăng nhập <i class="bi bi-arrow-right ms-1"></i>
+        </app-button>
+
+        <!-- Divider -->
+        <div class="divider-container mb-4">
+          <span class="divider-text text-muted">HOẶC ĐĂNG NHẬP VỚI</span>
+        </div>
+
+        <!-- Social Buttons -->
+        <div class="row g-2 g-sm-3">
+          <div class="col-6">
+            <button 
+              type="button" 
+              class="btn btn-social w-100 d-flex align-items-center justify-content-center py-2"
+              (click)="onSocialLogin('Google')">
+              <svg class="me-2" viewBox="0 0 24 24" width="18" height="18">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span class="small fw-semibold text-secondary">Google</span>
+            </button>
+          </div>
+          <div class="col-6">
+            <button 
+              type="button" 
+              class="btn btn-social w-100 d-flex align-items-center justify-content-center py-2"
+              (click)="onSocialLogin('Facebook')">
+              <i class="bi bi-facebook text-primary fs-5 me-2"></i>
+              <span class="small fw-semibold text-secondary">Facebook</span>
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- RIGHT SIDE: BRANDING HERO WITH LEGAL ILLUSTRATION -->
+    <div class="auth-hero-side position-relative d-none d-lg-flex flex-column justify-content-center p-5">
+      <div class="hero-overlay"></div>
+      
+      <div class="hero-content position-relative z-2 text-white">
+        <h1 class="hero-title mb-3">
+          Kết nối pháp lý<br>dễ dàng hơn
+        </h1>
+        <p class="hero-subtitle mb-4">
+          Nền tảng kết nối luật sư và khách hàng hàng đầu Việt Nam
+        </p>
+
+        <!-- Carousel Indicators -->
+        <div class="hero-indicators d-flex align-items-center gap-2">
+          <span class="indicator active"></span>
+          <span class="indicator"></span>
+          <span class="indicator"></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
