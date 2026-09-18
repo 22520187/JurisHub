@@ -1,0 +1,75 @@
+// ============================================
+// SPACING SCALE — base 4px
+// ============================================
+$space-1:  4px;
+$space-2:  8px;
+$space-3:  12px;
+$space-4:  16px;
+$space-5:  20px;
+$space-6:  24px;
+$space-8:  32px;
+$space-10: 40px;
+$space-12: 48px;
+$space-16: 64px;
+$space-20: 80px;
+$space-24: 96px;
+
+// ============================================
+// WIDTH
+// ============================================
+$width-xs:   120px;
+$width-sm:   200px;
+$width-md:   320px;
+$width-lg:   480px;
+$width-xl:   640px;
+$width-2xl:  768px;
+$width-full: 100%;
+
+// ============================================
+// HEIGHT — thường dùng cho input, button
+// ============================================
+$height-xs:   24px;
+$height-sm:   32px;
+$height-md:   36px;
+$height-lg:   40px;
+$height-xl:   48px;
+$height-2xl:  56px;
+$height-3xl:  64px;
+$height-full: 100%;
+
+// ============================================
+// GAP
+// ============================================
+$gap-xs:  4px;
+$gap-sm:  8px;
+$gap-md:  12px;
+$gap-lg:  16px;
+$gap-xl:  20px;
+$gap-2xl: 24px;
+$gap-3xl: 32px;
+
+// ============================================
+// PADDING (Top, Right, Bottom, Left)
+// ============================================
+$padding-xs:  4px;
+$padding-sm:  8px;
+$padding-md:  12px;
+$padding-lg:  16px;
+$padding-xl:  20px;
+$padding-2xl: 24px;
+$padding-3xl: 32px;
+
+// ============================================
+// FLOW & AUTO-LAYOUT MIXINS
+// ============================================
+@mixin flow-vertical($gap: 0) {
+  display: flex;
+  flex-direction: column;
+  gap: $gap;
+}
+
+@mixin flow-horizontal($gap: 0) {
+  display: flex;
+  flex-direction: row;
+  gap: $gap;
+}

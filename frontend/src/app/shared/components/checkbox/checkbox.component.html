@@ -1,0 +1,26 @@
+<div class="checkbox-wrapper" 
+  [class.disabled]="disabled" 
+  [class.checked]="state === 'checked'"
+  [class.indeterminate]="state === 'indeterminate'"
+  [class.box-only-click]="boxOnlyClick"
+  [style.--checked-color]="customStyle?.checkedColor || 'var(--primary-teal, #08544e)'"
+  [style.--tick-color]="customStyle?.tickColor || '#ffffff'"
+  [style.--minus-color]="customStyle?.minusColor || '#ffffff'"
+  [style.--text-color]="customStyle?.textColor || '#64748b'"
+>
+  <div class="checkbox-box" (click)="onBoxClick($event)">
+    <svg *ngIf="state === 'checked'" class="checkmark" viewBox="0 2 24 14">
+      <path 
+        d="M4 12 L10 18 L21 4" 
+        fill="none" stroke="#FFFFFF" 
+        stroke-width="4" 
+        stroke-linecap="round"
+        stroke-linejoin="round" />
+    </svg>
+    <svg *ngIf="state === 'indeterminate'" class="minusmark" viewBox="0 2 24 14">
+      <path d="M5 12 H19" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+    </svg>
+  </div>
+  <span class="checkbox-label" *ngIf="label">{{ label }}</span>
+  <ng-content></ng-content>
+</div>

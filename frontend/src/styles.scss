@@ -1,0 +1,18 @@
+@import "bootstrap/scss/bootstrap";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+:root {
+  --primary-teal: #0b5952;
+  --primary-teal-dark: #073f3a;
+  --primary-teal-light: #0f746b;
+  --primary-teal-subtle: #e6f4f2;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f3f4f6;
+  color: #1f2937;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}

@@ -1,0 +1,223 @@
+// ============================================
+// RAW COLOR PALETTE
+// ============================================
+
+// 1. NEUTRAL
+$neutral-white: #ffffff;
+$neutral-10: #fafafa;
+$neutral-50: #f5f5f5;
+$neutral-100: #eeeeee;
+$neutral-200: #e0e0e0;
+$neutral-300: #bdbdbd;
+$neutral-400: #9e9e9e;
+$neutral-500: #757575;
+$neutral-600: #616161;
+$neutral-700: #424242;
+$neutral-800: #212121;
+$neutral-900: #121212;
+$neutral-black: #000000;
+
+// 2. BRAND
+$brand-10: #e8f0fe;
+$brand-50: #d2e3fc;
+$brand-100: #aecbfa;
+$brand-200: #85a9f3;
+$brand-300: #6990eb;
+$brand-400: #5078e1;
+$brand-500: #3c63d4;
+$brand-600: #2952c8;
+$brand-700: #1e3ea0;
+$brand-800: #152d78;
+$brand-900: #0c1e50;
+
+// 3. FUNCTIONAL
+$functional-10: #f0f7ff;
+$functional-50: #e3f2fd;
+$functional-100: #bbdefb;
+$functional-200: #90caf9;
+$functional-300: #64b5f6;
+$functional-400: #42a5f5;
+$functional-500: #2196f3;
+$functional-600: #1976d2;
+$functional-700: #1565c0;
+$functional-800: #0d47a1;
+$functional-900: #0a2756;
+
+// Success
+$success-10: #f0fdf4;
+$success-50: #e6f4ea;
+$success-100: #cce8d5;
+$success-200: #a3d5b5;
+$success-300: #71be8c;
+$success-400: #44a568;
+$success-500: #288f4b;
+$success-600: #1e7e34;
+$success-700: #186629;
+$success-800: #0d3b18;
+$success-900: #07220e;
+
+// Warning
+$warning-10: #fffcf0;
+$warning-50: #fef7e0;
+$warning-100: #fce6a8;
+$warning-200: #fad170;
+$warning-300: #f7b938;
+$warning-400: #eaa115;
+$warning-500: #dc8c04;
+$warning-600: #c87a00;
+$warning-700: #a35a00;
+$warning-800: #7a4200;
+$warning-900: #5c3700;
+
+// Danger
+$danger-10: #fef1f0;
+$danger-50: #fce8e6;
+$danger-100: #fad1ce;
+$danger-200: #f5b0ab;
+$danger-300: #ef8b84;
+$danger-400: #e8655c;
+$danger-500: #db473d;
+$danger-600: #A80A12;
+$danger-700: #9e2b20;
+$danger-800: #7a1d14;
+$danger-900: #5c1309;
+
+// 4. UTILITY
+$utility-10: #f8fafc;
+$utility-50: #f1f5f9;
+$utility-100: #e2e8f0;
+$utility-200: #cbd5e1;
+$utility-300: #94a3b8;
+$utility-400: #64748b;
+$utility-500: #475569;
+$utility-600: #334155;
+$utility-700: #1e293b;
+$utility-800: #0f172a;
+$utility-900: #020617;
+
+// ============================================
+// SEMANTIC COLORS
+// Grouped by usage zones: Background, Text, Border
+// ============================================
+
+// --- Semantic: Background ---
+$bg-primary: $neutral-white;
+$bg-secondary: $neutral-50;
+$bg-tertiary: $neutral-100;
+$bg-inverse: $neutral-900;
+$bg-brand: $brand-600;
+$bg-brand-soft: $brand-10;
+$bg-info: $functional-10;
+$bg-success: $success-10;
+$bg-warning: $warning-10;
+$bg-danger: $danger-10;
+$bg-overlay: rgba($neutral-black, 0.5);
+$bg-disabled: $neutral-100;
+$bg-readonly: $neutral-50;
+$bg-selected: $brand-10;
+$bg-stripe: $neutral-10;
+
+// --- Semantic: Text ---
+$text-primary: $neutral-900;
+$text-secondary: $neutral-600;
+$text-tertiary: $neutral-400;
+$text-disabled: $neutral-300;
+$text-inverse: $neutral-white;
+$text-brand: $brand-600;
+$text-info: $functional-600;
+$text-success: $success-600;
+$text-warning: $warning-600;
+$text-danger: $danger-600;
+$text-link: $brand-600;
+$text-link-hover: $brand-700;
+
+// Typography Roles
+$text-emphasis: $text-primary;
+$text-title: $text-primary;
+$text-subheading: $text-secondary;
+$text-paragraph: $text-secondary;
+$text-label: $text-tertiary;
+$text-placeholder: $text-tertiary;
+
+// Web / Interactive Texts
+$text-visited: $brand-800;
+$text-active: $brand-600;
+$text-code: $danger-700;
+
+// --- Semantic: Border ---
+$border-default: $neutral-200;
+$border-strong: $neutral-400;
+$border-focus: $brand-600;
+$border-disabled: $neutral-200;
+$border-divider: $neutral-100;
+
+// Backward-compatible and extended border semantics
+$border-brand: $brand-600;
+$border-info: $functional-600;
+$border-success: $success-600;
+$border-warning: $warning-600;
+$border-danger: $danger-600;
+
+
+// ============================================
+// STATEFUL TEXT TOKENS
+// Each semantic group has 4 states: strong, sub, soft, disabled.
+// ============================================
+
+// sem/color/text/neutral
+$text-neutral-strong: $neutral-900;
+$text-neutral-sub: $neutral-600;
+$text-neutral-soft: $neutral-400;
+$text-neutral-disabled: $neutral-300;
+
+// sem/color/text/brand
+$text-brand-strong: $brand-800;
+$text-brand-sub: $brand-600;
+$text-brand-soft: $brand-500;
+$text-brand-disabled: $neutral-300;
+
+// sem/color/text/white
+$text-white-strong: $neutral-white;
+$text-white-sub: $neutral-100;
+$text-white-soft: $neutral-300;
+$text-white-disabled: $neutral-500;
+
+// sem/color/text/function/info
+$text-function-info-strong: $functional-800;
+$text-function-info-sub: $functional-600;
+$text-function-info-soft: $functional-500;
+$text-function-info-disabled: $neutral-300;
+
+// sem/color/text/function/caution
+$text-function-caution-strong: $warning-800;
+$text-function-caution-sub: $warning-600;
+$text-function-caution-soft: $warning-500;
+$text-function-caution-disabled: $neutral-300;
+
+// sem/color/text/function/positive
+$text-function-positive-strong: $success-800;
+$text-function-positive-sub: $success-600;
+$text-function-positive-soft: $success-500;
+$text-function-positive-disabled: $neutral-300;
+
+// sem/color/text/function/negative
+$text-function-negative-strong: $danger-800;
+$text-function-negative-sub: $danger-600;
+$text-function-negative-soft: $danger-500;
+$text-function-negative-disabled: $neutral-300;
+
+// ============================================
+// STATEFUL ILLUSTRATION TOKENS
+// ============================================
+
+// sem/color/illustration/brand
+$illustration-brand-strong: $brand-700;
+$illustration-brand-sub: $brand-500;
+$illustration-brand-soft: $brand-200;
+$illustration-brand-delicate: $brand-100;
+
+// sem/color/illustration/brand-secondary
+$illustration-brand-secondary-strong: $functional-700;
+$illustration-brand-secondary-sub: $functional-500;
+$illustration-brand-secondary-soft: $functional-200;
+$illustration-brand-secondary-delicate: $functional-100;

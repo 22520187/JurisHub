@@ -1,0 +1,660 @@
+// ── Host ──────────────────────────────────────────────────────────────────────
+:host {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+// ── Wrapper ───────────────────────────────────────────────────────────────────
+.tbl-wrap {
+  position: relative;
+  width: 100%;
+  background: #fff;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  // box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+  font-size: var(--tbl-font-size, 0.875rem);
+  font-family: var(--tbl-font-family, inherit);
+  box-sizing: border-box;
+}
+
+// ── Loading overlay ───────────────────────────────────────────────────────────
+.tbl-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: inherit;
+}
+
+.tbl-spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid #e0e0e0;
+  border-top-color: var(--tbl-header-bg, #1a237e);
+  border-radius: 50%;
+  animation: tbl-spin 0.75s linear infinite;
+}
+
+.tbl-spinner-label {
+  font-size: 0.82rem;
+  color: #666;
+}
+
+@keyframes tbl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ── Selection bar ─────────────────────────────────────────────────────────────
+.tbl-sel-bar {
+  padding: 8px 16px;
+  background: var(--tbl-selected-bg, #e3f2fd);
+  color: #1565c0;
+  font-size: 0.82rem;
+  border-bottom: 1px solid #90caf9;
+
+  strong {
+    font-weight: 600;
+  }
+}
+
+// ── Scroll container ──────────────────────────────────────────────────────────
+.tbl-scroll {
+  overflow-x: auto;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+// phiennhm
+.tbl--horizontal-scroll {
+  max-width: 100%;
+
+  .tbl-scroll--horizontal,
+  .tbl-scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+    max-width: 100%;
+  }
+
+  .tbl-scroll--horizontal {
+    scrollbar-width: thin;
+    scrollbar-color: #b8c0cc #f2f4f7;
+
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    &::-webkit-scrollbar-button,
+    &::-webkit-scrollbar-button:single-button {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f2f4f7;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: #b8c0cc;
+      border: 2px solid #f2f4f7;
+      border-radius: 4px;
+      background-clip: padding-box;
+
+      &:hover {
+        background-color: #98a2b3;
+      }
+    }
+  }
+
+  .tbl {
+    width: max-content;
+    min-width: 100%;
+    table-layout: auto;
+  }
+
+  .tbl-th,
+  .tbl-td {
+    white-space: nowrap;
+  }
+}
+// phiennhm
+// ── Table ─────────────────────────────────────────────────────────────────────
+.tbl {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.tbl-th:first-child {
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.tbl-th:last-child {
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.tbl-th {
+  padding: 12px 14px;
+  background: #E9EDF1;
+  color: #505A5F;
+  font-weight: 600;
+  text-align: center;
+  white-space: normal;
+  user-select: none;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+
+  &:not(:last-child) {
+    position: relative;
+
+    &::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 25%;
+      height: 50%;     
+      width: 1px;
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .tbl--compact & {
+    padding: 8px 10px;
+  }
+
+  &--sel {
+    width: 46px;
+    min-width: 46px;
+    text-align: center;
+  }
+
+  &--stt {
+    width: var(--tbl-index-width, 56px);
+    min-width: var(--tbl-index-width, 56px);
+    text-align: center;
+  }
+
+  &--act {
+    text-align: center;
+  }
+}
+
+// ── Rows ──────────────────────────────────────────────────────────────────────
+.tbl-row {
+  transition: background 0.12s ease;
+  cursor: default;
+
+  &:hover:not(.tbl-row--skel) {
+    background: var(--tbl-hover-bg, #e8eaf6);
+  }
+
+  &--sel {
+    background: var(--tbl-selected-bg, #e3f2fd) !important;
+  }
+
+  &--active {
+    background: var(--tbl-active-bg, #d5e4fb) !important;
+    cursor: pointer;
+  }
+
+  &--stripe {
+    background: var(--tbl-stripe-bg, #f8f9fa);
+  }
+
+  &--has-expanded-child > .tbl-td {
+    border-bottom: none !important;
+  }
+
+  // &--skel {
+  //   pointer-events: none;
+  // }
+}
+
+// ── Cells ─────────────────────────────────────────────────────────────────────
+.tbl-td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--tbl-border, #e0e0e0);
+  vertical-align: middle;
+  color: #333;
+
+  .tbl--compact & {
+    padding: 7px 10px;
+  }
+
+  &--sel {
+    width: 46px;
+    min-width: 46px;
+    text-align: center;
+  }
+
+  &--stt {
+    width: var(--tbl-index-width, 56px);
+    min-width: var(--tbl-index-width, 56px);
+    text-align: center;
+    color: #555;
+  }
+
+  &--act {
+    text-align: center;
+    white-space: normal;
+  }
+
+  &--expanded {
+    padding: 0;
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--tbl-border, #e0e0e0);
+  }
+
+  &--empty {
+    text-align: center;
+    padding: 56px 24px;
+  }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.tbl-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 0 8px;
+
+  img {
+    max-width: 200px;
+    height: auto;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  &__sub {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #9ca3af;
+    text-align: center;
+    max-width: 360px;
+    line-height: 1.5;
+  }
+}
+
+// ── Badge chip ────────────────────────────────────────────────────────────────
+.tbl-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+
+// ── Checkbox ──────────────────────────────────────────────────────────────────
+.tbl-chk {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  input[type='checkbox'] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--tbl-header-bg, #1a237e);
+  }
+}
+
+// ── Action buttons ────────────────────────────────────────────────────────────
+.tbl-act-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+// Icon-only button – no box, just the icon with cursor + hover effect
+.tbl-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  line-height: 1;
+  border-radius: 4px;
+  transition: opacity 0.15s, transform 0.1s;
+
+  i {
+    font-size: 15px;
+    vertical-align: middle;
+    // pointer-events: none;
+  }
+
+  &:hover:not(:disabled) {
+    opacity: 0.75;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+.tbl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1.4;
+  transition:
+    opacity 0.15s,
+    transform 0.1s,
+    box-shadow 0.15s;
+
+  &:hover:not(:disabled) {
+    opacity: 0.88;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  &:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+  }
+
+  &--default {
+    background: #f5f5f5;
+    border-color: #d0d0d0;
+    color: #333;
+  }
+
+  &--primary {
+    background: #1976d2;
+    border-color: #1565c0;
+    color: #fff;
+  }
+
+  &--success {
+    background: #388e3c;
+    border-color: #2e7d32;
+    color: #fff;
+  }
+
+  &--warning {
+    background: #f57c00;
+    border-color: #e65100;
+    color: #fff;
+  }
+
+  &--danger {
+    background: #d32f2f;
+    border-color: #b71c1c;
+    color: #fff;
+  }
+
+  &-icon {
+    font-size: 0.88rem;
+    line-height: 1;
+  }
+
+  &-label {
+    line-height: 1;
+  }
+}
+
+// ── Skeleton rows ─────────────────────────────────────────────────────────────
+.skel-cell {
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #eeeeee 25%, #f5f5f5 50%, #eeeeee 75%);
+  background-size: 200% 100%;
+  animation: tbl-shimmer 1.4s infinite linear;
+
+  &--chk {
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border-radius: 3px;
+  }
+
+  &--stt {
+    width: 24px;
+  }
+
+  &--act {
+    width: 88px;
+    margin: auto;
+  }
+}
+
+@keyframes tbl-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────────
+.tbl-pag {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 24px;
+  border-top: 1px solid #EAECF0;
+  background: white;
+}
+
+.tbl-pag__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: #344054;
+
+  strong {
+    font-weight: 500;
+  }
+}
+
+.tbl-pag__info-icon {
+  display: flex;
+  align-items: center;
+  color: #667085;
+  cursor: help;
+}
+
+// Pages + size selector grouped together on the right
+.tbl-pag__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tbl-pag__pages {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.tbl-pg-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  min-width: 36px;
+  padding: 0 8px;
+  background: white;
+  border: 1px solid #D0D5DD;
+  border-radius: 8px;
+  color: #344054;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled):not(.tbl-pg-btn--active) {
+    background: #F9FAFB;
+  }
+
+  &--active {
+    background: #D5E4FB;
+    color: #00426F;
+    border-color: #A4BCFD;
+    font-weight: 600;
+  }
+
+  &--nav {
+    color: #667085;
+    padding: 0 6px;
+  }
+
+  &:disabled {
+    color: #D0D5DD;
+    border-color: #F2F4F7;
+    cursor: not-allowed;
+  }
+}
+
+.tbl-pg-ellipsis {
+  padding: 0 8px;
+  color: #667085;
+  user-select: none;
+  font-size: 1rem;
+}
+
+.tbl-pag__size {
+  position: relative;
+  width: 130px;
+  font-size: 0.875rem;
+}
+
+.tbl-custom-select {
+  height: 36px;
+  border: 1px solid #D0D5DD;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: white;
+  color: #344054;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s;
+
+  &__arrow {
+    display: flex;
+    align-items: center;
+    color: #667085;
+    transition: transform 0.2s;
+  }
+
+  &[aria-expanded="true"] {
+    border-color: #A4BCFD;
+    box-shadow: 0px 0px 0px 4px #F2F4F7;
+    
+    .tbl-custom-select__arrow {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__dropdown {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    right: 0;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #EAECF0;
+    border-radius: 8px;
+    box-shadow: 0px 12px 16px -4px rgba(16, 24, 40, 0.08), 0px 4px 6px -2px rgba(16, 24, 40, 0.03);
+    padding: 4px;
+    z-index: 100;
+    list-style: none;
+    margin: 0;
+
+    li {
+      padding: 10px 12px;
+      cursor: pointer;
+      color: #344054;
+      font-size: 0.875rem;
+      border-radius: 6px;
+      transition: background 0.1s;
+
+      &:hover {
+        background: #F9FAFB;
+      }
+
+      &.active {
+        background: #D5E4FB;
+        color: #00426F;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+
+@media (max-width: 640px) {
+  .tbl-pag {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .tbl-pag__right {
+    flex-wrap: wrap;
+  }
+
+  .tbl-btn-label {
+    display: none;
+  }
+
+  .tbl-btn {
+    padding: 5px 7px;
+  }
+
+  .tbl-btn-icon {
+    font-size: 1rem;
+  }
+}

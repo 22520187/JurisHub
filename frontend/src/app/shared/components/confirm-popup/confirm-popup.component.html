@@ -1,0 +1,39 @@
+<div class="confirm-popup__backdrop" (click)="onClosed()">
+  <section class="confirm-popup" [style.width]="width" [style.maxWidth]="width" role="dialog" aria-modal="true"
+    [attr.aria-label]="title" (click)="$event.stopPropagation()">
+
+
+    <div class="confirm-popup__body">
+      <div class="confirm-popup__illustration-wrapper">
+        <img class="confirm-popup__illustration" [src]="illustrationSrc" alt="" aria-hidden="true" />
+      </div>
+
+      <div>
+        <h2 class="confirm-popup__main-title">{{ title }}</h2>
+
+        @if (prompt) {
+        <p class="confirm-popup__prompt-text" [class.text-left]="promptAlignLeft">{{ prompt }}</p>
+        }
+      </div>
+
+      @if (textareaVisible) {
+      <div class="confirm-popup__textarea-block">
+        <label class="confirm-popup__label">{{ textareaLabel }}</label>
+        <textarea class="confirm-popup__textarea" [rows]="textareaRows" [maxlength]="textareaMaxLength"
+          [placeholder]="textareaPlaceholder" [ngModel]="textareaValue" (ngModelChange)="onTextareaChange($event)"
+          [class.confirm-popup__textarea--error]="errorMessage"></textarea>
+        <div class="confirm-popup__counter">{{ textareaValue.length }}/{{ textareaMaxLength }}</div>
+        <div class="confirm-popup__error" *ngIf="errorMessage">{{ errorMessage }}</div>
+      </div>
+      }
+
+      <!-- Content Projection for additional content (e.g., error messages) -->
+      <ng-content></ng-content>
+    </div>
+
+    <footer class="confirm-popup__footer">
+      <tellerapp-button-group [buttons]="resolvedButtons" [align]="'center'" [gap]="8"
+        (buttonClick)="onButtonClick($event)" />
+    </footer>
+  </section>
+</div>

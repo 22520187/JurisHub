@@ -1,0 +1,3 @@
+// Public SCSS entry point cho shared-ui
+// Chỉ export design tokens — KHÔNG export reset hay base styles
+@forward 'abstracts/variables';

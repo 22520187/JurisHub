@@ -1,0 +1,10 @@
+// ============================================
+// SEMANTIC Z-INDEX LAYERS
+// ============================================
+$z-dropdown:       100;
+$z-sticky:         200; // table header sticky
+$z-fixed:          300; // sidebar fixed
+$z-modal-backdrop: 400;
+$z-modal:          500;
+$z-toast:          600; // noi tren modal
+$z-tooltip:        700;

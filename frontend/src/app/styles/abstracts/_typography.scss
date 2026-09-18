@@ -1,0 +1,284 @@
+// ============================================
+// TYPOGRAPHY TOKENS (MIXINS)
+// ============================================
+// Categories: emphasis, title, subheading, paragraph, label
+// Sizes: xl, lg, md, sm, xs
+//
+// HƯỚNG DẪN SỬ DỤNG:
+// 1. Dùng mặc định (chuẩn Design System):
+//    .class { @include title-xl; }
+//
+// 2. Chỉnh sửa font-style (VD: in nghiêng):
+//    .class { @include title-xl(italic); }
+//
+// 3. Chỉnh sửa linh hoạt line-height (Giữ nguyên style/spacing):
+//    .class { @include title-xl(normal, $line-height-md); }
+//
+// 4. Custom ghi đè toàn bộ tham số đặc thù:
+//    .class { @include title-xl(italic, 1.8, 0.5em); }
+// ============================================
+
+// ============================================
+// VARIABLES (Line Height & Letter Spacing)
+// Tỷ lệ được thiết kế chuẩn thiết kế: Chữ càng to (xl) khoảng cách càng khít để dễ đọc tiêu đề, Chữ nhỏ (xs) thì khoảng cách nới để dễ đọc nội dung.
+// ============================================
+$line-height-xl: 1.1;
+$line-height-lg: 1.25;
+$line-height-md: 1.5;
+$line-height-sm: 1.6;
+$line-height-xs: 1.75;
+
+$letter-spacing-xl: -0.05em;
+$letter-spacing-lg: -0.02em;
+$letter-spacing-md: 0em;
+$letter-spacing-sm: 0.02em;
+$letter-spacing-xs: 0.05em;
+
+// ============================================
+// FONT SIZE & WEIGHT TOKENS
+// Keep hard values centralized here; mixins only consume tokens.
+// ============================================
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$font-weight-extrabold: 800;
+
+$font-size-emphasis-xl: 48px;
+$font-size-emphasis-lg: 40px;
+$font-size-emphasis-md: 32px;
+$font-size-emphasis-sm: 24px;
+$font-size-emphasis-xs: 20px;
+
+$font-size-title-xl: 36px;
+$font-size-title-lg: 32px;
+$font-size-title-md: 28px;
+$font-size-title-sm: 24px;
+$font-size-title-xs: 20px;
+
+$font-size-subheading-xl: 24px;
+$font-size-subheading-lg: 20px;
+$font-size-subheading-md: 18px;
+$font-size-subheading-sm: 16px;
+$font-size-subheading-xs: 14px;
+
+$font-size-paragraph-xl: 20px;
+$font-size-paragraph-lg: 18px;
+$font-size-paragraph-md: 16px;
+$font-size-paragraph-sm: 14px;
+$font-size-paragraph-xs: 12px;
+
+$font-size-label-xl: 24px;
+$font-size-label-lg: 20px;
+$font-size-label-md: 16px;
+$font-size-label-sm: 14px;
+$font-size-label-xs: 12px;
+
+// ============================================
+// MIXINS
+// ============================================
+
+// --- EMPHASIS ---
+@mixin emphasis-xl($style: normal, $lh: $line-height-xl, $ls: $letter-spacing-xl) {
+    font-size: $font-size-emphasis-xl;
+    font-weight: $font-weight-extrabold;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin emphasis-lg($style: normal, $lh: $line-height-lg, $ls: $letter-spacing-lg) {
+    font-size: $font-size-emphasis-lg;
+    font-weight: $font-weight-extrabold;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin emphasis-md($style: normal, $lh: $line-height-md, $ls: $letter-spacing-md) {
+    font-size: $font-size-emphasis-md;
+    font-weight: $font-weight-bold;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin emphasis-sm($style: normal, $lh: $line-height-sm, $ls: $letter-spacing-sm) {
+    font-size: $font-size-emphasis-sm;
+    font-weight: $font-weight-bold;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin emphasis-xs($style: normal, $lh: $line-height-xs, $ls: $letter-spacing-xs) {
+    font-size: $font-size-emphasis-xs;
+    font-weight: $font-weight-bold;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+// --- TITLE ---
+@mixin title-xl($style: normal, $lh: $line-height-xl, $ls: $letter-spacing-xl) {
+    font-size: $font-size-title-xl;
+    font-weight: $font-weight-bold;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin title-lg($style: normal, $lh: $line-height-lg, $ls: $letter-spacing-lg) {
+    font-size: $font-size-title-lg;
+    font-weight: $font-weight-bold;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin title-md($style: normal, $lh: $line-height-md, $ls: $letter-spacing-md) {
+    font-size: $font-size-title-md;
+    font-weight: $font-weight-semibold;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin title-sm($style: normal, $lh: $line-height-sm, $ls: $letter-spacing-sm) {
+    font-size: $font-size-title-sm;
+    font-weight: $font-weight-semibold;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin title-xs($style: normal, $lh: $line-height-xs, $ls: $letter-spacing-xs) {
+    font-size: $font-size-title-xs;
+    font-weight: $font-weight-semibold;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+// --- SUBHEADING ---
+@mixin subheading-xl($style: normal, $lh: $line-height-xl, $ls: $letter-spacing-xl) {
+    font-size: $font-size-subheading-xl;
+    font-weight: $font-weight-medium;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin subheading-lg($style: normal, $lh: $line-height-lg, $ls: $letter-spacing-lg) {
+    font-size: $font-size-subheading-lg;
+    font-weight: $font-weight-medium;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin subheading-md($style: normal, $lh: $line-height-md, $ls: $letter-spacing-md) {
+    font-size: $font-size-subheading-md;
+    font-weight: $font-weight-medium;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin subheading-sm($style: normal, $lh: $line-height-sm, $ls: $letter-spacing-sm) {
+    font-size: $font-size-subheading-sm;
+    font-weight: $font-weight-medium;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin subheading-xs($style: normal, $lh: $line-height-xs, $ls: $letter-spacing-xs) {
+    font-size: $font-size-subheading-xs;
+    font-weight: $font-weight-medium;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+// --- PARAGRAPH ---
+@mixin paragraph-xl($style: normal, $lh: $line-height-xl, $ls: $letter-spacing-xl) {
+    font-size: $font-size-paragraph-xl;
+    font-weight: $font-weight-regular;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin paragraph-lg($style: normal, $lh: $line-height-lg, $ls: $letter-spacing-lg) {
+    font-size: $font-size-paragraph-lg;
+    font-weight: $font-weight-regular;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin paragraph-md($style: normal, $lh: $line-height-md, $ls: $letter-spacing-md) {
+    font-size: $font-size-paragraph-md;
+    font-weight: $font-weight-regular;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin paragraph-sm($style: normal, $lh: $line-height-sm, $ls: $letter-spacing-sm) {
+    font-size: $font-size-paragraph-sm;
+    font-weight: $font-weight-regular;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin paragraph-xs($style: normal, $lh: $line-height-xs, $ls: $letter-spacing-xs) {
+    font-size: $font-size-paragraph-xs;
+    font-weight: $font-weight-regular;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+// --- LABEL ---
+@mixin label-xl($style: normal, $lh: $line-height-xl, $ls: $letter-spacing-xl) {
+    font-size: $font-size-label-xl;
+    font-weight: $font-weight-semibold;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin label-lg($style: normal, $lh: $line-height-lg, $ls: $letter-spacing-lg) {
+    font-size: $font-size-label-lg;
+    font-weight: $font-weight-semibold;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin label-md($style: normal, $lh: $line-height-md, $ls: $letter-spacing-md) {
+    font-size: $font-size-label-md;
+    font-weight: $font-weight-medium;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin label-sm($style: normal, $lh: $line-height-sm, $ls: $letter-spacing-sm) {
+    font-size: $font-size-label-sm;
+    font-weight: $font-weight-medium;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}
+
+@mixin label-xs($style: normal, $lh: $line-height-xs, $ls: $letter-spacing-xs) {
+    font-size: $font-size-label-xs;
+    font-weight: $font-weight-medium;
+    font-style: $style;
+    line-height: $lh;
+    letter-spacing: $ls;
+}

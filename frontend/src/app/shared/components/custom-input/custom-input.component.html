@@ -1,0 +1,61 @@
+<div class="mb-3" [ngClass]="{ 'has-long-input': hasLongInput }">
+  @if (label) {
+  <label class="form-label" [attr.for]="inputId">
+    {{ label }}
+    @if (required && !notDisplayAsterisk) {
+    <span class="text-danger">*</span>
+    }
+  </label>
+  }
+
+  <div class="input-group custom-input-group" [ngClass]="{
+      'input-group-lg': hasLongInput,
+      'is-invalid': !!errorMessage,
+      'has-search': showSearchIcon,
+      'disabled': disabled,
+      'compact-suffix-padding': compactSuffixPadding
+    }">
+    @if (prefix) {
+    <span class="input-group-text input-icon" [innerHTML]="prefix"></span>
+    }
+
+    <input #inputRef [id]="inputId" [type]="type === 'password' ? 'password' : 'text'" class="form-control"
+      [ngClass]="{ 'text-end': type === 'money' || type === 'number' }" [style.text-align]="textAlign || null" [attr.placeholder]="effectivePlaceholder"
+      [disabled]="disabled" [readonly]="readOnly" [attr.inputmode]="onlyNumber ? 'numeric' : null"
+      [attr.maxlength]="maxLength" (input)="handleInput($event)"
+      (compositionstart)="onCompositionStart()" (compositionend)="onCompositionEnd($event)" (keydown.enter)="onEnter()"
+      (keypress)="handleKeyPress($event)" (blur)="onBlur()" (focus)="onFocus()" />
+
+    @if (suffix || suffixIconSrc) {
+    <button type="button" class="suffix-button" [disabled]="disabled"
+      [attr.aria-label]="suffixAriaLabel || suffix" (click)="onSuffixClick($event)">
+      @if (suffixIconSrc) {
+      <img [src]="suffixIconSrc" alt="" width="16" height="16" />
+      } @else {
+      <span [innerHTML]="suffix"></span>
+      }
+    </button>
+    }
+
+    @if (showSearchIcon) {
+    <button type="button" class="search-btn" [class.borderless]="searchBtnBorderless" [disabled]="disabled"
+      (click)="onSearchClick($event)" aria-label="Tìm kiếm">
+      @if (searchIconSrc) {
+      <img [src]="searchIconSrc" alt="search" width="16" height="16" />
+      } @else {
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+      }
+    </button>
+    }
+  </div>
+
+  @if (errorMessage) {
+  <div class="error-message">
+    {{ errorMessage }}
+  </div>
+  }
+</div>

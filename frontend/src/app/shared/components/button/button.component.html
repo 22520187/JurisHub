@@ -1,0 +1,57 @@
+<button
+  class="teller-btn"
+  [class]="hostClasses"
+  [style]="hostStyles"
+  [disabled]="disabled || loading"
+  [attr.type]="type"
+  [attr.aria-label]="ariaLabel || label"
+  [attr.aria-busy]="loading"
+  (click)="handleClick($event)"
+>
+  <!-- Ripple layer -->
+  <span class="teller-btn__ripple" #ripple></span>
+
+  <!-- Background image overla -->
+  <span
+    *ngIf="backgroundImage"
+    class="teller-btn__bg-image"
+    [style.backgroundImage]="'url(' + backgroundImage + ')'"
+    [style.opacity]="backgroundImageOpacity"
+  ></span>
+
+  <!-- Content wrapper -->
+  <span class="teller-btn__content">
+    <!-- Left icon -->
+    <span
+      *ngIf="iconLeft && !loading"
+      class="teller-btn__icon teller-btn__icon--left"
+      [innerHTML]="iconLeft"
+    ></span>
+
+    <!-- Loading spinner (replaces left icon when loading) -->
+    <span *ngIf="loading" class="teller-btn__spinner" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+          stroke-dasharray="31.4" stroke-dashoffset="10" />
+      </svg>
+    </span>
+
+    <!-- Label -->
+    <span class="teller-btn__label" *ngIf="label || (loading && loadingText)">
+      {{ loading && loadingText ? loadingText : label }}
+    </span>
+    <ng-content></ng-content>
+
+    <!-- Right icon -->
+    <span
+      *ngIf="iconRight && !loading"
+      class="teller-btn__icon teller-btn__icon--right"
+      [innerHTML]="iconRight"
+    ></span>
+
+    <!-- Badge -->
+    <span *ngIf="badge != null && !loading" class="teller-btn__badge">
+      {{ badge }}
+    </span>
+  </span>
+</button>
