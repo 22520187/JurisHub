@@ -1,0 +1,92 @@
+<div
+  class="tab-card"
+  [class.tab-card--shadow]="shadow"
+  [class.tab-card--bordered]="bordered"
+  [style.--tab-active-color]="activeColor || '#0f4c81'"
+  [style.--tab-indicator-color]="indicatorColor || '#0f4c81'"
+  [style.--tab-card-radius]="borderRadius || '12px'"
+>
+  <!-- Tab Header -->
+  <div class="tab-card__header" [class.tab-card__header--scrollable]="scrollableTabs">
+    <div class="tab-card__tabs-wrapper">
+      <div class="tab-card__tabs" role="tablist">
+        <button
+          *ngFor="let tab of tabs; let i = index"
+          class="tab-card__tab"
+          [class.tab-card__tab--active]="activeIndex === i"
+          [class.tab-card__tab--disabled]="tab.disabled"
+          [class.tab-card__tab--has-badge]="tab.badge != null"
+          [attr.aria-selected]="activeIndex === i"
+          [attr.aria-controls]="'tab-panel-' + componentId + '-' + i"
+          [attr.id]="'tab-' + componentId + '-' + i"
+          [disabled]="tab.disabled"
+          role="tab"
+          (click)="selectTab(i, tab)"
+          type="button"
+        >
+          <!-- Wrapper for icon + label + required + badge (used to calculate indicator width) -->
+          <span class="tab-card__tab-content" #tabContent>
+            <!-- Icon -->
+            <span
+              *ngIf="tab.icon"
+              class="tab-card__tab-icon"
+              [innerHTML]="tab.icon"
+            ></span>
+
+            <!-- Label -->
+            <span class="tab-card__tab-label">{{ tab.label }}</span>
+
+            <!-- Required asterisk -->
+            <span *ngIf="tab.required" class="tab-card__tab-required" aria-hidden="true">*</span>
+
+            <!-- Badge -->
+            <span
+              *ngIf="tab.badge != null"
+              class="tab-card__tab-badge"
+              [class.tab-card__tab-badge--dot]="tab.badgeType === 'dot'"
+            >
+              <ng-container *ngIf="tab.badgeType !== 'dot'">{{ tab.badge }}</ng-container>
+            </span>
+          </span>
+        </button>
+
+        <!-- Sliding indicator -->
+        <div
+          class="tab-card__indicator"
+          [style.transform]="'translateX(' + indicatorOffset + 'px)'"
+          [style.width.px]="indicatorWidth"
+        ></div>
+      </div>
+
+      <!-- Extra content (right side of header) -->
+      <div class="tab-card__header-extra" *ngIf="headerExtra">
+        <ng-container *ngTemplateOutlet="headerExtra"></ng-container>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-card__body" [class.tab-card__body--no-padding]="noPadding">
+    <ng-container *ngFor="let tab of tabs; let i = index">
+      <div
+        class="tab-card__panel"
+        [class.tab-card__panel--active]="activeIndex === i"
+        [class.tab-card__panel--lazy]="lazyLoad && activeIndex !== i"
+        [attr.id]="'tab-panel-' + componentId + '-' + i"
+        [attr.aria-labelledby]="'tab-' + componentId + '-' + i"
+        [attr.aria-hidden]="activeIndex !== i"
+        role="tabpanel"
+      >
+        <!-- Lazy: only render when first activated -->
+        <ng-container *ngIf="!lazyLoad || visitedTabs.has(i)">
+          <ng-container *ngTemplateOutlet="tab.content"></ng-container>
+        </ng-container>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Footer (optional) -->
+  <div class="tab-card__footer" *ngIf="footer">
+    <ng-container *ngTemplateOutlet="footer"></ng-container>
+  </div>
+</div>

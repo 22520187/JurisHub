@@ -1,0 +1,81 @@
+<div class="select-dropdown-wrapper" [ngStyle]="getWrapperStyle()">
+  <div class="select-header" *ngIf="label">
+    <label class="select-label" *ngIf="label" [attr.for]="'select-dropdown-' + label">
+      {{ label }}
+      <span class="required-asterisk" *ngIf="required">*</span>
+    </label>
+  </div>
+
+  <div #container class="select-container" [attr.tabindex]="disabled ? -1 : 0" [class.disabled]="disabled"
+    [class.error]="!!errorMessage" [class.open]="isOpen" (click)="onContainerClick($event)"
+    (keydown)="onKeydown($event)">
+    <div class="select-display">
+      <span *ngIf="iconLeft" class="select-leading-icon" [innerHTML]="iconLeft" aria-hidden="true"></span>
+      <input #textInput [id]="'select-dropdown-' + label" class="select-input" type="text" autocomplete="off"
+        [placeholder]="effectivePlaceholder"
+        [value]="isOpen && searchTerm ? searchTerm : (displayFn && selectedOption ? displayFn(selectedOption) : selectedOption?.label || '')"
+        (input)="onInput($any($event.target).value)" (click)="onContainerClick($event)" [readonly]="disabled"
+        aria-label="select-input" (blur)="onInputBlur()" />
+    </div>
+
+    <div class="select-arrow">
+      <ng-container *ngIf="canShowClear; else arrowTpl">
+        <button type="button" class="clear-button" (click)="clearSelection(); $event.stopPropagation()"
+          aria-label="Clear selection">
+          <img src="/assets/shared-ui/icon/icn-select-clear.svg" class="clear-icon" alt="Clear selection" />
+        </button>
+      </ng-container>
+      <ng-template #arrowTpl>
+        <svg class="select-icon" [class.rotate]="isOpen" width="20" height="20" viewBox="0 0 20 20" fill="none"
+          xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M5 7.5L10 12.5L15 7.5" stroke="#505A5F" stroke-width="1.3" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </ng-template>
+    </div>
+  </div>
+
+  <div class="options-dropdown" *ngIf="isOpen" [ngStyle]="dropdownStyles">
+    <div class="options-list">
+      <div *ngFor="let option of filteredOptions; trackBy: trackByValue" class="option-item" [class.selected]="isSelected(option)"
+        [class.disabled]="option.disabled" (mousedown)="!disabled && !option.disabled && selectOption(option); $event.preventDefault()">
+        <div class="checkbox-container" *ngIf="multiple">
+          <input type="checkbox" [checked]="isSelected(option)" (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()"
+            [disabled]="disabled || option.disabled">
+          <span class="checkmark"></span>
+        </div>
+        <span class="option-label">{{ option.label }}</span>
+
+        <svg *ngIf="!multiple && isSelected(option)" class="option-check" width="20" height="20" viewBox="0 0 20 20"
+          fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M16.6666 5L7.49998 14.1667L3.33331 10" stroke="#0023A3" stroke-width="1.3" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </div>
+      <div *ngIf="filteredOptions.length === 0" class="no-options">Không có dữ liệu</div>
+    </div>
+  </div>
+
+  <div *ngIf="multiple && showSelectAll && options.length > 0" class="select-all-external">
+    <div class="checkbox-container">
+      <input
+        type="checkbox"
+        [checked]="isAllSelected()"
+        [disabled]="disabled"
+        (click)="!disabled && toggleSelectAll(); $event.stopPropagation()"
+      >
+      <span
+        class="checkmark"
+        (click)="!disabled && toggleSelectAll(); $event.stopPropagation()"
+      ></span>
+    </div>
+
+    <span class="option-label">{{ selectAllLabel }}</span>
+  </div>
+
+  <div class="error-message" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+</div>
+
+<div class="dropdown-overlay" *ngIf="isOpen" (click)="closeDropdown()"></div>
