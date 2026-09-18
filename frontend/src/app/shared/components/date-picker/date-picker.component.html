@@ -1,0 +1,258 @@
+<div
+  class="custom-date-picker-wrapper"
+  [class.day-to-day]="type === 'dayToDay'"
+>
+  <!-- Label -->
+  <label
+    *ngIf="label"
+    class="date-picker-label"
+    [attr.for]="'datepicker-' + label"
+    >{{ label }} <span *ngIf="required" class="text-danger">*</span></label
+  >
+
+  <!-- Input Field -->
+  <div class="date-input-container">
+    <input
+      type="text"
+      class="date-input"
+      [id]="'datepicker-' + label"
+      [class.invalid]="(required && isControlTouched && isEmpty() && !isOpen) || !!internalErrorStr || invalid"
+      [value]="typedValue"
+      [placeholder]="(disabled && !isEditMode && isEmpty()) ? '' : placeholder"
+      [disabled]="disabled"
+      (input)="onInput($event)"
+      (keypress)="onKeyPress($event)"
+      (blur)="onBlur()"
+      (focus)="onFocus()"
+      [attr.maxlength]="maxLength"
+    />
+    <svg
+      class="calendar-icon"
+      [class.calendar-icon--disabled]="disabled"
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      (click)="toggleCalendar(); $event.stopPropagation()"
+      [style.cursor]="disabled ? 'default' : 'pointer'"
+      [style.pointer-events]="disabled ? 'none' : 'auto'"
+    >
+      <path
+        d="M6.66667 1.66667V4.16667M13.3333 1.66667V4.16667M2.5 7.5H17.5M4.16667 3.33333H15.8333C16.7538 3.33333 17.5 4.07953 17.5 5V16.6667C17.5 17.5871 16.7538 18.3333 15.8333 18.3333H4.16667C3.24619 18.3333 2.5 17.5871 2.5 16.6667V5C2.5 4.07953 3.24619 3.33333 4.16667 3.33333Z"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </div>
+
+  <div
+    *ngIf="((required && isControlTouched && isEmpty() && !isOpen)) || !!internalErrorStr || (invalid && !!validationMessage)"
+    class="error-message"
+  >
+    {{ internalErrorStr || validationMessage || defaultValidationMessage }}
+  </div>
+
+  <!-- Calendar Dropdown -->
+  <div
+    class="calendar-dropdown"
+    *ngIf="isOpen"
+    [class.dual-calendar]="type === 'dayToDay'"
+    [class.drop-up]="dropUp"
+    (click)="$event.stopPropagation()"
+  >
+      <!-- First Calendar (or only calendar for default type) -->
+      <div class="calendar-section">
+        <!-- Header -->
+        <div class="calendar-header">
+          <button class="nav-button" (mousedown)="$event.preventDefault(); $event.stopPropagation()" (click)="previousMonth()" type="button">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M20 12H4M4 12L10 18M4 12L10 6"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+
+          <div class="month-year-selectors">
+            <select
+              class="month-select"
+              [ngModel]="currentMonth.getMonth()"
+              [ngModelOptions]="{ standalone: true }"
+              (mousedown)="$event.stopPropagation()"
+              (click)="$event.stopPropagation()"
+              (ngModelChange)="onMonthDropdownChange($event)"
+            >
+              <option *ngFor="let month of monthNames; let i = index" [ngValue]="i">
+                {{ month }}
+              </option>
+            </select>
+
+            <select
+              class="year-select"
+              [ngModel]="currentMonth.getFullYear()"
+              [ngModelOptions]="{ standalone: true }"
+              (mousedown)="$event.stopPropagation()"
+              (click)="$event.stopPropagation()"
+              (ngModelChange)="onYearDropdownChange($event)"
+            >
+              <option *ngFor="let year of yearOptions" [ngValue]="year">
+                {{ year }}
+              </option>
+            </select>
+          </div>
+
+          <button
+            class="nav-button"
+            (mousedown)="$event.preventDefault(); $event.stopPropagation()"
+            (click)="nextMonthBtn()"
+            type="button"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M4 12H20M20 12L14 6M20 12L14 18"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Days of Week -->
+        <div class="days-of-week">
+          <div class="day-of-week" *ngFor="let day of daysOfWeek">
+            {{ day }}
+          </div>
+        </div>
+
+        <!-- Calendar Dates -->
+        <div class="calendar-dates" (mouseleave)="onDateHoverLeave()">
+          <div
+            class="calendar-date"
+            *ngFor="let calendarDate of calendarDates"
+            [class.other-month]="!calendarDate.isCurrentMonth"
+            [class.today]="
+              calendarDate.isToday &&
+              !calendarDate.isSelected &&
+              !calendarDate.isRangeStartVisual &&
+              !calendarDate.isRangeEndVisual
+            "
+            [class.selected]="calendarDate.isSelected"
+            [class.disabled]="calendarDate.isDisabled"
+            [class.range-start]="
+              calendarDate.isRangeStartVisual || isHoverRangeStart(calendarDate.date)
+            "
+            [class.range-end]="
+              calendarDate.isRangeEndVisual || isHoverRangeEnd(calendarDate.date)
+            "
+            [class.in-range]="
+              calendarDate.isInRange || isInHoverRange(calendarDate.date)
+            "
+            (mousedown)="$event.preventDefault(); $event.stopPropagation()"
+            (click)="selectDate(calendarDate)"
+            (keydown.enter)="selectDate(calendarDate)"
+            (keydown.space)="selectDate(calendarDate)"
+            (mouseenter)="onDateHover(calendarDate)"
+          >
+            {{ calendarDate.day }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Second Calendar (only for dayToDay type) -->
+      <div class="calendar-section" *ngIf="type === 'dayToDay'">
+        <!-- Header -->
+        <div class="calendar-header">
+          <button class="nav-button" (mousedown)="$event.preventDefault(); $event.stopPropagation()" (click)="previousMonth()" type="button">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M20 12H4M4 12L10 18M4 12L10 6"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+
+          <div class="month-year-label">{{ getNextMonthYearLabel() }}</div>
+
+          <button class="nav-button" (click)="nextMonthRight()" type="button">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M4 12H20M20 12L14 6M20 12L14 18"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Days of Week -->
+        <div class="days-of-week">
+          <div class="day-of-week" *ngFor="let day of daysOfWeek">
+            {{ day }}
+          </div>
+        </div>
+
+        <!-- Calendar Dates -->
+        <div class="calendar-dates" (mouseleave)="onDateHoverLeave()">
+          <div
+            class="calendar-date"
+            *ngFor="let calendarDate of nextCalendarDates"
+            [class.other-month]="!calendarDate.isCurrentMonth"
+            [class.today]="
+              calendarDate.isToday &&
+              !calendarDate.isSelected &&
+              !calendarDate.isRangeStartVisual &&
+              !calendarDate.isRangeEndVisual
+            "
+            [class.selected]="calendarDate.isSelected"
+            [class.disabled]="calendarDate.isDisabled"
+            [class.range-start]="
+              calendarDate.isRangeStartVisual || isHoverRangeStart(calendarDate.date)
+            "
+            [class.range-end]="
+              calendarDate.isRangeEndVisual || isHoverRangeEnd(calendarDate.date)
+            "
+            [class.in-range]="
+              calendarDate.isInRange || isInHoverRange(calendarDate.date)
+            "
+            (click)="selectDate(calendarDate)"
+            (mouseenter)="onDateHover(calendarDate)"
+          >
+            {{ calendarDate.day }}
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
