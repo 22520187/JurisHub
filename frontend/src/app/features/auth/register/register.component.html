@@ -1,0 +1,205 @@
+<div class="auth-wrapper d-flex align-items-center justify-content-center min-vh-100 p-3 p-md-4">
+  <div class="auth-card d-flex flex-column flex-lg-row">
+    
+    <!-- LEFT SIDE: REGISTRATION FORM -->
+    <div class="auth-form-side d-flex flex-column justify-content-center">
+      
+      <!-- Top Badge Icon -->
+      <div class="text-center mb-3">
+        <div class="auth-icon-circle mx-auto">
+          <i class="bi bi-lock fs-4"></i>
+        </div>
+      </div>
+
+      <!-- Heading -->
+      <div class="text-center mb-4">
+        <h2 class="auth-heading">Đăng ký tài khoản</h2>
+        <p class="auth-subheading text-muted">
+          Đã có tài khoản?
+          <a href="#" class="auth-link fw-semibold" (click)="$event.preventDefault()">
+            Đăng nhập <i class="bi bi-arrow-right"></i>
+          </a>
+        </p>
+      </div>
+
+      <!-- Registration Form -->
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
+        
+        <!-- Họ và tên -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold text-secondary small mb-1">
+            Họ và tên <span class="text-danger">*</span>
+          </label>
+          <div class="input-group-custom" [class.is-invalid]="submitted && registerForm.get('fullName')?.invalid">
+            <span class="input-icon">
+              <i class="bi bi-envelope"></i>
+            </span>
+            <input 
+              type="text" 
+              formControlName="fullName" 
+              class="form-control input-field" 
+              placeholder="Nguyễn Văn A">
+          </div>
+          @if (submitted && registerForm.get('fullName')?.errors?.['required']) {
+            <div class="text-danger small mt-1">Vui lòng nhập họ và tên</div>
+          }
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold text-secondary small mb-1">
+            Email <span class="text-danger">*</span>
+          </label>
+          <div class="input-group-custom" [class.is-invalid]="submitted && registerForm.get('email')?.invalid">
+            <span class="input-icon">
+              <i class="bi bi-envelope"></i>
+            </span>
+            <input 
+              type="email" 
+              formControlName="email" 
+              class="form-control input-field" 
+              placeholder="name@example.com">
+          </div>
+          @if (submitted && registerForm.get('email')?.errors?.['required']) {
+            <div class="text-danger small mt-1">Vui lòng nhập email</div>
+          }
+          @if (submitted && registerForm.get('email')?.errors?.['email']) {
+            <div class="text-danger small mt-1">Email không đúng định dạng</div>
+          }
+        </div>
+
+        <!-- Mật khẩu -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold text-secondary small mb-1">
+            Mật khẩu <span class="text-danger">*</span>
+          </label>
+          <div class="input-group-custom" [class.is-invalid]="submitted && registerForm.get('password')?.invalid">
+            <span class="input-icon">
+              <i class="bi bi-lock"></i>
+            </span>
+            <input 
+              [type]="showPassword ? 'text' : 'password'" 
+              formControlName="password" 
+              class="form-control input-field" 
+              placeholder="Nhập mật khẩu">
+            <button 
+              type="button" 
+              class="btn-toggle-eye" 
+              (click)="togglePasswordVisibility()" 
+              tabindex="-1">
+              <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+            </button>
+          </div>
+          @if (submitted && registerForm.get('password')?.errors?.['required']) {
+            <div class="text-danger small mt-1">Vui lòng nhập mật khẩu</div>
+          }
+          @if (submitted && registerForm.get('password')?.errors?.['minlength']) {
+            <div class="text-danger small mt-1">Mật khẩu phải có ít nhất 6 ký tự</div>
+          }
+        </div>
+
+        <!-- Xác nhận mật khẩu -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold text-secondary small mb-1">
+            Xác nhận mật khẩu <span class="text-danger">*</span>
+          </label>
+          <div class="input-group-custom" [class.is-invalid]="submitted && registerForm.get('confirmPassword')?.invalid">
+            <span class="input-icon">
+              <i class="bi bi-lock"></i>
+            </span>
+            <input 
+              [type]="showConfirmPassword ? 'text' : 'password'" 
+              formControlName="confirmPassword" 
+              class="form-control input-field" 
+              placeholder="Nhập lại mật khẩu">
+            <button 
+              type="button" 
+              class="btn-toggle-eye" 
+              (click)="toggleConfirmPasswordVisibility()" 
+              tabindex="-1">
+              <i class="bi" [ngClass]="showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+            </button>
+          </div>
+          @if (submitted && registerForm.get('confirmPassword')?.errors?.['passwordMismatch']) {
+            <div class="text-danger small mt-1">Mật khẩu xác nhận không khớp</div>
+          }
+        </div>
+
+        <!-- Checkbox Điều khoản -->
+        <div class="form-check mb-4 mt-2">
+          <input 
+            class="form-check-input custom-checkbox" 
+            type="checkbox" 
+            formControlName="agreeTerms" 
+            id="agreeTerms">
+          <label class="form-check-label text-muted small ms-1" for="agreeTerms">
+            Tôi đồng ý với các <a href="#" class="auth-link fw-semibold" (click)="$event.preventDefault()">điều khoản</a> và <a href="#" class="auth-link fw-semibold" (click)="$event.preventDefault()">chính sách bảo mật</a>
+          </label>
+          @if (submitted && registerForm.get('agreeTerms')?.invalid) {
+            <div class="text-danger small mt-1">Bạn cần đồng ý với điều khoản dịch vụ</div>
+          }
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-teal-submit w-100 py-2 fw-semibold mb-4 shadow-sm">
+          Đăng ký <i class="bi bi-arrow-right ms-1"></i>
+        </button>
+
+        <!-- Divider -->
+        <div class="divider-container mb-4">
+          <span class="divider-text text-muted">HOẶC ĐĂNG NHẬP VỚI</span>
+        </div>
+
+        <!-- Social Buttons -->
+        <div class="row g-2 g-sm-3">
+          <div class="col-6">
+            <button 
+              type="button" 
+              class="btn btn-social w-100 d-flex align-items-center justify-content-center py-2"
+              (click)="onSocialLogin('Google')">
+              <svg class="me-2" viewBox="0 0 24 24" width="18" height="18">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span class="small fw-semibold text-secondary">Google</span>
+            </button>
+          </div>
+          <div class="col-6">
+            <button 
+              type="button" 
+              class="btn btn-social w-100 d-flex align-items-center justify-content-center py-2"
+              (click)="onSocialLogin('Facebook')">
+              <i class="bi bi-facebook text-primary fs-5 me-2"></i>
+              <span class="small fw-semibold text-secondary">Facebook</span>
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- RIGHT SIDE: BRANDING HERO WITH LEGAL ILLUSTRATION -->
+    <div class="auth-hero-side position-relative d-none d-lg-flex flex-column justify-content-center p-5">
+      <div class="hero-overlay"></div>
+      
+      <div class="hero-content position-relative z-2 text-white">
+        <h1 class="hero-title mb-3">
+          Kết nối pháp lý<br>dễ dàng hơn
+        </h1>
+        <p class="hero-subtitle mb-4">
+          Nền tảng kết nối luật sư và khách hàng hàng đầu Việt Nam
+        </p>
+
+        <!-- Carousel Indicators -->
+        <div class="hero-indicators d-flex align-items-center gap-2">
+          <span class="indicator active"></span>
+          <span class="indicator"></span>
+          <span class="indicator"></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
