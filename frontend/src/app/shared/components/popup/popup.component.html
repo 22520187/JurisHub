@@ -1,0 +1,30 @@
+﻿<div class="backdrop" (click)="onBackdropClick($event)">
+    <div class="modal" [style.width]="width" [style.max-width]="width">
+        <!-- Header -->
+        <div class="modal-header" *ngIf="showHeader">
+            <div class="header-left">
+                <ng-content select="[popup-header-icon]"></ng-content>
+                <span class="modal-title">{{ title }}</span>
+            </div>
+            <tellerapp-button 
+                variant="ghost" 
+                [iconLeft]="EXIT_ICON"
+                (btnClick)="onClose()"
+                [customStyle]="CLOSE_BUTTON_STYLE"
+                class="btn-close"
+            />
+        </div>
+
+        <div class="divider" *ngIf="showHeader"></div>
+
+        <!-- Body -->
+        <div class="modal-body">
+            <ng-content select="[popup-body]"></ng-content>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+            <ng-content select="[popup-footer]"></ng-content>
+        </div>
+    </div>
+</div>
