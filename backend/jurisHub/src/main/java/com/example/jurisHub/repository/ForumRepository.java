@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ForumRepository extends JpaRepository<Post, Long> {
@@ -92,5 +93,26 @@ public interface ForumRepository extends JpaRepository<Post, Long> {
             nativeQuery = true,
             countQuery = "SELECT COUNT(*) FROM posts p WHERE p.is_active = true AND p.content LIKE ?1")
     Page<Post> findByIsActiveTrueAndContentContaining(String content, Pageable pageable);
+
+    /**
+     * Find post by ID with category, author and labels
+     */
+    @Query("SELECT DISTINCT p FROM Post p " +
+            "LEFT JOIN FETCH p.category " +
+            "LEFT JOIN FETCH p.author " +
+            "LEFT JOIN FETCH p.labels " +
+            "WHERE p.id = :id")
+    Optional<Post> findByIdWithCategoryAndAuthorIncludingInactive(@Param("id") Long id);
+
+    /**
+     * Find post by slug (for SEO-friendly URLs)
+     */
+    @Query("SELECT p FROM Post p " +
+            "LEFT JOIN FETCH p.category c " +
+            "LEFT JOIN FETCH p.author " +
+            "LEFT JOIN FETCH p.labels " +
+            "WHERE c.slug = :categorySlug AND p.slug = :postSlug AND p.isActive = true")
+    Optional<Post> findByCategorySlugAndPostSlug(@Param("categorySlug") String categorySlug, @Param("postSlug") String postSlug);
+
 
 }
