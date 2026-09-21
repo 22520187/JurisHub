@@ -28,7 +28,7 @@ import java.util.Map;
 @CrossOrigin(origins = {"http://localhost:3000"})
 public class ForumController {
     private final ForumService postService;
-//    private final VotingService votingService;
+    private final VotingService votingService;
 
     @GetMapping("/categories")
     public ResponseEntity<List<PostCategoryDto>> getAllCategories() {
@@ -221,6 +221,32 @@ public class ForumController {
             @RequestParam(defaultValue = "10") int limit) {
         List<PopularTagDto> tags = postService.getPopularTags(limit);
         return ResponseEntity.ok(tags);
+    }
+
+    /**
+     * Vote on a post
+     */
+    @PostMapping("/posts/{postId}/vote")
+    public ResponseEntity<VoteDto> votePost(
+            @PathVariable Long postId,
+            @Valid @RequestBody VoteRequestDto voteRequest,
+            Authentication authentication) {
+        Long userId = getUserIdFromAuthentication(authentication);
+        VoteDto voteDto = votingService.votePost(postId, userId, voteRequest.getVoteType());
+        return ResponseEntity.ok(voteDto);
+    }
+
+    /**
+     * Vote on a reply
+     */
+    @PostMapping("/replies/{replyId}/vote")
+    public ResponseEntity<VoteDto> voteReply(
+            @PathVariable Long replyId,
+            @Valid @RequestBody VoteRequestDto voteRequest,
+            Authentication authentication) {
+        Long userId = getUserIdFromAuthentication(authentication);
+        VoteDto voteDto = votingService.voteReply(replyId, userId, voteRequest.getVoteType());
+        return ResponseEntity.ok(voteDto);
     }
 
 }

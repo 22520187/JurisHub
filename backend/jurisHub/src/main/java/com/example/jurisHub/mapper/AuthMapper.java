@@ -21,6 +21,10 @@ public class AuthMapper {
         return ApiResponse.success(authResponse);
     }
 
+    public ApiResponse<AuthResponse> toAuthErrorResponse(String message) {
+        return ApiResponse.error(message);
+    }
+
     public ApiResponse<String> toSuccessMessageResponse(String message) {
         return ApiResponse.success(message);
     }

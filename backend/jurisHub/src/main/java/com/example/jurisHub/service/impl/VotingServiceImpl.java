@@ -183,6 +183,7 @@ public class VotingServiceImpl implements VotingService {
         return getReplyVoteStats(replyId, userId);
     }
 
+    @Override
     public VoteDto getPostVoteStats(Long postId, Long userId) {
         Post post = forumRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
