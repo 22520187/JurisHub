@@ -5,6 +5,7 @@ import com.example.jurisHub.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -114,5 +115,54 @@ public interface ForumRepository extends JpaRepository<Post, Long> {
             "WHERE c.slug = :categorySlug AND p.slug = :postSlug AND p.isActive = true")
     Optional<Post> findByCategorySlugAndPostSlug(@Param("categorySlug") String categorySlug, @Param("postSlug") String postSlug);
 
+    /**
+     * Update reply count
+     */
+    @Modifying
+    @Query("UPDATE Post p SET p.replyCount = (SELECT COUNT(r) FROM PostReply r WHERE r.post.id = p.id AND r.isActive = true) WHERE p.id = :postId")
+    void updateReplyCount(@Param("postId") Long postId);
+
+    /**
+     * Update last reply time
+     */
+    @Modifying
+    @Query("UPDATE Post p SET p.lastReplyAt = :lastReplyAt WHERE p.id = :postId")
+    void updateLastReplyTime(@Param("postId") Long postId, @Param("lastReplyAt") LocalDateTime lastReplyAt);
+
+    /**
+     * Count total active posts
+     */
+    long countByIsActiveTrue();
+
+    /**
+     * Count posts created since a specific time
+     */
+    long countByIsActiveTrueAndCreatedAtAfter(LocalDateTime since);
+
+    /**
+     * Get popular topics (by views and replies)
+     */
+    @Query("SELECT p FROM Post p JOIN FETCH p.category WHERE p.isActive = true ORDER BY (p.views + p.replyCount * 2) DESC")
+    List<Post> findPopularTopics(Pageable pageable);
+
+    /**
+     * Count posts by category ID created since a specific time
+     */
+    long countByCategoryIdAndIsActiveTrueAndCreatedAtAfter(Long categoryId, LocalDateTime since);
+
+    long countByCreatedAtAfter(LocalDateTime since);
+
+    /**
+     * Get all distinct tags from active posts
+     */
+    @Query(value = "SELECT tag_value as tag, COUNT(*) as count " +
+            "FROM posts p " +
+            "CROSS JOIN LATERAL unnest(string_to_array(LOWER(p.tags), ',')) AS tag_value " +
+            "WHERE p.is_active = true AND p.tags IS NOT NULL AND p.tags != '' " +
+            "GROUP BY tag_value " +
+            "ORDER BY count DESC " +
+            "LIMIT :limit",
+            nativeQuery = true)
+    List<Object[]> findPopularTags(@Param("limit") int limit);
 
 }

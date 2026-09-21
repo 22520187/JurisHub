@@ -1,8 +1,6 @@
 package com.example.jurisHub.service;
 
-import com.example.jurisHub.dto.forum.PostCategoryDto;
-import com.example.jurisHub.dto.forum.PostCreateDto;
-import com.example.jurisHub.dto.forum.PostDto;
+import com.example.jurisHub.dto.forum.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -24,4 +22,13 @@ public interface ForumService {
     PostDto createPost(PostCreateDto postCreateDto, Long authorId);
     PostDto updatePost(Long id, PostCreateDto postUpdateDto, Long authorId);
     void deletePost(Long id, Long authorId);
+
+    List<PostReplyDto> getReplyByPost(Long postId, Long currentUserId);
+    PostReplyDto addReply(Long postId, String content, Long authorId, Long parentId);
+    void deleteReply(Long replyId, Long authorId);
+
+    ForumStatsDto getForumStats();
+    List<PopularTopicDto> getPopularTopics(int limit);
+    List<CategoryStatsDto> getCategoryStats();
+    List<PopularTagDto> getPopularTags(int limit);
 }

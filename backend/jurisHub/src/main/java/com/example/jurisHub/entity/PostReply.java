@@ -91,4 +91,16 @@ public class PostReply {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    public boolean isTopLevel() {
+        return parent == null;
+    }
+
+    public boolean hasChildren() {
+        return children != null && !children.isEmpty();
+    }
+
+    public int getChildrenCount() {
+        return children != null ? children.size() : 0;
+    }
 }
