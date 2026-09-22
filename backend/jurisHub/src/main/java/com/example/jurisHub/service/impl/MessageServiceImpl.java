@@ -1,6 +1,5 @@
 package com.example.jurisHub.service.impl;
 
-
 import com.example.jurisHub.dto.conversation.MessageDto;
 import com.example.jurisHub.dto.conversation.SendMessageRequest;
 import com.example.jurisHub.entity.Conversation;

@@ -25,6 +25,11 @@ public interface ConversationService {
     ConversationDto getConversationById(Long conversationId, Long userId);
 
     /**
+     * Get conversation with all messages and PDF document
+     */
+    ConversationDto getConversationWithDetails(Long conversationId, Long userId);
+
+    /**
      * Update conversation title
      */
     ConversationDto updateConversationTitle(Long conversationId, Long userId, String title);

@@ -26,6 +26,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
      */
     Optional<Conversation> findByIdAndUserId(Long id, Long userId);
 
+
     /**
      * Find conversation with messages and PDF document eagerly loaded
      */
