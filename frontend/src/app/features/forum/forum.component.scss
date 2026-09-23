@@ -1,0 +1,299 @@
+// =============================================================================
+// Variables & Colors
+// =============================================================================
+$primary-teal: #08544e;
+$primary-teal-dark: #053b37;
+$primary-teal-hover: #032623;
+$primary-teal-subtle: #e6f4f2;
+$text-dark: #0f172a;
+$text-muted: #64748b;
+$border-color: #e2e8f0;
+$card-radius: 12px;
+
+.forum-page-wrapper {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: $text-dark;
+}
+
+// =============================================================================
+// 2. FORUM HEADER
+// =============================================================================
+.forum-header-section {
+  .forum-main-heading {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+  }
+
+  .forum-subheading {
+    font-size: 0.95rem;
+  }
+
+  .forum-search-box {
+    width: 260px;
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 0.95rem;
+      pointer-events: none;
+    }
+
+    .forum-search-input {
+      height: 42px;
+      padding-left: 38px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 0.9rem;
+      background-color: #ffffff;
+
+      &:focus {
+        border-color: $primary-teal;
+        box-shadow: 0 0 0 3px rgba(8, 84, 78, 0.1);
+      }
+    }
+  }
+}
+
+// =============================================================================
+// 3. MAIN CARDS & FILTERS
+// =============================================================================
+.forum-card {
+  background: #ffffff;
+  border: 1px solid $border-color;
+  border-radius: $card-radius;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+  .forum-card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.filter-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.quick-filter-pill {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: $primary-teal;
+    color: $primary-teal;
+  }
+
+  &.active {
+    background: $primary-teal-subtle;
+    border-color: $primary-teal;
+    color: $primary-teal;
+    font-weight: 600;
+  }
+}
+
+.forum-divider {
+  border-color: #f1f5f9;
+  opacity: 1;
+}
+
+// Pagination
+.pagination-nav-group {
+  .btn-page-arrow {
+    width: 32px;
+    height: 32px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-page-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+
+    &.active {
+      background-color: #557c79;
+      color: #ffffff;
+    }
+  }
+}
+
+// Stats Card
+.stat-highlight-number {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #053b37;
+  line-height: 1.2;
+}
+
+// =============================================================================
+// 4. CREATE TOPIC MODAL
+// =============================================================================
+.custom-topic-select,
+.custom-topic-input {
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.9rem;
+
+  &:focus {
+    border-color: $primary-teal;
+    box-shadow: 0 0 0 3px rgba(8, 84, 78, 0.1);
+  }
+}
+
+.editor-wrapper {
+  border: 1px solid #cbd5e1;
+
+  .editor-toolbar {
+    background-color: #f8fafc;
+
+    .btn-toolbar-action {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      color: #475569;
+      border: 1px solid transparent;
+      border-radius: 4px;
+
+      &:hover {
+        background-color: #e2e8f0;
+        color: #0f172a;
+      }
+    }
+  }
+
+  .editor-textarea {
+    resize: vertical;
+    font-size: 0.95rem;
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+}
+
+.posting-guidelines-box {
+  background-color: #f8fafc;
+  border: 1px solid #f1f5f9;
+
+  .guidelines-title {
+    font-size: 0.85rem;
+    color: #334155;
+  }
+
+  .guidelines-list {
+    li {
+      line-height: 1.6;
+      margin-bottom: 2px;
+    }
+  }
+}
+
+.btn-close-xs {
+  font-size: 0.65rem;
+  padding: 0.25rem;
+}
+
+// Modal Container Override - Scoped to forum create modal
+::ng-deep lib-modal-custom.forum-create-modal,
+::ng-deep .forum-create-modal {
+  .modal-overlay {
+    padding: 30px 16px;
+    background-color: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .modal-container {
+    margin: 20px auto;
+    max-width: 580px !important;
+    width: 100% !important;
+    max-height: calc(100vh - 70px) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .modal-header {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      border-bottom: 1px solid #f1f5f9;
+      padding: 18px 24px 14px 24px !important;
+      flex-shrink: 0;
+
+      .modal-title {
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        letter-spacing: -0.2px;
+      }
+
+      .close-btn {
+        color: #64748b !important;
+        font-size: 1.5rem;
+        transition: color 0.15s ease;
+
+        &:hover {
+          color: #0f172a !important;
+        }
+      }
+    }
+
+    .modal-content {
+      padding: 20px 24px 24px 24px !important;
+      overflow-y: auto !important;
+      flex: 1 1 auto;
+      max-height: calc(100vh - 150px);
+    }
+  }
+}
+
