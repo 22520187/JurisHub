@@ -22,7 +22,7 @@
       <ng-container *ngIf="canShowClear; else arrowTpl">
         <button type="button" class="clear-button" (click)="clearSelection(); $event.stopPropagation()"
           aria-label="Clear selection">
-          <img src="/assets/shared-ui/icon/icn-select-clear.svg" class="clear-icon" alt="Clear selection" />
+          <img src="/assets/icons/icn-select-clear.svg" class="clear-icon" alt="Clear selection" />
         </button>
       </ng-container>
       <ng-template #arrowTpl>
@@ -37,11 +37,12 @@
 
   <div class="options-dropdown" *ngIf="isOpen" [ngStyle]="dropdownStyles">
     <div class="options-list">
-      <div *ngFor="let option of filteredOptions; trackBy: trackByValue" class="option-item" [class.selected]="isSelected(option)"
-        [class.disabled]="option.disabled" (mousedown)="!disabled && !option.disabled && selectOption(option); $event.preventDefault()">
+      <div *ngFor="let option of filteredOptions; trackBy: trackByValue" class="option-item"
+        [class.selected]="isSelected(option)" [class.disabled]="option.disabled"
+        (mousedown)="!disabled && !option.disabled && selectOption(option); $event.preventDefault()">
         <div class="checkbox-container" *ngIf="multiple">
-          <input type="checkbox" [checked]="isSelected(option)" (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()"
-            [disabled]="disabled || option.disabled">
+          <input type="checkbox" [checked]="isSelected(option)" (click)="$event.stopPropagation()"
+            (mousedown)="$event.stopPropagation()" [disabled]="disabled || option.disabled">
           <span class="checkmark"></span>
         </div>
         <span class="option-label">{{ option.label }}</span>
@@ -58,16 +59,9 @@
 
   <div *ngIf="multiple && showSelectAll && options.length > 0" class="select-all-external">
     <div class="checkbox-container">
-      <input
-        type="checkbox"
-        [checked]="isAllSelected()"
-        [disabled]="disabled"
-        (click)="!disabled && toggleSelectAll(); $event.stopPropagation()"
-      >
-      <span
-        class="checkmark"
-        (click)="!disabled && toggleSelectAll(); $event.stopPropagation()"
-      ></span>
+      <input type="checkbox" [checked]="isAllSelected()" [disabled]="disabled"
+        (click)="!disabled && toggleSelectAll(); $event.stopPropagation()">
+      <span class="checkmark" (click)="!disabled && toggleSelectAll(); $event.stopPropagation()"></span>
     </div>
 
     <span class="option-label">{{ selectAllLabel }}</span>

@@ -1,0 +1,574 @@
+<div class="home-wrapper">
+
+    <!-- ========================================================================= -->
+    <!-- 1. HEADER / NAVBAR                                                        -->
+    <!-- ========================================================================= -->
+    <header class="main-navbar">
+        <div class="container navbar-inner d-flex align-items-center justify-content-between">
+
+            <!-- Brand Logo -->
+            <a routerLink="/" class="navbar-brand d-flex align-items-center text-decoration-none">
+                <span class="brand-title">Juris Hub</span>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="navbar-nav-links d-none d-md-flex align-items-center gap-4">
+                <a routerLink="/forum" class="nav-item-link">Diễn đàn</a>
+                <a href="#ai-assistant" (click)="$event.preventDefault(); handleQuickAction('ai-lawyer')"
+                    class="nav-item-link">Trợ lý AI</a>
+                <a href="#faq" (click)="$event.preventDefault(); handleQuickAction('question')"
+                    class="nav-item-link">Hỏi đáp văn bản</a>
+            </nav>
+
+            <!-- Auth / User Actions -->
+            <div class="navbar-actions d-flex align-items-center gap-3">
+                <!-- Khi người dùng CHƯA đăng nhập -->
+                @if (!authService.isLoggedIn()) {
+                <div class="d-flex align-items-center gap-2">
+                    <app-button label="Đăng Ký" variant="outline" size="sm" [customStyle]="{
+                borderColor: '#08544e',
+                color: '#08544e',
+                borderRadius: '8px',
+                fontWeight: '600',
+                minWidth: '85px',
+                height: '38px'
+              }" (btnClick)="navigateToRegister()">
+                    </app-button>
+                    <app-button label="Đăng nhập" variant="custom" size="sm" [customStyle]="{
+                backgroundColor: '#08544e',
+                backgroundColorHover: '#053b37',
+                color: '#ffffff',
+                borderRadius: '8px',
+                fontWeight: '600',
+                minWidth: '95px',
+                height: '38px',
+                boxShadow: '0 2px 6px rgba(8, 84, 78, 0.2)'
+              }" (btnClick)="navigateToLogin()">
+                    </app-button>
+                </div>
+                } @else {
+                <!-- Khi người dùng ĐÃ đăng nhập -->
+                <div class="d-flex align-items-center gap-3">
+                    <button type="button" class="btn-icon-nav position-relative" aria-label="Thông báo">
+                        <i class="bi bi-bell fs-5"></i>
+                    </button>
+
+                    <div class="user-avatar-dropdown" (click)="authService.logout()"
+                        title="Click để Đăng xuất (Thử nghiệm)">
+                        <div class="user-avatar-circle">
+                            {{ authService.currentUser()?.initials || 'NV' }}
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!-- 2. HERO SECTION                                                           -->
+    <!-- ========================================================================= -->
+    <section class="hero-section py-4 py-lg-5">
+        <div class="container">
+            <div class="row align-items-center g-4">
+
+                <!-- Left: Headline & Search -->
+                <div class="col-lg-7">
+                    <h1 class="hero-heading mb-3">Tra cứu văn bản pháp luật nhanh chóng</h1>
+                    <p class="hero-description text-muted mb-4">
+                        Tìm kiếm, đọc và tải về văn bản pháp luật. Cập nhật tin tức pháp luật, tra cứu theo cơ quan ban
+                        hành và lĩnh vực.
+                    </p>
+
+                    <!-- Search Bar -->
+                    <div class="hero-search-wrapper">
+                        <div class="hero-search-box position-relative">
+                            <i class="bi bi-search search-prefix-icon"></i>
+                            <input type="text" class="form-control hero-input"
+                                placeholder="Tìm kiếm văn bản pháp luật..." [(ngModel)]="heroSearchKeyword"
+                                (keydown.enter)="onHeroSearch()" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Quick Search Tips Card -->
+                <div class="col-lg-5">
+                    <div class="quick-tips-card p-4">
+                        <h6 class="tips-title fw-bold mb-3">Mẹo tìm nhanh</h6>
+                        <ul class="tips-list mb-0 ps-3">
+                            <li>Nhập từ khóa tiêu đề hoặc số hiệu (ví dụ: 123/2020)</li>
+                            <li>Sử dụng bộ lọc loại văn bản để thu hẹp kết quả</li>
+                            <li>Nhấp vào "Tìm văn bản" để cuộn nhanh xuống kết quả</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- 3. BREAKING NEWS BANNER                                                    -->
+    <!-- ========================================================================= -->
+    <div class="breaking-news-banner py-2">
+        <div class="container d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center flex-grow-1 overflow-hidden">
+                <span class="badge-nong me-3">{{ breakingNews.badge }}</span>
+                <span class="news-text text-truncate">{{ breakingNews.content }}</span>
+            </div>
+            <i class="bi bi-arrow-right ms-2 news-arrow"></i>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 4. STATISTICS COUNTER BAR                                                 -->
+    <!-- ========================================================================= -->
+    <div class="stats-counter-bar py-4">
+        <div class="container">
+            <div class="row text-center g-3">
+                @for (stat of stats; track stat.label) {
+                <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ stat.value }}</div>
+                        <div class="stat-label">{{ stat.label }}</div>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 5. MAIN CONTENT AREA (2 Columns)                                          -->
+    <!-- ========================================================================= -->
+    <main class="main-content py-5">
+        <div class="container">
+            <div class="row g-4">
+
+                <!-- LEFT COLUMN: Lĩnh vực pháp luật & Văn bản mới nhất -->
+                <div class="col-lg-8">
+
+                    <!-- Section: Lĩnh vực pháp luật -->
+                    <section class="mb-5">
+                        <div class="section-header d-flex align-items-center justify-content-between mb-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-folder2 text-teal fs-4"></i>
+                                <h2 class="section-title mb-0">Lĩnh vực pháp luật</h2>
+                                <span class="meta-pill ms-2">
+                                    <i class="bi bi-bar-chart me-1"></i> 14 lĩnh vực
+                                </span>
+                            </div>
+                            <button class="btn btn-outline-teal btn-sm rounded-pill px-3 py-1">
+                                Xem tất cả (14)
+                            </button>
+                        </div>
+
+                        <!-- Category Grid (8 items) -->
+                        <div class="row g-3">
+                            @for (cat of categories; track cat.id) {
+                            <div class="col-sm-6 col-md-3">
+                                <div class="category-card p-3 h-100" (click)="filterByCategory(cat)">
+                                    <div class="category-tag-badge mb-2"
+                                        [style.backgroundColor]="cat.tagBg || '#f1f5f9'"
+                                        [style.color]="cat.tagColor || '#475569'">
+                                        <span>{{ cat.tag }}</span>
+                                        <i class="bi bi-chevron-right ms-1"></i>
+                                    </div>
+                                    <h3 class="category-name mb-3">{{ cat.name }}</h3>
+                                    <div
+                                        class="d-flex align-items-center justify-content-between small text-muted mb-2">
+                                        <span class="count-text">{{ cat.count }} văn bản</span>
+                                        <span class="trend-text">↗ {{ cat.percent | number:'1.1-1' }}%</span>
+                                    </div>
+                                    <div class="progress category-progress">
+                                        <div class="progress-bar bg-teal" role="progressbar"
+                                            [style.width.%]="cat.percent * 3">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            }
+                        </div>
+                    </section>
+
+                    <!-- Section: Văn bản pháp luật mới nhất -->
+                    <section id="latest-documents-section" class="mb-4">
+                        <div class="section-header d-flex align-items-center justify-content-between mb-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-text text-teal fs-4"></i>
+                                <h2 class="section-title mb-0">Văn bản pháp luật mới nhất</h2>
+                            </div>
+                            <span class="text-muted small">{{ filteredDocuments.length }} văn bản</span>
+                        </div>
+
+                        <!-- Filter Controls Row -->
+                        <div class="filter-controls-row d-flex flex-column flex-sm-row gap-3 mb-4">
+                            <div class="flex-grow-1">
+                                <app-custom-input
+                                    placeholder="Tìm kiếm văn bản theo tiêu đề, số hiệu, cơ quan ban hành..."
+                                    [(ngModel)]="docSearchKeyword" prefix='<i class="bi bi-search"></i>'>
+                                </app-custom-input>
+                            </div>
+                            <div class="filter-dropdown-wrapper" style="min-width: 170px;">
+                                <app-select-dropdown [options]="docTypeOptions" [(ngModel)]="selectedDocTypeValue"
+                                    (selectionChange)="onDocTypeFilterChange($event)">
+                                </app-select-dropdown>
+                            </div>
+                        </div>
+
+                        <!-- Documents List -->
+                        <div class="documents-list d-flex flex-column gap-3">
+                            @for (doc of paginatedDocuments; track doc.id) {
+                            <div class="document-card p-4">
+                                <!-- Header Badges & Actions -->
+                                <div
+                                    class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-3">
+                                    <div class="d-flex align-items-center flex-wrap gap-2">
+                                        <tellerapp-badge [color]="doc.typeBadgeColor">{{ doc.type }}</tellerapp-badge>
+                                        <tellerapp-badge [color]="'default'">{{ doc.status }}</tellerapp-badge>
+                                        <tellerapp-badge [color]="doc.codeBadgeColor">{{ doc.code }}</tellerapp-badge>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="d-flex align-items-center gap-2">
+                                        <app-button variant="secondary" size="xs" label="Xem chi tiết"
+                                            iconLeft='<i class="bi bi-eye me-1"></i>' [customStyle]="{
+                          backgroundColor: '#f8fafc',
+                          borderColor: '#e2e8f0',
+                          borderWidth: '1px',
+                          color: '#334155',
+                          borderRadius: '6px',
+                          height: '32px',
+                          fontSize: '12px',
+                          fontWeight: '500'
+                        }" (btnClick)="handleViewDetail(doc)">
+                                        </app-button>
+                                        <app-button variant="secondary" size="xs" label="Tải về"
+                                            iconLeft='<i class="bi bi-download me-1"></i>' [customStyle]="{
+                          backgroundColor: '#f8fafc',
+                          borderColor: '#e2e8f0',
+                          borderWidth: '1px',
+                          color: '#334155',
+                          borderRadius: '6px',
+                          height: '32px',
+                          fontSize: '12px',
+                          fontWeight: '500'
+                        }" (btnClick)="handleDownload(doc)">
+                                        </app-button>
+                                        <app-button variant="secondary" size="xs" label="Nguồn gốc"
+                                            iconLeft='<i class="bi bi-box-arrow-up-right me-1"></i>' [customStyle]="{
+                          backgroundColor: '#f8fafc',
+                          borderColor: '#e2e8f0',
+                          borderWidth: '1px',
+                          color: '#334155',
+                          borderRadius: '6px',
+                          height: '32px',
+                          fontSize: '12px',
+                          fontWeight: '500'
+                        }" (btnClick)="handleSource(doc)">
+                                        </app-button>
+                                    </div>
+                                </div>
+
+                                <!-- Document Title -->
+                                <h4 class="document-title mb-3" (click)="handleViewDetail(doc)">
+                                    {{ doc.title }}
+                                </h4>
+
+                                <!-- Document Meta info -->
+                                <div
+                                    class="document-meta d-flex flex-wrap align-items-center gap-4 text-muted small mb-3">
+                                    <span class="d-flex align-items-center gap-1">
+                                        <i class="bi bi-book"></i> {{ doc.agency }}
+                                    </span>
+                                    <span class="d-flex align-items-center gap-1">
+                                        <i class="bi bi-person"></i> {{ doc.signer }}
+                                    </span>
+                                    <span class="d-flex align-items-center gap-1">
+                                        <i class="bi bi-calendar3"></i> {{ doc.issuedDate }}
+                                    </span>
+                                </div>
+
+                                <!-- Excerpt snippet -->
+                                <p class="document-excerpt text-muted small mb-0">
+                                    {{ doc.excerpt }}
+                                </p>
+                            </div>
+                            } @empty {
+                            <div class="text-center py-5 text-muted">
+                                <i class="bi bi-search fs-1 mb-2 d-block text-secondary"></i>
+                                <p>Không tìm thấy văn bản phù hợp với điều kiện tìm kiếm.</p>
+                            </div>
+                            }
+                        </div>
+
+                        <!-- Pagination Bar -->
+                        <div class="pagination-bar d-flex align-items-center justify-content-center gap-2 mt-5">
+                            <button type="button" class="btn-pagination-nav" [disabled]="currentPage === 1"
+                                (click)="setPage(currentPage - 1)">
+                                Trước
+                            </button>
+
+                            @for (page of pageNumbers; track page) {
+                            <button type="button" class="btn-pagination-number" [class.active]="currentPage === page"
+                                (click)="setPage(page)">
+                                {{ page }}
+                            </button>
+                            }
+
+                            <button type="button" class="btn-pagination-nav" [disabled]="currentPage === totalPages"
+                                (click)="setPage(currentPage + 1)">
+                                Sau
+                            </button>
+                        </div>
+
+                    </section>
+
+                </div>
+
+                <!-- RIGHT COLUMN: Sidebar Cards -->
+                <div class="col-lg-4">
+                    <aside class="sidebar-wrapper d-flex flex-column gap-4">
+
+                        <!-- Card 1: Cơ quan ban hành phổ biến -->
+                        <div class="sidebar-card p-4">
+                            <div class="d-flex align-items-center gap-2 mb-4">
+                                <i class="bi bi-building text-teal fs-5"></i>
+                                <h3 class="sidebar-card-title mb-0">Cơ quan ban hành phổ biến</h3>
+                            </div>
+
+                            <div class="agencies-list d-flex flex-column gap-3">
+                                @for (agency of popularAgencies; track agency.id) {
+                                <div class="agency-item" (click)="filterByAgency(agency)">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <span class="agency-name">{{ agency.name }}</span>
+                                        <i class="bi bi-chevron-right text-muted small"></i>
+                                    </div>
+                                    <div class="agency-sub mb-2 small text-muted">{{ agency.count }} văn bản</div>
+                                    <div class="progress agency-progress">
+                                        <div class="progress-bar bg-teal" [style.width.%]="agency.percent"></div>
+                                    </div>
+                                </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Tương tác nhanh -->
+                        <div class="sidebar-card p-4">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <i class="bi bi-chat-dots text-teal fs-5"></i>
+                                <h3 class="sidebar-card-title mb-0">Tương tác nhanh</h3>
+                            </div>
+
+                            <div class="quick-actions-list d-flex flex-column gap-2 pt-2">
+                                <!-- Action 1: Đặt câu hỏi pháp lý (Green button) -->
+                                <button type="button"
+                                    class="btn-quick-action btn-quick-action-primary d-flex align-items-center gap-2 px-3 py-2 text-white"
+                                    (click)="handleQuickAction('question')">
+                                    <i class="bi bi-chat-left-text fs-5"></i>
+                                    <span>Đặt câu hỏi pháp lý</span>
+                                </button>
+
+                                <!-- Action 2: Chat với AI Lawyer (Outline button) -->
+                                <button type="button"
+                                    class="btn-quick-action btn-quick-action-outline d-flex align-items-center gap-2 px-3 py-2"
+                                    (click)="handleQuickAction('ai-lawyer')">
+                                    <i class="bi bi-robot fs-5"></i>
+                                    <span>Chat với AI Lawyer</span>
+                                </button>
+
+                                <!-- Action 3: Tra cứu văn bản (Outline button) -->
+                                <button type="button"
+                                    class="btn-quick-action btn-quick-action-outline d-flex align-items-center gap-2 px-3 py-2"
+                                    (click)="handleQuickAction('search-doc')">
+                                    <i class="bi bi-file-earmark-text fs-5"></i>
+                                    <span>Tra cứu văn bản</span>
+                                </button>
+
+                                <!-- Action 4: Tìm luật sư (Outline button) -->
+                                <button type="button"
+                                    class="btn-quick-action btn-quick-action-outline d-flex align-items-center gap-2 px-3 py-2"
+                                    (click)="handleQuickAction('find-lawyer')">
+                                    <i class="bi bi-briefcase fs-5"></i>
+                                    <span>Tìm luật sư</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Loại văn bản phổ biến -->
+                        <div class="sidebar-card p-4">
+                            <div class="d-flex align-items-center gap-2 mb-4">
+                                <i class="bi bi-diagram-3 text-teal fs-5"></i>
+                                <h3 class="sidebar-card-title mb-0">Loại văn bản phổ biến</h3>
+                            </div>
+
+                            <div class="doc-types-list d-flex flex-column gap-3">
+                                @for (type of popularDocTypes; track type.name) {
+                                <div class="doc-type-item d-flex align-items-center justify-content-between p-2 rounded"
+                                    (click)="filterByDocTypeSummary(type)">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <i [class]="type.icon + ' text-muted fs-5'"></i>
+                                        <span class="type-name">{{ type.name }}</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="type-count-badge">{{ type.count }}</span>
+                                        <i class="bi bi-chevron-right text-muted small"></i>
+                                    </div>
+                                </div>
+                                }
+                            </div>
+                        </div>
+
+                    </aside>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- ========================================================================= -->
+    <!-- 6. FOOTER                                                                 -->
+    <!-- ========================================================================= -->
+    <footer class="main-footer pt-5 pb-4">
+        <div class="container">
+            <div class="row g-4 mb-5">
+
+                <!-- Column 1: Brand info -->
+                <div class="col-lg-4">
+                    <div class="footer-brand d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-bank fs-4 text-teal"></i>
+                        <span class="footer-brand-title">Juris Hub</span>
+                    </div>
+                    <p class="footer-desc text-secondary mb-0">
+                        Nền tảng tư vấn pháp luật hàng đầu Việt Nam, kết nối bạn với luật sư chuyên nghiệp.
+                    </p>
+                </div>
+
+                <!-- Column 2: Dịch vụ -->
+                <div class="col-sm-6 col-lg-2 offset-lg-1">
+                    <h5 class="footer-col-heading mb-3">Dịch vụ</h5>
+                    <ul class="footer-links-list list-unstyled mb-0 d-flex flex-column gap-2">
+                        <li><a href="#" (click)="$event.preventDefault()">Tư vấn pháp luật</a></li>
+                        <li><a href="#"
+                                (click)="$event.preventDefault(); scrollToElement('latest-documents-section')">Tra cứu
+                                văn bản</a></li>
+                        <li><a href="#" (click)="$event.preventDefault()">Hỏi đáp cộng đồng</a></li>
+                        <li><a href="#" (click)="$event.preventDefault(); handleQuickAction('ai-lawyer')">AI Lawyer</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Lĩnh vực -->
+                <div class="col-sm-6 col-lg-2">
+                    <h5 class="footer-col-heading mb-3">Lĩnh vực</h5>
+                    <ul class="footer-links-list list-unstyled mb-0 d-flex flex-column gap-2">
+                        <li><a href="#" (click)="$event.preventDefault()">Luật Doanh nghiệp</a></li>
+                        <li><a href="#" (click)="$event.preventDefault()">Luật Lao động</a></li>
+                        <li><a href="#" (click)="$event.preventDefault()">Luật Đất đai</a></li>
+                        <li><a href="#" (click)="$event.preventDefault()">Luật Thuế</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 4: Liên hệ -->
+                <div class="col-lg-3">
+                    <h5 class="footer-col-heading mb-3">Liên hệ</h5>
+                    <ul class="footer-contact-list list-unstyled mb-3 d-flex flex-column gap-2">
+                        <li class="d-flex align-items-center gap-2">
+                            <i class="bi bi-geo-alt text-teal"></i>
+                            <span>123 Đường ABC, Q.1, TP.HCM</span>
+                        </li>
+                        <li class="d-flex align-items-center gap-2">
+                            <i class="bi bi-telephone text-teal"></i>
+                            <span>(028) 3xxx-xxxx</span>
+                        </li>
+                        <li class="d-flex align-items-center gap-2">
+                            <i class="bi bi-envelope text-teal"></i>
+                            <span>contact@legalconnect.vn</span>
+                        </li>
+                    </ul>
+
+                    <!-- Social Circles -->
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="#" (click)="$event.preventDefault()" class="social-circle-btn"
+                            aria-label="Facebook">f</a>
+                        <a href="#" (click)="$event.preventDefault()" class="social-circle-btn"
+                            aria-label="LinkedIn">in</a>
+                        <a href="#" (click)="$event.preventDefault()" class="social-circle-btn"
+                            aria-label="YouTube">yt</a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer Bottom Bar -->
+            <div
+                class="footer-bottom-bar pt-4 border-top border-secondary border-opacity-25 d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3 text-secondary small">
+                <div>© 2024 Legal Connect. Bảo lưu mọi quyền.</div>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="#" (click)="$event.preventDefault()"
+                        class="text-secondary text-decoration-none hover-white">Điều khoản sử dụng</a>
+                    <a href="#" (click)="$event.preventDefault()"
+                        class="text-secondary text-decoration-none hover-white">Chính sách bảo mật</a>
+                    <a href="#" (click)="$event.preventDefault()"
+                        class="text-secondary text-decoration-none hover-white">Cookie</a>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
+    <!-- Modal Xem Chi Tiết Văn Bản Pháp Luật -->
+    <lib-modal-custom [isOpen]="isDetailModalOpen"
+        [title]="selectedDoc?.code ? (selectedDoc?.code + ' - Chi tiết văn bản') : 'Chi tiết văn bản'" size="lg"
+        [showFooter]="true" (closeDialog)="closeDetailModal()">
+        @if (selectedDoc) {
+        <div class="doc-detail-modal-body p-2">
+            <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+                <tellerapp-badge [color]="selectedDoc.typeBadgeColor">{{ selectedDoc.type }}</tellerapp-badge>
+                <tellerapp-badge [color]="'default'">{{ selectedDoc.status }}</tellerapp-badge>
+                <tellerapp-badge [color]="selectedDoc.codeBadgeColor">{{ selectedDoc.code }}</tellerapp-badge>
+            </div>
+
+            <h5 class="fw-bold mb-3 text-dark">{{ selectedDoc.title }}</h5>
+
+            <div class="row g-2 mb-3 p-3 bg-light rounded text-muted small">
+                <div class="col-md-4">
+                    <span class="fw-semibold text-secondary">Cơ quan ban hành:</span> {{ selectedDoc.agency }}
+                </div>
+                <div class="col-md-4">
+                    <span class="fw-semibold text-secondary">Người ký:</span> {{ selectedDoc.signer }}
+                </div>
+                <div class="col-md-4">
+                    <span class="fw-semibold text-secondary">Ngày ban hành:</span> {{ selectedDoc.issuedDate }}
+                </div>
+            </div>
+
+            <h6 class="fw-bold mb-2">Nội dung chi tiết:</h6>
+            <div class="doc-full-content p-3 bg-white border rounded"
+                style="max-height: 380px; overflow-y: auto; white-space: pre-wrap; font-size: 0.9rem; line-height: 1.6;">
+                {{ selectedDoc.cleanedContent || selectedDoc.excerpt }}
+            </div>
+        </div>
+        }
+
+        @if (selectedDoc) {
+        <div modal-footer class="d-flex justify-content-end gap-2 w-100">
+            @if (selectedDoc.link) {
+            <app-button variant="outline" size="sm" label="Nguồn gốc"
+                iconLeft='<i class="bi bi-box-arrow-up-right me-1"></i>' (btnClick)="handleSource(selectedDoc)">
+            </app-button>
+            }
+            <app-button variant="secondary" size="sm" label="Tải về file" iconLeft='<i class="bi bi-download me-1"></i>'
+                (btnClick)="handleDownload(selectedDoc)">
+            </app-button>
+            <app-button variant="primary" size="sm" label="Đóng" (btnClick)="closeDetailModal()">
+            </app-button>
+        </div>
+        }
+    </lib-modal-custom>
+
+    <!-- Scroll to Top Component -->
+    <tellerapp-scroll-to-top></tellerapp-scroll-to-top>
+
+</div>

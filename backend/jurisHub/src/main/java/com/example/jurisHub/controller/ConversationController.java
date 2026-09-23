@@ -7,7 +7,6 @@ import com.example.jurisHub.entity.Conversation;
 import com.example.jurisHub.security.UserPrincipal;
 import com.example.jurisHub.service.ConversationService;
 import com.example.jurisHub.service.MessageService;
-import com.example.jurisHub.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
