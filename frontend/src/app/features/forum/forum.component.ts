@@ -5,7 +5,6 @@ import { Router, RouterModule } from '@angular/router';
 import {
   ButtonComponent,
   BadgeComponent,
-  CustomInputComponent,
   SelectDropdownComponent,
   SelectOption,
   ModalCustomComponent,
@@ -45,7 +44,6 @@ export interface ForumCategory {
     RouterModule,
     ButtonComponent,
     BadgeComponent,
-    CustomInputComponent,
     SelectDropdownComponent,
     ModalCustomComponent,
     ScrollToTopComponent

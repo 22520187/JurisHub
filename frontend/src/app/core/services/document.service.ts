@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
-import { from, Observable, map } from 'rxjs';
-import { LegalDocument, loadLegalDocuments } from '../../lib/csv-parser';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
+import { LegalDocument, parseCSV } from '../../lib/csv-parser';
 
 export interface LegalDocumentItem {
   id: string;
@@ -35,11 +36,14 @@ export interface DocTypeSummary {
   providedIn: 'root'
 })
 export class DocumentService {
+  private readonly http = inject(HttpClient);
+
   /**
-   * Gọi hàm loadLegalDocuments() từ thư viện lib/csv-parser để lấy 50 văn bản từ CSV
+   * Đọc file CSV văn bản pháp luật qua Angular HttpClient để kích hoạt Change Detection tự động
    */
   getDocuments(): Observable<LegalDocumentItem[]> {
-    return from(loadLegalDocuments()).pipe(
+    return this.http.get('/50_dataset_van_ban_phap_luat.csv', { responseType: 'text' }).pipe(
+      map(csvText => parseCSV(csvText)),
       map(rawDocs => rawDocs.map(doc => this.mapToLegalDocumentItem(doc)))
     );
   }

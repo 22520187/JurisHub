@@ -1,11 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import {
   ButtonComponent,
   BadgeComponent,
-  CustomInputComponent,
   SelectDropdownComponent,
   SelectOption,
   ScrollToTopComponent,
@@ -33,7 +32,6 @@ export interface CategoryItem {
     RouterModule,
     ButtonComponent,
     BadgeComponent,
-    CustomInputComponent,
     SelectDropdownComponent,
     ScrollToTopComponent,
     ModalCustomComponent
@@ -45,6 +43,7 @@ export class HomeComponent implements OnInit {
   readonly authService = inject(AuthService);
   private readonly documentService = inject(DocumentService);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   // Search models
   heroSearchKeyword: string = '';
@@ -136,10 +135,14 @@ export class HomeComponent implements OnInit {
 
         // Tính toán loại văn bản phổ biến từ CSV
         this.computeDocTypes(docs);
+
+        // Kích hoạt cập nhật giao diện ngay lập tức
+        this.cdr.markForCheck();
       },
       error: err => {
         console.error('Lỗi khi đọc file CSV văn bản pháp luật:', err);
         this.isLoadingDocuments = false;
+        this.cdr.markForCheck();
       }
     });
   }
