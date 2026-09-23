@@ -1,0 +1,65 @@
+<header class="main-navbar">
+  <div class="container navbar-inner d-flex align-items-center justify-content-between">
+    <!-- Brand Logo -->
+    <a routerLink="/" class="navbar-brand d-flex align-items-center text-decoration-none">
+      <span class="brand-title">Juris Hub</span>
+    </a>
+
+    <!-- Navigation Links -->
+    <nav class="navbar-nav-links d-none d-md-flex align-items-center gap-4">
+      <a routerLink="/forum" routerLinkActive="active" class="nav-item-link">Diễn đàn</a>
+      <a href="#ai-assistant" (click)="$event.preventDefault(); onQuickAction('ai-lawyer')" class="nav-item-link">Trợ lý AI</a>
+      <a href="#faq" (click)="$event.preventDefault(); onQuickAction('faq')" class="nav-item-link">Hỏi đáp văn bản</a>
+    </nav>
+
+    <!-- Auth / User Actions -->
+    <div class="navbar-actions d-flex align-items-center gap-3">
+      @if (!authService.isLoggedIn()) {
+        <div class="d-flex align-items-center gap-2">
+          <app-button
+            label="Đăng Ký"
+            variant="outline"
+            size="sm"
+            [customStyle]="{
+              borderColor: '#08544e',
+              color: '#08544e',
+              borderRadius: '8px',
+              fontWeight: '600',
+              minWidth: '85px',
+              height: '38px'
+            }"
+            (btnClick)="navigateToRegister()">
+          </app-button>
+          <app-button
+            label="Đăng nhập"
+            variant="custom"
+            size="sm"
+            [customStyle]="{
+              backgroundColor: '#08544e',
+              backgroundColorHover: '#053b37',
+              color: '#ffffff',
+              borderRadius: '8px',
+              fontWeight: '600',
+              minWidth: '95px',
+              height: '38px',
+              boxShadow: '0 2px 6px rgba(8, 84, 78, 0.2)'
+            }"
+            (btnClick)="navigateToLogin()">
+          </app-button>
+        </div>
+      } @else {
+        <div class="d-flex align-items-center gap-3">
+          <button type="button" class="btn-icon-nav position-relative" aria-label="Thông báo">
+            <i class="bi bi-bell fs-5"></i>
+          </button>
+
+          <div class="user-avatar-dropdown" (click)="authService.logout()" title="Click để Đăng xuất">
+            <div class="user-avatar-circle">
+              {{ authService.currentUser()?.initials || 'NV' }}
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</header>

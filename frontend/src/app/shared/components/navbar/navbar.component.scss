@@ -1,0 +1,80 @@
+$primary-teal: #08544e;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.main-navbar {
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+  height: 72px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+  .navbar-inner {
+    height: 100%;
+  }
+
+  .brand-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: $primary-teal;
+    letter-spacing: -0.5px;
+  }
+
+  .nav-item-link {
+    color: #475569;
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: color 0.2s ease;
+
+    &:hover,
+    &.active {
+      color: $primary-teal;
+      font-weight: 600;
+    }
+  }
+
+  .btn-icon-nav {
+    background: transparent;
+    border: none;
+    color: #475569;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+
+    &:hover {
+      background: #f1f5f9;
+      color: $primary-teal;
+    }
+  }
+
+  .user-avatar-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: #0d2b27;
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: transform 0.15s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}

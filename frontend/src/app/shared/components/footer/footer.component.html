@@ -1,0 +1,77 @@
+<footer class="main-footer pt-5 pb-4">
+  <div class="container">
+    <div class="row g-4 mb-5">
+
+      <!-- Column 1: Brand info -->
+      <div class="col-lg-4">
+        <div class="footer-brand d-flex align-items-center gap-2 mb-3">
+          <i class="bi bi-bank fs-4 text-teal"></i>
+          <span class="footer-brand-title">Juris Hub</span>
+        </div>
+        <p class="footer-desc text-secondary mb-0">
+          Nền tảng tư vấn pháp luật hàng đầu Việt Nam, kết nối bạn với luật sư chuyên nghiệp.
+        </p>
+      </div>
+
+      <!-- Column 2: Dịch vụ -->
+      <div class="col-sm-6 col-lg-2 offset-lg-1">
+        <h5 class="footer-col-heading mb-3">Dịch vụ</h5>
+        <ul class="footer-links-list list-unstyled mb-0 d-flex flex-column gap-2">
+          <li><a href="#" (click)="$event.preventDefault()">Tư vấn pháp luật</a></li>
+          <li><a routerLink="/" fragment="latest-documents-section">Tra cứu văn bản</a></li>
+          <li><a routerLink="/forum">Hỏi đáp cộng đồng</a></li>
+          <li><a href="#" (click)="$event.preventDefault(); handleQuickAction('ai-lawyer')">AI Lawyer</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 3: Lĩnh vực -->
+      <div class="col-sm-6 col-lg-2">
+        <h5 class="footer-col-heading mb-3">Lĩnh vực</h5>
+        <ul class="footer-links-list list-unstyled mb-0 d-flex flex-column gap-2">
+          <li><a href="#" (click)="$event.preventDefault()">Luật Doanh nghiệp</a></li>
+          <li><a href="#" (click)="$event.preventDefault()">Luật Lao động</a></li>
+          <li><a href="#" (click)="$event.preventDefault()">Luật Đất đai</a></li>
+          <li><a href="#" (click)="$event.preventDefault()">Luật Thuế</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 4: Liên hệ -->
+      <div class="col-lg-3">
+        <h5 class="footer-col-heading mb-3">Liên hệ</h5>
+        <ul class="footer-contact-list list-unstyled mb-3 d-flex flex-column gap-2">
+          <li class="d-flex align-items-center gap-2">
+            <i class="bi bi-geo-alt text-teal"></i>
+            <span>123 Đường ABC, Q.1, TP.HCM</span>
+          </li>
+          <li class="d-flex align-items-center gap-2">
+            <i class="bi bi-telephone text-teal"></i>
+            <span>(028) 3xxx-xxxx</span>
+          </li>
+          <li class="d-flex align-items-center gap-2">
+            <i class="bi bi-envelope text-teal"></i>
+            <span>contact@legalconnect.vn</span>
+          </li>
+        </ul>
+
+        <!-- Social Circles -->
+        <div class="d-flex align-items-center gap-2">
+          <a href="#" (click)="$event.preventDefault()" class="social-circle-btn" aria-label="Facebook">f</a>
+          <a href="#" (click)="$event.preventDefault()" class="social-circle-btn" aria-label="LinkedIn">in</a>
+          <a href="#" (click)="$event.preventDefault()" class="social-circle-btn" aria-label="YouTube">yt</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer Bottom Bar -->
+    <div class="footer-bottom-bar pt-4 border-top border-secondary border-opacity-25 d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3 text-secondary small">
+      <div>© 2024 Legal Connect. Bảo lưu mọi quyền.</div>
+      <div class="d-flex align-items-center gap-3">
+        <a href="#" (click)="$event.preventDefault()" class="text-secondary text-decoration-none hover-white">Điều khoản sử dụng</a>
+        <a href="#" (click)="$event.preventDefault()" class="text-secondary text-decoration-none hover-white">Chính sách bảo mật</a>
+        <a href="#" (click)="$event.preventDefault()" class="text-secondary text-decoration-none hover-white">Cookie</a>
+      </div>
+    </div>
+
+  </div>
+</footer>
