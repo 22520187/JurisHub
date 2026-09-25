@@ -121,10 +121,7 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   ];
 
   ngOnInit(): void {
-    // If user is not logged in, auto-login with default NV user for realistic demo
-    if (!this.authService.isLoggedIn()) {
-      this.authService.login();
-    }
+    // Component initialization
   }
 
   ngAfterViewChecked(): void {

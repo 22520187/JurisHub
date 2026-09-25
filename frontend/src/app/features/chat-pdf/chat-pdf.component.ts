@@ -76,9 +76,7 @@ export class ChatPdfComponent implements OnInit, AfterViewChecked {
   private shouldScrollToBottom: boolean = false;
 
   ngOnInit(): void {
-    if (!this.authService.isLoggedIn()) {
-      this.authService.login();
-    }
+    // Component initialization
   }
 
   ngAfterViewChecked(): void {

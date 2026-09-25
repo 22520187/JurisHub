@@ -25,6 +25,8 @@ export class LoginComponent {
 
   showPassword = false;
   submitted = false;
+  isLoading = false;
+  errorMessage = '';
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
@@ -32,26 +34,45 @@ export class LoginComponent {
 
   onSubmit(): void {
     this.submitted = true;
+    this.errorMessage = '';
     if (this.loginForm.invalid) {
       return;
     }
 
-    console.log('Dữ liệu đăng nhập (Chưa gọi API):', this.loginForm.value);
-    const email = this.loginForm.value.email;
-    const namePart = email.split('@')[0];
-    this.authService.login({
-      id: 'usr_' + Date.now(),
-      name: namePart,
-      email: email,
-      initials: 'NV',
-      role: 'User'
+    const { email, password } = this.loginForm.value;
+    this.isLoading = true;
+
+    this.authService.login({ email, password }).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        this.router.navigate(['/']);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.warn('API error, falling back or displaying message:', err);
+        // If error message returned by backend
+        if (err?.error?.message) {
+          this.errorMessage = err.error.message;
+        } else if (err?.status === 0 || err?.status === 404) {
+          // If server is not running, log in with mock data for local frontend demo
+          this.authService.setMockUser({
+            name: email.split('@')[0],
+            email: email
+          });
+          this.router.navigate(['/']);
+        } else {
+          this.errorMessage = 'Email hoặc mật khẩu không chính xác. Vui lòng thử lại.';
+        }
+      }
     });
-    this.router.navigate(['/']);
   }
 
   onSocialLogin(provider: string): void {
     console.log(`Đăng nhập qua ${provider}`);
-    this.authService.login();
+    this.authService.setMockUser({
+      name: 'Nguyen Van A',
+      email: 'test123@gmail.com'
+    });
     this.router.navigate(['/']);
   }
 }

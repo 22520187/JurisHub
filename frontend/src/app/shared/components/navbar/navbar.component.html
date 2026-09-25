@@ -2,7 +2,7 @@
   <div class="container navbar-inner d-flex align-items-center justify-content-between">
     <!-- Brand Logo -->
     <a routerLink="/" class="navbar-brand d-flex align-items-center text-decoration-none">
-      <span class="brand-title">Legal Connect</span>
+      <span class="brand-title">Juris Hub</span>
     </a>
 
     <!-- Navigation Links -->
@@ -15,26 +15,17 @@
     <!-- Auth / User Actions -->
     <div class="navbar-actions d-flex align-items-center gap-3">
       @if (!authService.isLoggedIn()) {
-        <div class="d-flex align-items-center gap-2">
-          <app-button
-            label="Đăng Ký"
-            variant="outline"
-            size="sm"
-            [customStyle]="{
+      <div class="d-flex align-items-center gap-2">
+        <app-button label="Đăng Ký" variant="outline" size="sm" [customStyle]="{
               borderColor: '#08544e',
               color: '#08544e',
               borderRadius: '8px',
               fontWeight: '600',
               minWidth: '85px',
               height: '38px'
-            }"
-            (btnClick)="navigateToRegister()">
-          </app-button>
-          <app-button
-            label="Đăng nhập"
-            variant="custom"
-            size="sm"
-            [customStyle]="{
+            }" (btnClick)="navigateToRegister()">
+        </app-button>
+        <app-button label="Đăng nhập" variant="custom" size="sm" [customStyle]="{
               backgroundColor: '#08544e',
               backgroundColorHover: '#053b37',
               color: '#ffffff',
@@ -43,22 +34,72 @@
               minWidth: '95px',
               height: '38px',
               boxShadow: '0 2px 6px rgba(8, 84, 78, 0.2)'
-            }"
-            (btnClick)="navigateToLogin()">
-          </app-button>
-        </div>
+            }" (btnClick)="navigateToLogin()">
+        </app-button>
+      </div>
       } @else {
-        <div class="d-flex align-items-center gap-3">
-          <button type="button" class="btn-icon-nav position-relative" aria-label="Thông báo">
-            <i class="bi bi-bell fs-5"></i>
-          </button>
+      <div class="d-flex align-items-center gap-3">
+        <button type="button" class="btn-icon-nav position-relative" aria-label="Thông báo">
+          <i class="bi bi-bell fs-5"></i>
+        </button>
 
-          <div class="user-avatar-dropdown" (click)="authService.logout()" title="Click để Đăng xuất">
-            <div class="user-avatar-circle">
-              {{ authService.currentUser()?.initials || 'NV' }}
-            </div>
+        <!-- Avatar with Dropdown Container -->
+        <div class="user-avatar-wrapper position-relative">
+          <div class="user-avatar-circle" (click)="toggleDropdown($event)" title="Hồ sơ tài khoản" role="button"
+            tabindex="0" [attr.aria-expanded]="isDropdownOpen">
+            {{ authService.currentUser()?.initials || 'NV' }}
           </div>
+
+          <!-- Dropdown Menu (Matching User Screenshot) -->
+          @if (isDropdownOpen) {
+          <div class="user-profile-dropdown" (click)="$event.stopPropagation()">
+            <!-- User Info Header -->
+            <div class="dropdown-user-header">
+              <div class="user-display-name text-truncate">
+                {{ authService.currentUser()?.name || 'Nguyen Van A' }}
+              </div>
+              <div class="user-display-email text-truncate">
+                {{ authService.currentUser()?.email || 'test123@gmail.com' }}
+              </div>
+            </div>
+
+            <div class="dropdown-divider"></div>
+
+            <!-- Menu Item 1: Hồ sơ cá nhân -->
+            <button type="button" class="dropdown-menu-item" (click)="onNavigate('/profile')">
+              <i class="bi bi-person item-icon"></i>
+              <span class="item-label">Hồ sơ cá nhân</span>
+            </button>
+
+            <!-- Menu Item 2: Bài viết của tôi -->
+            <button type="button" class="dropdown-menu-item" (click)="onNavigate('/forum')">
+              <i class="bi bi-file-earmark-text item-icon"></i>
+              <span class="item-label">Bài viết của tôi</span>
+            </button>
+
+            <!-- Menu Item 3: Cuộc trò chuyện -->
+            <button type="button" class="dropdown-menu-item" (click)="onNavigate('/chat')">
+              <i class="bi bi-chat-square-text item-icon"></i>
+              <span class="item-label">Cuộc trò chuyện</span>
+            </button>
+
+            <!-- Menu Item 4: Cài đặt -->
+            <button type="button" class="dropdown-menu-item" (click)="onNavigate('/settings')">
+              <i class="bi bi-gear item-icon"></i>
+              <span class="item-label">Cài đặt</span>
+            </button>
+
+            <div class="dropdown-divider"></div>
+
+            <!-- Menu Item 5: Đăng xuất (Red) -->
+            <button type="button" class="dropdown-menu-item logout-item" (click)="onLogout()">
+              <i class="bi bi-box-arrow-right item-icon text-danger"></i>
+              <span class="item-label text-danger fw-semibold">Đăng xuất</span>
+            </button>
+          </div>
+          }
         </div>
+      </div>
       }
     </div>
   </div>
