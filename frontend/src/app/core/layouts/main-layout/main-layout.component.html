@@ -1,9 +1,11 @@
-<div class="layout-wrapper d-flex flex-column min-vh-100">
+<div class="layout-wrapper d-flex flex-column min-vh-100" [class.chat-layout-wrapper]="isChatRoute">
   <app-navbar></app-navbar>
 
-  <main class="layout-main-content flex-grow-1">
+  <main class="layout-main-content flex-grow-1" [class.chat-main-content]="isChatRoute">
     <router-outlet></router-outlet>
   </main>
 
-  <app-footer></app-footer>
+  @if (!isChatRoute) {
+    <app-footer></app-footer>
+  }
 </div>

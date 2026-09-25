@@ -2,14 +2,14 @@
   <div class="container navbar-inner d-flex align-items-center justify-content-between">
     <!-- Brand Logo -->
     <a routerLink="/" class="navbar-brand d-flex align-items-center text-decoration-none">
-      <span class="brand-title">Juris Hub</span>
+      <span class="brand-title">Legal Connect</span>
     </a>
 
     <!-- Navigation Links -->
     <nav class="navbar-nav-links d-none d-md-flex align-items-center gap-4">
       <a routerLink="/forum" routerLinkActive="active" class="nav-item-link">Diễn đàn</a>
-      <a href="#ai-assistant" (click)="$event.preventDefault(); onQuickAction('ai-lawyer')" class="nav-item-link">Trợ lý AI</a>
-      <a href="#faq" (click)="$event.preventDefault(); onQuickAction('faq')" class="nav-item-link">Hỏi đáp văn bản</a>
+      <a routerLink="/chat" routerLinkActive="active" class="nav-item-link">Trợ lý AI</a>
+      <a routerLink="/chat-pdf" routerLinkActive="active" class="nav-item-link">Hỏi đáp văn bản</a>
     </nav>
 
     <!-- Auth / User Actions -->

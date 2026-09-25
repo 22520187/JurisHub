@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 
@@ -11,4 +11,10 @@ import { FooterComponent } from '../../../shared/components/footer/footer.compon
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'
 })
-export class MainLayoutComponent {}
+export class MainLayoutComponent {
+  private readonly router = inject(Router);
+
+  get isChatRoute(): boolean {
+    return this.router.url.includes('/chat') || this.router.url.includes('/chat-pdf');
+  }
+}

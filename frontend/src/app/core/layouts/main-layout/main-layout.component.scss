@@ -7,8 +7,22 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+
+  &.chat-layout-wrapper {
+    height: 100vh;
+    overflow: hidden;
+  }
 }
 
 .layout-main-content {
   flex: 1 0 auto;
+
+  &.chat-main-content {
+    height: calc(100vh - 72px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+  }
 }
+
