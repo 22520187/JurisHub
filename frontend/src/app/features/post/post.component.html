@@ -1,0 +1,154 @@
+<div class="my-posts-page-wrapper py-4 py-md-5">
+  <div class="container">
+    <div class="my-posts-container">
+
+      <!-- Header -->
+      <div class="my-posts-header mb-4">
+        <h1 class="page-title mb-1">Bài viết của tôi</h1>
+        <p class="page-subtitle text-muted mb-0">Quản lý bài viết và danh sách lưu của bạn</p>
+      </div>
+
+      <!-- Main Card Container -->
+      <div class="my-posts-card p-4">
+        <!-- Tabs Header -->
+        <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+          <div class="tab-buttons-group d-flex align-items-center gap-2">
+            <!-- Tab 1: Bài viết của tôi -->
+            <button
+              type="button"
+              class="tab-btn"
+              [class.active]="activeTab === 'my-posts'"
+              (click)="setActiveTab('my-posts')">
+              Bài viết của tôi ({{ myPosts.length }})
+            </button>
+
+            <!-- Tab 2: Đã lưu -->
+            <button
+              type="button"
+              class="tab-btn"
+              [class.active]="activeTab === 'saved'"
+              (click)="setActiveTab('saved')">
+              Đã lưu ({{ savedPosts.length }})
+            </button>
+          </div>
+
+          <!-- Top Action (shown when there are posts) -->
+          @if (activeTab === 'my-posts' && myPosts.length > 0) {
+            <app-button
+              label="+ Tạo bài viết mới"
+              variant="custom"
+              size="sm"
+              [customStyle]="{
+                backgroundColor: '#08544e',
+                backgroundColorHover: '#053b37',
+                color: '#ffffff',
+                borderRadius: '6px',
+                fontWeight: '600',
+                height: '36px',
+                minWidth: '150px',
+                fontSize: '13px'
+              }"
+              (btnClick)="navigateToCreatePost()">
+            </app-button>
+          }
+        </div>
+
+        <!-- TAB 1 CONTENT: Bài viết của tôi -->
+        @if (activeTab === 'my-posts') {
+          @if (myPosts.length === 0) {
+            <!-- Empty State matching user screenshot -->
+            <div class="empty-state-box text-center py-5">
+              <p class="empty-message text-muted mb-3">Bạn chưa có bài viết nào</p>
+              <app-button
+                label="Tạo bài viết mới"
+                variant="custom"
+                size="md"
+                [customStyle]="{
+                  backgroundColor: '#08544e',
+                  backgroundColorHover: '#053b37',
+                  color: '#ffffff',
+                  borderRadius: '6px',
+                  fontWeight: '600',
+                  height: '38px',
+                  minWidth: '160px',
+                  fontSize: '14px',
+                  boxShadow: '0 2px 6px rgba(8, 84, 78, 0.15)'
+                }"
+                (btnClick)="navigateToCreatePost()">
+              </app-button>
+            </div>
+          } @else {
+            <!-- List of User's Posts -->
+            <div class="user-posts-list d-flex flex-column gap-3">
+              @for (post of myPosts; track post.id) {
+                <div class="post-item-card p-3 rounded-3 border d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                  <div class="post-item-main flex-grow-1">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <tellerapp-badge color="default" size="sm">{{ post.category }}</tellerapp-badge>
+                      @for (tag of post.tags || []; track tag) {
+                        <span class="badge bg-light text-muted border">#{{ tag }}</span>
+                      }
+                    </div>
+                    <h3 class="post-item-title mb-1 fs-6">
+                      <a [routerLink]="['/forum']" class="text-decoration-none text-dark fw-semibold">
+                        {{ post.title }}
+                      </a>
+                    </h3>
+                    <div class="d-flex align-items-center gap-3 text-muted small">
+                      <span><i class="bi bi-clock me-1"></i>{{ post.createdAt }}</span>
+                      <span><i class="bi bi-eye me-1"></i>{{ post.viewsCount }} lượt xem</span>
+                      <span><i class="bi bi-chat me-1"></i>{{ post.repliesCount }} phản hồi</span>
+                    </div>
+                  </div>
+
+                  <div class="post-item-actions d-flex align-items-center gap-2">
+                    <a [routerLink]="['/forum']" class="btn btn-sm btn-outline-secondary">
+                      Xem bài viết
+                    </a>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+
+        <!-- TAB 2 CONTENT: Đã lưu -->
+        @if (activeTab === 'saved') {
+          @if (savedPosts.length === 0) {
+            <div class="empty-state-box text-center py-5">
+              <p class="empty-message text-muted mb-0">Bạn chưa lưu bài viết nào</p>
+            </div>
+          } @else {
+            <div class="user-posts-list d-flex flex-column gap-3">
+              @for (post of savedPosts; track post.id) {
+                <div class="post-item-card p-3 rounded-3 border d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                  <div class="post-item-main flex-grow-1">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <span class="badge bg-light text-dark border">{{ post.category }}</span>
+                    </div>
+                    <h3 class="post-item-title mb-1 fs-6">
+                      <a [routerLink]="['/forum']" class="text-decoration-none text-dark fw-semibold">
+                        {{ post.title }}
+                      </a>
+                    </h3>
+                    <div class="d-flex align-items-center gap-3 text-muted small">
+                      <span><i class="bi bi-person me-1"></i>{{ post.author }}</span>
+                      <span><i class="bi bi-clock me-1"></i>{{ post.createdAt }}</span>
+                      <span><i class="bi bi-eye me-1"></i>{{ post.viewsCount }} lượt xem</span>
+                    </div>
+                  </div>
+                  <div class="post-item-actions">
+                    <a [routerLink]="['/forum']" class="btn btn-sm btn-outline-secondary">
+                      Xem bài viết
+                    </a>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+
+    </div>
+  </div>
+</div>
