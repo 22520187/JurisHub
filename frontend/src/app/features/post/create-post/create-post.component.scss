@@ -1,0 +1,132 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+$primary-teal: #08544e;
+$primary-teal-dark: #053b37;
+$primary-teal-subtle: #e6f4f2;
+$text-dark: #0f172a;
+$text-muted: #64748b;
+$border-color: #e2e8f0;
+
+.create-post-page-wrapper {
+  background-color: #f8fafc;
+  min-height: calc(100vh - 72px);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: $text-dark;
+}
+
+.create-post-container {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  padding: 0;
+  color: $text-muted;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: $primary-teal;
+  }
+}
+
+.create-post-header {
+  .page-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #0f2c42;
+    letter-spacing: -0.5px;
+  }
+
+  .page-subtitle {
+    font-size: 0.95rem;
+  }
+}
+
+.create-post-card {
+  background-color: #ffffff;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.custom-topic-select,
+.custom-topic-input {
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus {
+    border-color: $primary-teal;
+    box-shadow: 0 0 0 3px rgba(8, 84, 78, 0.12);
+  }
+}
+
+.btn-close-xs {
+  font-size: 0.65rem;
+  padding: 0.25rem;
+}
+
+.editor-wrapper {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+
+  .editor-toolbar {
+    background-color: #f8fafc;
+
+    .btn-toolbar-action {
+      color: #475569;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      border: none;
+      transition: background-color 0.15s ease, color 0.15s ease;
+
+      &:hover {
+        background-color: #e2e8f0;
+        color: #0f172a;
+      }
+    }
+  }
+
+  .editor-textarea {
+    resize: vertical;
+    min-height: 160px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+}
+
+.posting-guidelines-box {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid $primary-teal;
+
+  .guidelines-title {
+    color: #0f2c42;
+    font-size: 0.9rem;
+  }
+
+  .guidelines-list {
+    line-height: 1.6;
+    margin-bottom: 0;
+  }
+}

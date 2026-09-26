@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -11,6 +11,7 @@ import {
   ScrollToTopComponent
 } from '../../shared/components';
 import { AuthService } from '../../core/services/auth.service';
+import { ForumService } from '../../core/services/forum.service';
 
 export interface ForumPost {
   id: string;
@@ -45,15 +46,20 @@ export interface ForumCategory {
     ButtonComponent,
     BadgeComponent,
     SelectDropdownComponent,
-    ModalCustomComponent,
     ScrollToTopComponent
   ],
   templateUrl: './forum.component.html',
   styleUrl: './forum.component.scss'
 })
-export class ForumComponent {
+export class ForumComponent implements OnInit {
   readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly forumService = inject(ForumService);
+
+  ngOnInit(): void {
+    this.posts = this.forumService.posts() as unknown as ForumPost[];
+    this.totalResults = this.posts.length;
+  }
 
   // Search
   searchKeyword: string = '';
@@ -136,17 +142,9 @@ export class ForumComponent {
     if (filter === 'lawyer') this.isLawyerAnsweredActive = !this.isLawyerAnsweredActive;
   }
 
-  // Create Modal Actions
+  // Create Modal Actions (now routes to dedicated create-post page)
   openCreateModal(): void {
-    this.newTopic = {
-      category: '',
-      title: '',
-      tagInput: '',
-      tags: [],
-      content: ''
-    };
-    this.createModalError = '';
-    this.isCreateModalOpen = true;
+    this.router.navigate(['/forum/create']);
   }
 
   closeCreateModal(): void {

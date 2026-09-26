@@ -1,0 +1,189 @@
+<div class="create-post-page-wrapper py-4 py-md-5">
+  <div class="container">
+    <div class="create-post-container">
+
+      <!-- Toast Feedback -->
+      <app-toast-message
+        [visible]="showToast"
+        [type]="toastType"
+        title="Thông báo"
+        [message]="toastMessage"
+        [duration]="3"
+        (close)="showToast = false">
+      </app-toast-message>
+
+      <!-- Back Link -->
+      <div class="mb-3">
+        <button type="button" class="btn-back d-inline-flex align-items-center gap-2" (click)="goBack()">
+          <i class="bi bi-arrow-left"></i>
+          <span>Quay lại</span>
+        </button>
+      </div>
+
+      <!-- Page Header -->
+      <div class="create-post-header mb-4">
+        <h1 class="page-title mb-1">Tạo chủ đề mới</h1>
+        <p class="text-muted page-subtitle mb-0">Đặt câu hỏi hoặc chia sẻ kiến thức pháp luật với cộng đồng JurisHub</p>
+      </div>
+
+      <!-- Main Form Card -->
+      <div class="create-post-card p-4 p-md-5">
+        <!-- Error Alert -->
+        @if (errorMessage) {
+          <div class="alert alert-danger py-2 px-3 mb-4 rounded-3 small" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ errorMessage }}
+          </div>
+        }
+
+        <form (ngSubmit)="submitPost()">
+          <!-- Field 1: Chuyên mục -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold small mb-2">Chuyên mục <span class="text-danger">*</span></label>
+            <select class="form-select custom-topic-select" [(ngModel)]="category" name="category">
+              <option value="" disabled selected>Chọn chuyên mục</option>
+              @for (cat of categories; track cat.value) {
+                <option [value]="cat.value">{{ cat.label }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Field 2: Nhãn (Label) -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold small mb-1">Nhãn (Label)</label>
+            <p class="text-muted small mb-0">
+              {{ category ? 'Chọn các nhãn phù hợp với nội dung câu hỏi' : 'Vui lòng chọn chuyên mục để hiển thị các nhãn' }}
+            </p>
+          </div>
+
+          <!-- Field 3: Tiêu đề -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold small mb-2">Tiêu đề <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              class="form-control custom-topic-input"
+              placeholder="Nhập tiêu đề chủ đề..."
+              [(ngModel)]="title"
+              name="title" />
+            <p class="form-text text-muted small mt-1 mb-0">
+              Tiêu đề ngắn gọn, súc tích và mô tả chính xác vấn đề (tối thiểu 10 ký tự)
+            </p>
+          </div>
+
+          <!-- Field 4: Thẻ -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold small mb-2">Thẻ</label>
+            <input
+              type="text"
+              class="form-control custom-topic-input"
+              placeholder="Nhập thẻ và nhấn Enter (tối đa 5 thẻ)"
+              [(ngModel)]="tagInput"
+              name="tagInput"
+              (keydown.enter)="addTag(); $event.preventDefault()" />
+            <p class="form-text text-muted small mt-1 mb-2">
+              Thêm các thẻ liên quan để dễ dàng tìm kiếm
+            </p>
+
+            @if (tags.length > 0) {
+              <div class="d-flex flex-wrap gap-2">
+                @for (tag of tags; track tag) {
+                  <span class="badge bg-light text-dark border d-flex align-items-center gap-1 px-2 py-1">
+                    #{{ tag }}
+                    <button type="button" class="btn-close btn-close-xs" (click)="removeTag(tag)"></button>
+                  </span>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Field 5: Nội dung (Editor) -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold small mb-2">Nội dung <span class="text-danger">*</span></label>
+
+            <div class="editor-wrapper border rounded-3 overflow-hidden">
+              <!-- Toolbar -->
+              <div class="editor-toolbar bg-light px-3 py-2 border-bottom d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-1">
+                  <button type="button" class="btn btn-sm btn-toolbar-action fw-bold" (click)="applyFormat('bold')">B</button>
+                  <button type="button" class="btn btn-sm btn-toolbar-action fst-italic" (click)="applyFormat('italic')">I</button>
+                  <button type="button" class="btn btn-sm btn-toolbar-action fw-semibold" (click)="applyFormat('heading')">H2</button>
+                  <button type="button" class="btn btn-sm btn-toolbar-action" (click)="applyFormat('ul')">
+                    <i class="bi bi-list-ul"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-toolbar-action" (click)="applyFormat('ol')">
+                    <i class="bi bi-list-ol"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-toolbar-action" (click)="applyFormat('quote')">
+                    <i class="bi bi-quote"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-toolbar-action" (click)="applyFormat('link')">
+                    <i class="bi bi-link-45deg"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Textarea -->
+              <textarea
+                id="create-topic-textarea"
+                class="form-control editor-textarea border-0 p-3"
+                rows="7"
+                placeholder="Mô tả chi tiết nội dung, câu hỏi pháp lý của bạn..."
+                [(ngModel)]="content"
+                name="content">
+              </textarea>
+            </div>
+
+            <p class="text-end text-muted small mt-1 mb-0">Tối thiểu 30 ký tự</p>
+          </div>
+
+          <!-- Hướng dẫn đăng bài -->
+          <div class="posting-guidelines-box p-3 mb-4 rounded-3">
+            <h6 class="guidelines-title fw-bold mb-2">Hướng dẫn đăng bài</h6>
+            <ul class="guidelines-list mb-0 ps-3 text-muted small">
+              <li>Viết tiếng Việt có dấu, rõ ràng, dễ hiểu</li>
+              <li>Không đăng nội dung vi phạm pháp luật, đạo đức, thuần phong mỹ tục</li>
+              <li>Không spam, quảng cáo</li>
+              <li>Tôn trọng các thành viên khác</li>
+            </ul>
+          </div>
+
+          <!-- Footer Buttons -->
+          <div class="d-flex align-items-center justify-content-end gap-3 pt-2">
+            <app-button
+              variant="outline"
+              size="sm"
+              label="Hủy"
+              [customStyle]="{
+                borderRadius: '6px',
+                borderColor: '#d1d5db',
+                color: '#334155',
+                minWidth: '85px',
+                height: '40px'
+              }"
+              (btnClick)="goBack()">
+            </app-button>
+
+            <app-button
+              variant="custom"
+              size="sm"
+              label="Đăng bài"
+              [loading]="isSubmitting"
+              [customStyle]="{
+                backgroundColor: '#08544e',
+                backgroundColorHover: '#053b37',
+                color: '#ffffff',
+                borderRadius: '6px',
+                fontWeight: '600',
+                minWidth: '110px',
+                height: '40px',
+                boxShadow: '0 2px 6px rgba(8, 84, 78, 0.2)'
+              }"
+              (btnClick)="submitPost()">
+            </app-button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
