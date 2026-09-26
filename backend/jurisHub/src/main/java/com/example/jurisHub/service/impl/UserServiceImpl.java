@@ -1,6 +1,7 @@
 package com.example.jurisHub.service.impl;
 
 import com.example.jurisHub.dto.auth.RegisterRequest;
+import com.example.jurisHub.dto.user.UpdateProfileRequest;
 import com.example.jurisHub.dto.user.UserPostDto;
 import com.example.jurisHub.dto.user.UserProfileDto;
 import com.example.jurisHub.entity.Post;
@@ -92,7 +93,32 @@ public class UserServiceImpl implements UserService {
                 .bio(user.getBio())
                 .legalExpertise(legalExpertiseList)
                 .build();
+    }
 
+    @Override
+    @Transactional
+    public UserProfileDto updateProfile(Long userId, UpdateProfileRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (request.getFullName() != null && !request.getFullName().trim().isEmpty()) {
+            user.setFullName(request.getFullName().trim());
+        }
+        if (request.getPhoneNumber() != null) {
+            user.setPhoneNumber(request.getPhoneNumber().trim());
+        }
+        if (request.getBio() != null) {
+            user.setBio(request.getBio());
+        }
+        if (request.getAvatar() != null) {
+            user.setAvatar(request.getAvatar());
+        }
+        if (request.getLegalExpertise() != null) {
+            user.setLegalExpertise(String.join(",", request.getLegalExpertise()));
+        }
+
+        userRepository.save(user);
+        return getUserProfile(userId);
     }
 
     @Override

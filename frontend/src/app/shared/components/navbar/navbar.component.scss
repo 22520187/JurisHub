@@ -72,6 +72,14 @@ $primary-teal: #08544e;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     transition: transform 0.15s ease;
+    overflow: hidden;
+
+    .navbar-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
 
     &:hover {
       transform: scale(1.05);

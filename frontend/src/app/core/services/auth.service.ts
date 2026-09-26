@@ -12,6 +12,7 @@ export interface UserProfile {
   phoneNumber?: string;
   role?: string;
   authProvider?: string;
+  bio?: string;
 }
 
 export interface ApiResponse<T> {
@@ -233,5 +234,26 @@ export class AuthService {
       initials: this.calculateInitials(user?.name || defaultUser.name)
     };
     this.setUserProfile(profile);
+  }
+
+  /**
+   * Update current user profile and sync to storage
+   */
+  updateUserProfile(updated: Partial<UserProfile>): UserProfile {
+    const current = this.currentUserSignal() || {
+      id: 1,
+      name: 'Nguyen Van A',
+      email: 'test123@gmail.com',
+      initials: 'NV',
+      role: 'USER'
+    };
+    const newName = updated.name !== undefined ? updated.name : current.name;
+    const profile: UserProfile = {
+      ...current,
+      ...updated,
+      initials: this.calculateInitials(newName)
+    };
+    this.setUserProfile(profile);
+    return profile;
   }
 }

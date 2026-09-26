@@ -47,7 +47,11 @@
         <div class="user-avatar-wrapper position-relative">
           <div class="user-avatar-circle" (click)="toggleDropdown($event)" title="Hồ sơ tài khoản" role="button"
             tabindex="0" [attr.aria-expanded]="isDropdownOpen">
-            {{ authService.currentUser()?.initials || 'NV' }}
+            @if (authService.currentUser()?.avatarUrl) {
+              <img [src]="authService.currentUser()?.avatarUrl" alt="Avatar" class="navbar-avatar-img" />
+            } @else {
+              {{ authService.currentUser()?.initials || 'NV' }}
+            }
           </div>
 
           <!-- Dropdown Menu (Matching User Screenshot) -->

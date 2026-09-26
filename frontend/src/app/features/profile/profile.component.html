@@ -1,0 +1,240 @@
+<div class="profile-page-wrapper py-4 py-md-5">
+    <div class="container">
+        <div class="profile-container">
+
+            <!-- Toast Notification for feedback -->
+            <app-toast-message [visible]="showToast" [type]="toastType" [title]="toastTitle" [message]="toastMessage"
+                [duration]="3" (close)="showToast = false">
+            </app-toast-message>
+
+            <!-- 1. PROFILE HEADER CARD -->
+            <div class="profile-card profile-header-card mb-4">
+                @if (!isEditMode) {
+                <!-- VIEW MODE (Matching Image 1) -->
+                <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-4">
+                    <!-- Avatar Circle with Upload support -->
+                    <div class="profile-avatar-wrapper position-relative flex-shrink-0">
+                        <div class="profile-avatar-circle" (click)="fileInputView.click()"
+                            title="Nhấp để thay đổi ảnh đại diện" role="button" tabindex="0">
+                            @if (displayAvatarUrl) {
+                            <img [src]="displayAvatarUrl" alt="Avatar" class="avatar-img" />
+                            } @else {
+                            <span class="avatar-letter">{{ profileAvatarLetter }}</span>
+                            }
+                            <!-- Hover overlay -->
+                            <div class="avatar-hover-overlay">
+                                <i class="bi bi-camera"></i>
+                                <span>Đổi ảnh</span>
+                            </div>
+                        </div>
+
+                        <!-- Camera badge button -->
+                        <button type="button" class="avatar-upload-badge-btn" (click)="fileInputView.click()"
+                            title="Tải ảnh lên" aria-label="Tải ảnh lên">
+                            <i class="bi bi-camera-fill"></i>
+                        </button>
+
+                        <input type="file" #fileInputView class="d-none"
+                            accept="image/png, image/jpeg, image/jpg, image/webp"
+                            (change)="onAvatarSelected($event)" />
+                    </div>
+
+                    <!-- User Info Details -->
+                    <div class="profile-header-info flex-grow-1">
+                        <h1 class="profile-user-name mb-2">{{ displayName }}</h1>
+
+                        <!-- Badge Role -->
+                        <div class="mb-3">
+                            <tellerapp-badge color="default" size="sm">
+                                {{ displayRole }}
+                            </tellerapp-badge>
+                        </div>
+
+                        <!-- Meta Info: Email & Join date -->
+                        <div class="profile-meta-list d-flex flex-column gap-2 mb-3">
+                            <div class="profile-meta-item d-flex align-items-center gap-2">
+                                <i class="bi bi-envelope"></i>
+                                <span>{{ displayEmail }}</span>
+                            </div>
+                            <div class="profile-meta-item d-flex align-items-center gap-2">
+                                <i class="bi bi-calendar3"></i>
+                                <span>{{ displayJoinedDate }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Action Button: Chỉnh sửa -->
+                        <div>
+                            <app-button label="Chỉnh sửa" variant="custom" size="sm" [customStyle]="{
+                    backgroundColor: '#08544e',
+                    backgroundColorHover: '#053b37',
+                    color: '#ffffff',
+                    borderRadius: '6px',
+                    fontWeight: '600',
+                    height: '36px',
+                    minWidth: '110px',
+                    fontSize: '13px'
+                  }" (btnClick)="startEdit()">
+                                <i class="bi bi-pencil me-1"></i>
+                            </app-button>
+                        </div>
+                    </div>
+                </div>
+                } @else {
+                <div class="d-flex flex-column flex-sm-row align-items-start gap-4">
+                    <!-- Avatar Circle with Upload support -->
+                    <div class="profile-avatar-wrapper position-relative flex-shrink-0">
+                        <div class="profile-avatar-circle" (click)="fileInputEdit.click()"
+                            title="Nhấp để thay đổi ảnh đại diện" role="button" tabindex="0">
+                            @if (displayAvatarUrl) {
+                            <img [src]="displayAvatarUrl" alt="Avatar" class="avatar-img" />
+                            } @else {
+                            <span class="avatar-letter">{{ profileAvatarLetter }}</span>
+                            }
+                            <!-- Hover overlay -->
+                            <div class="avatar-hover-overlay">
+                                <i class="bi bi-camera"></i>
+                                <span>Đổi ảnh</span>
+                            </div>
+                        </div>
+
+                        <!-- Camera badge button -->
+                        <button type="button" class="avatar-upload-badge-btn" (click)="fileInputEdit.click()"
+                            title="Tải ảnh lên" aria-label="Tải ảnh lên">
+                            <i class="bi bi-camera-fill"></i>
+                        </button>
+
+                        <input type="file" #fileInputEdit class="d-none"
+                            accept="image/png, image/jpeg, image/jpg, image/webp"
+                            (change)="onAvatarSelected($event)" />
+                    </div>
+
+                    <!-- Edit Form Fields -->
+                    <div class="profile-edit-form flex-grow-1">
+                        <div class="mb-3 edit-field-group">
+                            <app-custom-input label="Họ và tên" placeholder="Nhập họ và tên"
+                                [(ngModel)]="editForm.fullName" [notDisplayAsterisk]="true">
+                            </app-custom-input>
+                        </div>
+
+                        <div class="profile-meta-item d-flex align-items-center gap-2 mb-3">
+                            <i class="bi bi-envelope"></i>
+                            <span>{{ displayEmail }}</span>
+                        </div>
+
+                        <div class="mb-4 edit-field-group">
+                            <app-custom-input label="Số điện thoại" placeholder="Nhập số điện thoại"
+                                [(ngModel)]="editForm.phoneNumber" [notDisplayAsterisk]="true">
+                            </app-custom-input>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <app-button label="Lưu thay đổi" variant="custom" size="sm" [loading]="isSaving"
+                                [customStyle]="{
+                    backgroundColor: '#08544e',
+                    backgroundColorHover: '#053b37',
+                    color: '#ffffff',
+                    borderRadius: '6px',
+                    fontWeight: '600',
+                    height: '36px',
+                    minWidth: '125px',
+                    fontSize: '13px'
+                  }" (btnClick)="saveProfile()">
+                                <i class="bi bi-floppy me-1"></i>
+                            </app-button>
+
+                            <app-button label="Hủy" variant="outline" size="sm" [customStyle]="{
+                    borderColor: '#d1d5db',
+                    color: '#374151',
+                    borderRadius: '6px',
+                    fontWeight: '500',
+                    height: '36px',
+                    minWidth: '70px',
+                    fontSize: '13px'
+                  }" (btnClick)="cancelEdit()">
+                                <i class="bi bi-x-lg me-1"></i>
+                            </app-button>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+
+            <div class="profile-stats-grid mb-4">
+                <div class="profile-stat-card">
+                    <div class="stat-info">
+                        <span class="stat-label">Bài viết</span>
+                        <span class="stat-value">{{ profile.postCount ?? 0 }}</span>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-chat-square"></i>
+                    </div>
+                </div>
+
+                <div class="profile-stat-card">
+                    <div class="stat-info">
+                        <span class="stat-label">Phản hồi</span>
+                        <span class="stat-value">{{ profile.replyCount ?? 0 }}</span>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-chat-square"></i>
+                    </div>
+                </div>
+
+                <div class="profile-stat-card">
+                    <div class="stat-info">
+                        <span class="stat-label">Hoạt động</span>
+                        <span class="stat-value">{{ profile.activityCount ?? 0 }}</span>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-eye"></i>
+                    </div>
+                </div>
+
+                <!-- Card 4: Lượt xem -->
+                <div class="profile-stat-card">
+                    <div class="stat-info">
+                        <span class="stat-label">Lượt xem</span>
+                        <span class="stat-value">{{ profile.viewsCount ?? 4 }}</span>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-eye"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-card profile-content-card mb-4">
+                <h2 class="profile-section-title">GIỚI THIỆU</h2>
+                <p class="profile-section-content mb-0">
+                    {{ displayBio }}
+                </p>
+            </div>
+
+            <div class="profile-card profile-content-card mb-4">
+                <h2 class="profile-section-title">HOẠT ĐỘNG GẦN ĐÂY</h2>
+
+                @if (userPosts.length === 0) {
+                <div class="empty-activities text-center py-4">
+                    <span class="text-muted empty-text">Chưa có bài viết nào</span>
+                </div>
+                } @else {
+                <div class="recent-posts-list d-flex flex-column gap-3">
+                    @for (post of userPosts; track post.id) {
+                    <div class="recent-post-item p-3 rounded border">
+                        <a [routerLink]="['/forum/post', post.id]"
+                            class="fw-semibold text-decoration-none text-dark d-block mb-1">
+                            {{ post.title }}
+                        </a>
+                        <div class="d-flex align-items-center gap-3 text-muted small">
+                            <span><i class="bi bi-eye me-1"></i>{{ post.views || 0 }} lượt xem</span>
+                            <span><i class="bi bi-chat me-1"></i>{{ post.replyCount || 0 }} phản hồi</span>
+                            <span><i class="bi bi-clock me-1"></i>{{ post.createdAt | date:'dd/MM/yyyy' }}</span>
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>

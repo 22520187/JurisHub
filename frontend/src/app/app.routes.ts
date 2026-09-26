@@ -6,6 +6,7 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { ChatComponent } from './features/chatbot/chat.component';
 import { ChatPdfComponent } from './features/chat-pdf/chat-pdf.component';
+import { ProfileComponent } from './features/profile/profile.component';
 
 export const routes: Routes = [
   {
@@ -18,6 +19,7 @@ export const routes: Routes = [
       { path: 'chat', component: ChatComponent },
       { path: 'chatbot', component: ChatComponent },
       { path: 'chat-pdf', component: ChatPdfComponent },
+      { path: 'profile', component: ProfileComponent },
     ]
   },
   { path: 'login', component: LoginComponent },

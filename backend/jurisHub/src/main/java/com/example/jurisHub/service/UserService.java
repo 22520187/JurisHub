@@ -1,6 +1,7 @@
 package com.example.jurisHub.service;
 
 import com.example.jurisHub.dto.auth.RegisterRequest;
+import com.example.jurisHub.dto.user.UpdateProfileRequest;
 import com.example.jurisHub.dto.user.UserPostDto;
 import com.example.jurisHub.dto.user.UserProfileDto;
 import com.example.jurisHub.entity.User;
@@ -18,5 +19,8 @@ public interface UserService {
 
     UserProfileDto getUserProfile(Long userId);
 
+    UserProfileDto updateProfile(Long userId, UpdateProfileRequest request);
+
     Page<UserPostDto> getUserPosts(Long userId, Pageable pageable);
 }
+
