@@ -3,8 +3,11 @@ package com.example.jurisHub.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -17,28 +20,37 @@ import java.util.Set;
 
         @Index(name = "idx_post_labels_name", columnList = "name")
 })
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 public class PostLabel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private Long id;
 
+    @ToString.Include
     @Column(nullable = false, unique = true)
     private String name;
 
+    @ToString.Include
     @Column(nullable = false, unique = true)
     private String slug;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Builder.Default
     @Column(nullable = false)
     private String color = "#3B82F6";
 
+    @Builder.Default
     @Column(name = "is_active")
     private Boolean isActive = true;
 

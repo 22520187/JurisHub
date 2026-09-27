@@ -55,17 +55,19 @@ public class ForumServiceImpl implements ForumService {
 
         latestPosts.forEach(post -> {
             if (post.getAuthor() != null) {
-                post.getAuthor().getEmail(); // Force loading of author email
+                post.getAuthor().getEmail(); 
             }
             if (post.getCategory() != null) {
-                post.getCategory().getName(); // Force loading of category name
+                post.getCategory().getName(); 
             }
         });
 
         Map<Long, Post> latestPostMap = latestPosts.stream()
+                .filter(post -> post != null && post.getCategory() != null && post.getCategory().getId() != null)
                 .collect(java.util.stream.Collectors.toMap(
                         post -> post.getCategory().getId(),
-                        post -> post)
+                        post -> post,
+                        (existing, replacement) -> existing)
                 );
 
         List<PostCategoryDto> result = categories.stream()

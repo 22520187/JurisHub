@@ -31,11 +31,8 @@ public interface ForumRepository extends JpaRepository<Post, Long> {
      * Uses DISTINCT ON to get only one post per category (the most recent one)
      * Join with author to avoid N+1 lazy loading
      */
-    @Query(value = "SELECT DISTINCT ON (p.category_id) p.id, p.title, p.slug, p.content, p.category_id, " +
-            "p.author_id, p.views, p.reply_count, p.upvote_count, p.downvote_count, " +
-            "p.is_pinned, p.is_solved, p.is_hot, p.is_active, p.report_count, p.is_reported, " +
-            "p.violation_reason, p.tags, p.created_at, p.updated_at, p.last_reply_at " +
-            "FROM posts p " +
+    @Query(value = "SELECT DISTINCT ON (p.category_id) p.* " +
+            "FROM jurishub.posts p " +
             "WHERE p.is_active = true " +
             "ORDER BY p.category_id, p.created_at DESC",
             nativeQuery = true)
@@ -92,7 +89,7 @@ public interface ForumRepository extends JpaRepository<Post, Long> {
      */
     @Query(value = "SELECT p.id, p.title, p.content, p.category_id, p.author_id, p.views, p.reply_count, p.upvote_count, p.downvote_count, p.is_pinned, p.is_solved, p.is_hot, p.is_active, p.report_count, p.is_reported, p.violation_reason, p.tags, p.created_at, p.updated_at, p.last_reply_at FROM posts p WHERE p.is_active = true AND p.content LIKE ?1",
             nativeQuery = true,
-            countQuery = "SELECT COUNT(*) FROM posts p WHERE p.is_active = true AND p.content LIKE ?1")
+            countQuery = "SELECT COUNT(*) FROM jurishub.posts p WHERE p.is_active = true AND p.content LIKE ?1")
     Page<Post> findByIsActiveTrueAndContentContaining(String content, Pageable pageable);
 
     /**
@@ -156,7 +153,7 @@ public interface ForumRepository extends JpaRepository<Post, Long> {
      * Get all distinct tags from active posts
      */
     @Query(value = "SELECT tag_value as tag, COUNT(*) as count " +
-            "FROM posts p " +
+            "FROM jurishub.posts p " +
             "CROSS JOIN LATERAL unnest(string_to_array(LOWER(p.tags), ',')) AS tag_value " +
             "WHERE p.is_active = true AND p.tags IS NOT NULL AND p.tags != '' " +
             "GROUP BY tag_value " +

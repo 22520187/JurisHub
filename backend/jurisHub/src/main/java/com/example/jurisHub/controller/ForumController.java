@@ -90,7 +90,7 @@ public class ForumController {
     /**
      * Get post by category slug and post slug (SEO-friendly URL)
      */
-    @GetMapping("/categories/{categorySlug}/posts/{postsSlug}")
+    @GetMapping("/categories/{categorySlug}/posts/{postSlug}")
     public ResponseEntity<PostDto> getPostBySlug(@PathVariable String categorySlug, @PathVariable String postSlug, Authentication authentication) {
         Long currentUserId = getUserIdFromAuth(authentication);
         System.out.println("getPostBySlug - Category: " + categorySlug + ", Slug: " + postSlug + ", CurrentUserId: " + currentUserId);
