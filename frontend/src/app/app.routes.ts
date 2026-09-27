@@ -9,6 +9,7 @@ import { ChatPdfComponent } from './features/chat-pdf/chat-pdf.component';
 import { ProfileComponent } from './features/profile/profile.component';
 import { PostComponent } from './features/post/post.component';
 import { CreatePostComponent } from './features/post/create-post/create-post.component';
+import { MessageComponent } from './features/message/message.component';
 
 export const routes: Routes = [
   {
@@ -26,6 +27,8 @@ export const routes: Routes = [
       { path: 'post', component: PostComponent },
       { path: 'post/create', component: CreatePostComponent },
       { path: 'my-posts', redirectTo: 'post' },
+      { path: 'message', component: MessageComponent },
+      { path: 'messages', redirectTo: 'message' },
     ]
   },
   { path: 'login', component: LoginComponent },
