@@ -25,7 +25,7 @@ import java.util.Map;
 @RequestMapping("/api/forum")
 @RequiredArgsConstructor
 @Validated
-@CrossOrigin(origins = {"http://localhost:3000"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://localhost:4200"})
 public class ForumController {
     private final ForumService postService;
     private final VotingService votingService;

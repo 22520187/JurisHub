@@ -19,9 +19,13 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.CrossOrigin;
+
 @Slf4j
 @Controller
 @RequestMapping("/api/chat")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://localhost:4200"})
 public class ChatController {
     private final OnlineUserService onlineUserService;
     private final SimpMessagingTemplate messagingTemplate;
@@ -187,6 +191,7 @@ public class ChatController {
      * API endpoint để lấy danh sách user online (REST API)
      */
     @GetMapping("/online-users")
+    @ResponseBody
     public OnlineUsersResponse getOnlineUsers() {
         OnlineUsersResponse response = onlineUserService.getOnlineUsers();
 
