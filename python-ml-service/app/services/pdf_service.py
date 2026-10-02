@@ -1,6 +1,7 @@
 import io
 import os
 import hashlib
+import asyncio
 from typing import List, Dict, Optional, Any
 from pathlib import Path
 import httpx
@@ -105,43 +106,98 @@ class PDFService:
     # =========================================================================
 
     async def _call_llm(self, prompt: str, system_prompt: Optional[str] = None) -> str:
-        """Hàm gọi LLM linh hoạt: Hỗ trợ Google Gemini và OpenRouter"""
+        """Hàm gọi LLM linh hoạt & chống lỗi: Hỗ trợ Google Gemini Fallback Chain và OpenRouter"""
         provider = getattr(self.settings, "llm_provider", "google").lower()
         google_api_key = getattr(self.settings, "google_api_key", "") or getattr(self.settings, "GOOGLE_API_KEY", "")
         openrouter_api_key = getattr(self.settings, "openrouter_api_key", "") or getattr(self.settings, "OPENROUTER_API_KEY", "")
-        # 1. Ưu tiên Google Gemini nếu có key
+
+        errors = []
+
+        # 1. Ưu tiên Google Gemini với chuỗi Fallback Model
         if google_api_key and (provider == "google" or not openrouter_api_key):
-            model = getattr(self.settings, "llm_model", "gemini-flash-latest")
-            if model in ["gemini-pro", "gemini-1.5-flash"]:
-                model = "gemini-flash-latest"
+            primary_model = getattr(self.settings, "llm_model", "gemini-3.8-flash") or "gemini-3.8-flash"
+            if primary_model in ["gemini-pro", "gemini-1.5-flash"]:
+                primary_model = "gemini-3.8-flash"
+
+            fallback_models = [
+                primary_model,
+                "gemini-flash-latest",
+                "gemini-flash-lite-latest",
+                "gemini-3.5-flash-lite",
+                "gemini-3.1-flash-lite",
+                "gemini-3.6-flash"
+            ]
+            candidate_models = list(dict.fromkeys(fallback_models))
+
             full_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={google_api_key}"
             payload = {
                 "contents": [{"parts": [{"text": full_prompt}]}],
                 "generationConfig": {"temperature": 0.3, "maxOutputTokens": 2048}
             }
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                res = await client.post(url, json=payload)
-                if res.status_code == 200:
-                    return res.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
-                raise ValueError(f"Gemini API lỗi {res.status_code}: {res.text}")
+
+            async with httpx.AsyncClient(timeout=35.0) as client:
+                for idx, model in enumerate(candidate_models):
+                    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={google_api_key}"
+                    max_attempts = 2 if idx == 0 else 1
+                    for attempt in range(max_attempts):
+                        try:
+                            logger.info(f"🤖 [PDF LLM] Gọi Gemini model '{model}' (Lần {attempt + 1}/{max_attempts})...")
+                            res = await client.post(url, json=payload)
+                            if res.status_code == 200:
+                                if idx > 0:
+                                    logger.success(f"✅ [PDF FALLBACK SUCCESS] Dùng model dự phòng thành công: {model}")
+                                return res.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+
+                            if res.status_code in [503, 429, 500, 502, 504]:
+                                logger.warning(
+                                    f"⚠️ [PDF GEMINI SPIKE] Model '{model}' trả về {res.status_code}. "
+                                    f"Đang {'thử lại...' if attempt < max_attempts - 1 else 'chuyển sang model tiếp theo...'}"
+                                )
+                                errors.append(f"{model} (HTTP {res.status_code})")
+                                if attempt < max_attempts - 1:
+                                    await asyncio.sleep(1.5)
+                                    continue
+                                break
+                            else:
+                                logger.warning(f"⚠️ Model '{model}' lỗi HTTP {res.status_code}: {res.text[:120]}")
+                                errors.append(f"{model} (HTTP {res.status_code})")
+                                break
+
+                        except (httpx.TimeoutException, httpx.NetworkError) as net_err:
+                            logger.warning(f"⚠️ Timeout/Lỗi mạng model '{model}': {net_err}")
+                            errors.append(f"{model} ({type(net_err).__name__})")
+                            if attempt < max_attempts - 1:
+                                await asyncio.sleep(1.5)
+                                continue
+                            break
+                        except Exception as e:
+                            logger.warning(f"⚠️ Lỗi gọi model '{model}': {e}")
+                            errors.append(f"{model} ({str(e)})")
+                            break
+
         # 2. Hoặc dùng OpenRouter
         if openrouter_api_key:
-            model = getattr(self.settings, "llm_model", "meta-llama/llama-3.2-3b-instruct:free")
+            logger.info("🔄 [PDF PROVIDER FALLBACK] Đang chuyển sang OpenRouter...")
+            model = getattr(self.settings, "openrouter_model", "meta-llama/llama-3.2-3b-instruct:free")
             messages = []
             if system_prompt:
                 messages.append({"role": "system", "content": system_prompt})
             messages.append({"role": "user", "content": prompt})
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                res = await client.post(
-                    "https://openrouter.ai/api/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {openrouter_api_key}", "Content-Type": "application/json"},
-                    json={"model": model, "messages": messages, "temperature": 0.3}
-                )
-                if res.status_code == 200:
-                    return res.json()["choices"][0]["message"]["content"].strip()
-                raise ValueError(f"OpenRouter API lỗi {res.status_code}: {res.text}")
-        raise ValueError("Chưa cấu hình API Key cho Google Gemini hoặc OpenRouter trong .env")
+            try:
+                async with httpx.AsyncClient(timeout=35.0) as client:
+                    res = await client.post(
+                        "https://openrouter.ai/api/v1/chat/completions",
+                        headers={"Authorization": f"Bearer {openrouter_api_key}", "Content-Type": "application/json"},
+                        json={"model": model, "messages": messages, "temperature": 0.3}
+                    )
+                    if res.status_code == 200:
+                        return res.json()["choices"][0]["message"]["content"].strip()
+                    errors.append(f"OpenRouter (HTTP {res.status_code})")
+            except Exception as e:
+                errors.append(f"OpenRouter ({str(e)})")
+
+        error_summary = "; ".join(errors) if errors else "Không rõ nguyên nhân"
+        raise ValueError(f"Không thể kết nối đến bất kỳ mô hình AI nào. Các lỗi ghi nhận: {error_summary}")
     # =========================================================================
     # 🔹 PHẦN 3: TÓM TẮT MAP-REDUCE (Map-Reduce Summarization)
     # =========================================================================

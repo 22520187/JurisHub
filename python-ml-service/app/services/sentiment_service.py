@@ -109,7 +109,14 @@ QUY TẮC:
 Nội dung cần phân tích:
 \"\"\"{text}\"\"\""""
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={google_api_key}"
+        fallback_models = [
+            model,
+            "gemini-flash-latest",
+            "gemini-flash-lite-latest",
+            "gemini-3.5-flash-lite",
+            "gemini-3.1-flash-lite"
+        ]
+        candidate_models = list(dict.fromkeys(fallback_models))
 
         payload = {
             "contents": [
@@ -125,20 +132,21 @@ Nội dung cần phân tích:
 
         try:
             async with httpx.AsyncClient(timeout=15.0) as client:
-                res = await client.post(url, json=payload, headers={"Content-Type": "application/json"})
-                logger.info(f"📡 [GEMINI RESPONSE] Status Code: {res.status_code}")
-
-                if res.status_code == 200:
-                    data = res.json()
-                    raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
-                    logger.info(f"✅ [GEMINI OUTPUT]: {raw_text.strip()}")
-
-                    match = re.search(r"\{.*?\}", raw_text, re.DOTALL)
-                    if match:
-                        return json.loads(match.group())
-                else:
-                    logger.error(f"❌ Lỗi Google Gemini API: {res.status_code} - {res.text}")
-
+                for candidate in candidate_models:
+                    url = f"https://generativelanguage.googleapis.com/v1beta/models/{candidate}:generateContent?key={google_api_key}"
+                    res = await client.post(url, json=payload, headers={"Content-Type": "application/json"})
+                    if res.status_code == 200:
+                        data = res.json()
+                        raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
+                        match = re.search(r"\{.*?\}", raw_text, re.DOTALL)
+                        if match:
+                            return json.loads(match.group())
+                    elif res.status_code in [503, 429]:
+                        logger.warning(f"⚠️ [SENTIMENT GEMINI SPIKE] Model '{candidate}' quá tải (HTTP {res.status_code}). Đang chuyển model dự phòng...")
+                        continue
+                    else:
+                        logger.warning(f"⚠️ Model '{candidate}' lỗi HTTP {res.status_code}. Thử model tiếp theo...")
+                        continue
         except Exception as e:
             logger.error(f"❌ Exception khi gọi Google Gemini: {e}")
 

@@ -6,7 +6,7 @@ from loguru import logger
 from app.core.config import get_settings
 from app.core.logger import setup_logging
 from app.api.v1.api import api_router
-from app.api.v1.endpoints import sentiment
+from app.api.v1.endpoints import sentiment, pdf, rag
 # Thiết lập Logger
 setup_logging()
 settings = get_settings()
@@ -50,6 +50,8 @@ app.add_middleware(
 # Gắn toàn bộ router v1
 app.include_router(api_router, prefix=settings.API_V1_STR)
 app.include_router(sentiment.router, prefix="/sentiment", tags=["Sentiment (Legacy Route)"])
+app.include_router(pdf.router, prefix="/pdf", tags=["PDF QA"])
+app.include_router(rag.router, prefix="/rag", tags=["RAG QA"])
 @app.get("/", summary="Root Endpoint")
 async def root():
     return {
