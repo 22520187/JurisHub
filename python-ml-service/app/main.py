@@ -22,6 +22,13 @@ async def lifespan(app: FastAPI):
         sentiment_svc.initialize()
     except Exception as e:
         logger.error(f"Lỗi khi pre-load Sentiment model: {e}")
+
+    # Pre-load Legal RAG Service (Embeddings & ChromaDB)
+    try:
+        from app.services.rag_service import get_rag_service
+        get_rag_service()
+    except Exception as e:
+        logger.error(f"Lỗi khi pre-load RAG Service: {e}")
     
     # Tạo các thư mục lưu trữ dữ liệu nếu chưa tồn tại
     os.makedirs(settings.CHROMA_PERSIST_DIR, exist_ok=True)

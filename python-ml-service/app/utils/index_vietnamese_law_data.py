@@ -4,8 +4,8 @@ import json
 import asyncio
 from pathlib import Path
 import pandas as pd
+from typing import Optional
 from loguru import logger
-from torch import Optional
 
 sys.path.append(str(Path(__file__).parent.parent.parent))
 from app.services.rag_service import get_rag_service

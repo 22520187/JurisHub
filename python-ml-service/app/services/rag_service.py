@@ -98,7 +98,7 @@ class RAGService:
                 "generationConfig": {"temperature": 0.2, "maxOutputTokens": 2048}
             }
 
-            async with httpx.AsyncClient(timeout=35.0) as client:
+            async with httpx.AsyncClient(timeout=15.0) as client:
                 for idx, model in enumerate(candidate_models):
                     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={google_api_key}"
                     
