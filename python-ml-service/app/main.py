@@ -6,6 +6,7 @@ from loguru import logger
 from app.core.config import get_settings
 from app.core.logger import setup_logging
 from app.api.v1.api import api_router
+from app.api.v1.endpoints import sentiment
 # Thiết lập Logger
 setup_logging()
 settings = get_settings()
@@ -13,6 +14,14 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     """Xử lý sự kiện khi server khởi động và dừng"""
     logger.info(f"Đang khởi động {settings.PROJECT_NAME} v{settings.VERSION}...")
+
+    # Pre-load Sentiment Model để request đầu tiên không bị delay
+    try:
+        from app.services.sentiment_service import get_sentiment_service
+        sentiment_svc = get_sentiment_service()
+        sentiment_svc.initialize()
+    except Exception as e:
+        logger.error(f"Lỗi khi pre-load Sentiment model: {e}")
     
     # Tạo các thư mục lưu trữ dữ liệu nếu chưa tồn tại
     os.makedirs(settings.CHROMA_PERSIST_DIR, exist_ok=True)
@@ -40,6 +49,7 @@ app.add_middleware(
 )
 # Gắn toàn bộ router v1
 app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(sentiment.router, prefix="/sentiment", tags=["Sentiment (Legacy Route)"])
 @app.get("/", summary="Root Endpoint")
 async def root():
     return {

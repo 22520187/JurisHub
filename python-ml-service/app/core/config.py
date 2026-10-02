@@ -23,8 +23,8 @@ class Settings(BaseSettings):
 
     # AI & LLM Settings
     EMBEDDING_MODEL: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-    LLM_PROVIDER: str = "openrouter"  # openrouter, google, openai
-    LLM_MODEL: str = "meta-llama/llama-3.3-70b-instruct:free"
+    LLM_PROVIDER: str = "google"  # openrouter, google, openai
+    LLM_MODEL: str = "gemini-3.8-flash"
     OPENROUTER_API_KEY: str = ""
     GOOGLE_API_KEY: str = ""
     OPENAI_API_KEY: str = ""
