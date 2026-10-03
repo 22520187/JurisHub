@@ -2,8 +2,11 @@ package com.example.jurisHub.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
@@ -29,18 +32,25 @@ import java.util.Set;
 
         @Index(name = "idx_posts_reply_count", columnList = "reply_count DESC")
 })
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private Long id;
 
+    @ToString.Include
     @Column(nullable = false)
     private String title;
 
+    @ToString.Include
     @Column(length = 255)
     private String slug;
 

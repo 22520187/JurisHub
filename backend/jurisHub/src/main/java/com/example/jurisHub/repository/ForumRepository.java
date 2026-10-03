@@ -5,12 +5,14 @@ import com.example.jurisHub.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ForumRepository extends JpaRepository<Post, Long> {
@@ -29,11 +31,8 @@ public interface ForumRepository extends JpaRepository<Post, Long> {
      * Uses DISTINCT ON to get only one post per category (the most recent one)
      * Join with author to avoid N+1 lazy loading
      */
-    @Query(value = "SELECT DISTINCT ON (p.category_id) p.id, p.title, p.slug, p.content, p.category_id, " +
-            "p.author_id, p.views, p.reply_count, p.upvote_count, p.downvote_count, " +
-            "p.is_pinned, p.is_solved, p.is_hot, p.is_active, p.report_count, p.is_reported, " +
-            "p.violation_reason, p.tags, p.created_at, p.updated_at, p.last_reply_at " +
-            "FROM posts p " +
+    @Query(value = "SELECT DISTINCT ON (p.category_id) p.* " +
+            "FROM jurishub.posts p " +
             "WHERE p.is_active = true " +
             "ORDER BY p.category_id, p.created_at DESC",
             nativeQuery = true)
@@ -90,7 +89,77 @@ public interface ForumRepository extends JpaRepository<Post, Long> {
      */
     @Query(value = "SELECT p.id, p.title, p.content, p.category_id, p.author_id, p.views, p.reply_count, p.upvote_count, p.downvote_count, p.is_pinned, p.is_solved, p.is_hot, p.is_active, p.report_count, p.is_reported, p.violation_reason, p.tags, p.created_at, p.updated_at, p.last_reply_at FROM posts p WHERE p.is_active = true AND p.content LIKE ?1",
             nativeQuery = true,
-            countQuery = "SELECT COUNT(*) FROM posts p WHERE p.is_active = true AND p.content LIKE ?1")
+            countQuery = "SELECT COUNT(*) FROM jurishub.posts p WHERE p.is_active = true AND p.content LIKE ?1")
     Page<Post> findByIsActiveTrueAndContentContaining(String content, Pageable pageable);
+
+    /**
+     * Find post by ID with category, author and labels
+     */
+    @Query("SELECT DISTINCT p FROM Post p " +
+            "LEFT JOIN FETCH p.category " +
+            "LEFT JOIN FETCH p.author " +
+            "LEFT JOIN FETCH p.labels " +
+            "WHERE p.id = :id")
+    Optional<Post> findByIdWithCategoryAndAuthorIncludingInactive(@Param("id") Long id);
+
+    /**
+     * Find post by slug (for SEO-friendly URLs)
+     */
+    @Query("SELECT p FROM Post p " +
+            "LEFT JOIN FETCH p.category c " +
+            "LEFT JOIN FETCH p.author " +
+            "LEFT JOIN FETCH p.labels " +
+            "WHERE c.slug = :categorySlug AND p.slug = :postSlug AND p.isActive = true")
+    Optional<Post> findByCategorySlugAndPostSlug(@Param("categorySlug") String categorySlug, @Param("postSlug") String postSlug);
+
+    /**
+     * Update reply count
+     */
+    @Modifying
+    @Query("UPDATE Post p SET p.replyCount = (SELECT COUNT(r) FROM PostReply r WHERE r.post.id = p.id AND r.isActive = true) WHERE p.id = :postId")
+    void updateReplyCount(@Param("postId") Long postId);
+
+    /**
+     * Update last reply time
+     */
+    @Modifying
+    @Query("UPDATE Post p SET p.lastReplyAt = :lastReplyAt WHERE p.id = :postId")
+    void updateLastReplyTime(@Param("postId") Long postId, @Param("lastReplyAt") LocalDateTime lastReplyAt);
+
+    /**
+     * Count total active posts
+     */
+    long countByIsActiveTrue();
+
+    /**
+     * Count posts created since a specific time
+     */
+    long countByIsActiveTrueAndCreatedAtAfter(LocalDateTime since);
+
+    /**
+     * Get popular topics (by views and replies)
+     */
+    @Query("SELECT p FROM Post p JOIN FETCH p.category WHERE p.isActive = true ORDER BY (p.views + p.replyCount * 2) DESC")
+    List<Post> findPopularTopics(Pageable pageable);
+
+    /**
+     * Count posts by category ID created since a specific time
+     */
+    long countByCategoryIdAndIsActiveTrueAndCreatedAtAfter(Long categoryId, LocalDateTime since);
+
+    long countByCreatedAtAfter(LocalDateTime since);
+
+    /**
+     * Get all distinct tags from active posts
+     */
+    @Query(value = "SELECT tag_value as tag, COUNT(*) as count " +
+            "FROM jurishub.posts p " +
+            "CROSS JOIN LATERAL unnest(string_to_array(LOWER(p.tags), ',')) AS tag_value " +
+            "WHERE p.is_active = true AND p.tags IS NOT NULL AND p.tags != '' " +
+            "GROUP BY tag_value " +
+            "ORDER BY count DESC " +
+            "LIMIT :limit",
+            nativeQuery = true)
+    List<Object[]> findPopularTags(@Param("limit") int limit);
 
 }

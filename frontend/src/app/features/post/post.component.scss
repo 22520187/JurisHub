@@ -1,0 +1,94 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+$primary-teal: #08544e;
+$primary-teal-dark: #053b37;
+$text-dark: #0f172a;
+$text-muted: #64748b;
+$border-color: #e2e8f0;
+
+.my-posts-page-wrapper {
+  background-color: #f8fafc;
+  min-height: calc(100vh - 72px);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: $text-dark;
+}
+
+.my-posts-container {
+  max-width: 1140px;
+  margin: 0 auto;
+}
+
+.my-posts-header {
+  .page-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #0f2c42;
+    letter-spacing: -0.5px;
+  }
+
+  .page-subtitle {
+    font-size: 0.95rem;
+  }
+}
+
+.my-posts-card {
+  background-color: #ffffff;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  min-height: 420px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+
+  &:hover:not(.active) {
+    background-color: #f1f5f9;
+    color: #0f172a;
+  }
+
+  &.active {
+    background-color: $primary-teal;
+    color: #ffffff;
+    font-weight: 600;
+  }
+}
+
+.empty-state-box {
+  padding: 60px 20px;
+
+  .empty-message {
+    font-size: 0.95rem;
+    color: #64748b;
+  }
+}
+
+.post-item-card {
+  background-color: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .post-item-title a {
+    color: #0f2c42;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: $primary-teal;
+    }
+  }
+}

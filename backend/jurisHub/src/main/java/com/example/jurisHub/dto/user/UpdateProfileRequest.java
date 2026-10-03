@@ -26,6 +26,6 @@ public class UpdateProfileRequest {
     @Pattern(regexp = "^[+]?[0-9\\s\\-()]*$", message = "Phone number must contain only digits, spaces, hyphens, parentheses, and optional plus sign")
     private String phoneNumber;
 
-    @Size(max = 500, message = "Avatar URL must not exceed 500 characters")
+    @Size(max = 5000000, message = "Avatar must not exceed 5MB")
     private String avatar;
 }

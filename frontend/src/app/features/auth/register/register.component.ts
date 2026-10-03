@@ -1,8 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CustomInputComponent, CheckboxComponent, ButtonComponent } from '../../../shared/components';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -13,6 +14,8 @@ import { CustomInputComponent, CheckboxComponent, ButtonComponent } from '../../
 })
 export class RegisterComponent {
   private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   registerForm: FormGroup = this.fb.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
@@ -27,6 +30,8 @@ export class RegisterComponent {
   showPassword = false;
   showConfirmPassword = false;
   submitted = false;
+  isLoading = false;
+  errorMessage = '';
   activeSlide = 0;
 
   passwordMatchValidator(form: FormGroup) {
@@ -49,15 +54,46 @@ export class RegisterComponent {
 
   onSubmit(): void {
     this.submitted = true;
+    this.errorMessage = '';
     if (this.registerForm.invalid) {
       return;
     }
 
-    console.log('Dữ liệu đăng ký (Chưa gọi API):', this.registerForm.value);
-    alert('Đăng ký thử nghiệm thành công! (Dữ liệu đã ghi nhận, sẵn sàng kết nối API)');
+    const { fullName, email, password } = this.registerForm.value;
+    this.isLoading = true;
+
+    this.authService.register({ fullName, email, password }).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        // Upon successful registration, session is set and navigate home
+        this.router.navigate(['/']);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.warn('Register error:', err);
+        if (err?.error?.message) {
+          this.errorMessage = err.error.message;
+        } else if (err?.status === 0 || err?.status === 404) {
+          // If server is not running or unreachable, fallback demo mock user
+          this.authService.setMockUser({
+            name: fullName,
+            email: email
+          });
+          this.router.navigate(['/']);
+        } else {
+          this.errorMessage = 'Đăng ký không thành công. Vui lòng kiểm tra lại thông tin.';
+        }
+      }
+    });
   }
 
   onSocialLogin(provider: string): void {
     console.log(`Đăng nhập qua ${provider}`);
+    this.authService.setMockUser({
+      name: 'Nguyen Van A',
+      email: 'test123@gmail.com'
+    });
+    this.router.navigate(['/']);
   }
 }
+

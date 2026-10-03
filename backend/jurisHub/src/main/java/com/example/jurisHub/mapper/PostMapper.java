@@ -1,7 +1,9 @@
 package com.example.jurisHub.mapper;
 
+import com.example.jurisHub.dto.forum.PostCreateDto;
 import com.example.jurisHub.dto.forum.PostDto;
 import com.example.jurisHub.entity.Post;
+import com.example.jurisHub.entity.PostCategory;
 import com.example.jurisHub.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -65,57 +67,57 @@ public class PostMapper {
     /**
      * Convert PostCreateDto to Post entity
      */
-//    public Post toEntity(PostCreateDto createDto, PostCategory category, User author) {
-//        if (createDto == null) {
-//            return null;
-//        }
-//
-//        Post post = new Post();
-//        post.setTitle(createDto.getTitle());
-//        post.setContent(createDto.getContent());
-//        post.setCategory(category);
-//        post.setAuthor(author);
-//        post.setPinned(createDto.getPinned() != null ? createDto.getPinned() : false);
-//        post.setIsHot(createDto.getIsHot() != null ? createDto.getIsHot() : false);
-//        post.setSolved(false);
-//        post.setIsActive(true);
-//        post.setViews(0);
-//        post.setReplyCount(0);
-//
-//        if (createDto.getTags() != null) {
-//            post.setTagsFromSet(createDto.getTags());
-//        }
-//
-//        return post;
-//    }
+    public Post toEntity(PostCreateDto createDto, PostCategory category, User author) {
+        if (createDto == null) {
+            return null;
+        }
+
+        Post post = new Post();
+        post.setTitle(createDto.getTitle());
+        post.setContent(createDto.getContent());
+        post.setCategory(category);
+        post.setAuthor(author);
+        post.setPinned(createDto.getPinned() != null ? createDto.getPinned() : false);
+        post.setIsHot(createDto.getIsHot() != null ? createDto.getIsHot() : false);
+        post.setSolved(false);
+        post.setIsActive(true);
+        post.setViews(0);
+        post.setReplyCount(0);
+
+        if (createDto.getTags() != null) {
+            post.setTagsFromSet(createDto.getTags());
+        }
+
+        return post;
+    }
 
     /**
      * Update existing Post entity from PostCreateDto
      */
-//    public void updateEntity(Post existingPost, PostCreateDto updateDto, PostCategory category) {
-//        if (existingPost == null || updateDto == null) {
-//            return;
-//        }
-//
-//        existingPost.setTitle(updateDto.getTitle());
-//        existingPost.setContent(updateDto.getContent());
-//
-//        if (category != null) {
-//            existingPost.setCategory(category);
-//        }
-//
-//        if (updateDto.getPinned() != null) {
-//            existingPost.setPinned(updateDto.getPinned());
-//        }
-//
-//        if (updateDto.getIsHot() != null) {
-//            existingPost.setIsHot(updateDto.getIsHot());
-//        }
-//
-//        if (updateDto.getTags() != null) {
-//            existingPost.setTagsFromSet(updateDto.getTags());
-//        }
-//    }
+    public void updateEntity(Post existingPost, PostCreateDto updateDto, PostCategory category) {
+        if (existingPost == null || updateDto == null) {
+            return;
+        }
+
+        existingPost.setTitle(updateDto.getTitle());
+        existingPost.setContent(updateDto.getContent());
+
+        if (category != null) {
+            existingPost.setCategory(category);
+        }
+
+        if (updateDto.getPinned() != null) {
+            existingPost.setPinned(updateDto.getPinned());
+        }
+
+        if (updateDto.getIsHot() != null) {
+            existingPost.setIsHot(updateDto.getIsHot());
+        }
+
+        if (updateDto.getTags() != null) {
+            existingPost.setTagsFromSet(updateDto.getTags());
+        }
+    }
 
     /**
      * Convert User to UserSummaryDto

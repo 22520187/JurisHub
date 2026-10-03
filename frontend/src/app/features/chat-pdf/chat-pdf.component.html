@@ -1,0 +1,588 @@
+<div class="chat-pdf-container">
+  <!-- ========================================================= -->
+  <!-- LEFT SIDEBAR: CONVERSATION HISTORY                         -->
+  <!-- ========================================================= -->
+  <aside class="chat-sidebar" [class.collapsed]="isSidebarCollapsed">
+    <!-- Sidebar Header -->
+    <div class="sidebar-header d-flex align-items-center justify-content-between">
+      <h2 class="sidebar-title mb-0">Cuộc trò chuyện</h2>
+
+      <div class="sidebar-actions d-flex align-items-center gap-1">
+        <!-- New Conversation / Upload Button -->
+        <button
+          type="button"
+          class="btn-icon-sidebar"
+          title="Tải lên tài liệu mới"
+          (click)="handleNewChat()"
+          aria-label="Tải lên tài liệu mới">
+          <i class="bi bi-plus-circle fs-5"></i>
+        </button>
+
+        <!-- Collapse Sidebar Button -->
+        <button
+          type="button"
+          class="btn-icon-sidebar"
+          title="Thu gọn thanh bên"
+          (click)="toggleSidebar()"
+          aria-label="Thu gọn thanh bên">
+          <i class="bi bi-chevron-left fs-6"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Search Conversation -->
+    <div class="sidebar-search-box px-3 py-2">
+      <div class="search-input-wrapper position-relative">
+        <i class="bi bi-search search-icon"></i>
+        <input
+          type="text"
+          class="form-control sidebar-search-input"
+          placeholder="Tìm kiếm hội thoại..."
+          [(ngModel)]="searchHistoryQuery" />
+        @if (searchHistoryQuery) {
+          <button
+            type="button"
+            class="btn-clear-search"
+            (click)="searchHistoryQuery = ''"
+            aria-label="Xóa tìm kiếm">
+            <i class="bi bi-x"></i>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Conversation List -->
+    <div class="sidebar-conversations-list flex-grow-1 custom-scrollbar">
+      @if (filteredConversations.length === 0) {
+        <div class="empty-conversations-state text-center py-4 px-3">
+          <i class="bi bi-file-earmark-pdf text-muted fs-3 mb-2 d-block"></i>
+          <p class="text-muted small mb-2">Chưa có tài liệu nào</p>
+          <app-button
+            label="Tải tài liệu"
+            variant="outline"
+            size="sm"
+            [customStyle]="{
+              borderColor: '#0b5952',
+              color: '#0b5952',
+              borderRadius: '6px'
+            }"
+            (btnClick)="handleNewChat()">
+          </app-button>
+        </div>
+      } @else {
+        <div class="conversation-group">
+          @for (conv of filteredConversations; track conv.id) {
+            <div
+              class="conversation-item d-flex align-items-center justify-content-between"
+              [class.active]="activeConversation?.id === conv.id"
+              (click)="handleSelectChat(conv.id)"
+              tabindex="0"
+              role="button"
+              [attr.aria-selected]="activeConversation?.id === conv.id">
+              <div class="d-flex align-items-center gap-2 overflow-hidden flex-grow-1">
+                <i
+                  class="bi flex-shrink-0"
+                  [ngClass]="conv.document ? 'bi-file-earmark-pdf text-danger' : 'bi-chat-left-text text-muted'"></i>
+                <span class="conversation-title text-truncate" [title]="conv.title">
+                  {{ conv.title }}
+                </span>
+              </div>
+
+              <!-- Delete Action Button -->
+              <button
+                type="button"
+                class="btn-delete-conversation flex-shrink-0"
+                title="Xóa cuộc trò chuyện"
+                (click)="openDeleteModal(conv, $event)"
+                aria-label="Xóa cuộc trò chuyện">
+                <i class="bi bi-trash3"></i>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Sidebar Footer / User indicator -->
+    <div class="sidebar-footer p-3 border-top d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <div class="user-avatar-mini">
+          {{ authService.currentUser()?.initials || 'NV' }}
+        </div>
+        <div class="user-info-text">
+          <span class="user-name text-truncate d-block">{{ authService.currentUser()?.name || 'Người dùng' }}</span>
+          <span class="user-status-label small text-muted">Trực tuyến</span>
+        </div>
+      </div>
+      <tellerapp-badge color="green" size="sm">Cơ bản</tellerapp-badge>
+    </div>
+  </aside>
+
+  <!-- Collapsed Sidebar Floating Toggle -->
+  @if (isSidebarCollapsed) {
+    <div class="sidebar-collapsed-strip d-flex flex-column align-items-center py-3 gap-2">
+      <button
+        type="button"
+        class="btn-icon-collapsed"
+        title="Mở rộng danh sách hội thoại"
+        (click)="toggleSidebar()">
+        <i class="bi bi-chevron-right fs-5"></i>
+      </button>
+
+      <button
+        type="button"
+        class="btn-icon-collapsed mt-1"
+        title="Tải lên tài liệu mới"
+        (click)="handleNewChat()">
+        <i class="bi bi-plus-lg fs-5"></i>
+      </button>
+    </div>
+  }
+
+  <!-- ========================================================= -->
+  <!-- MAIN CHAT-PDF AREA                                        -->
+  <!-- ========================================================= -->
+  <main class="chat-main-area flex-grow-1 d-flex flex-column">
+
+    <!-- Hidden file input for file upload dialog -->
+    <input
+      #fileInput
+      type="file"
+      accept=".pdf"
+      class="d-none"
+      (change)="onFileSelected($event)" />
+
+    <!-- ======================================================= -->
+    <!-- STATE 1: UPLOAD STATE (MATCHING IMAGE 1)                 -->
+    <!-- ======================================================= -->
+    @if (!hasDocument) {
+      <div class="pdf-upload-view flex-grow-1 d-flex flex-column align-items-center justify-content-center p-4">
+        <!-- Main Titles -->
+        <div class="text-center mb-4">
+          <h1 class="upload-main-title mb-2">Phân Tích Văn Bản Pháp Luật</h1>
+          <p class="upload-sub-title text-muted mb-0">
+            Tải lên văn bản pháp luật của bạn và nhận được phân tích thông minh từ AI
+          </p>
+        </div>
+
+        <!-- Upload Card Container (Matching Image 1) -->
+        <div class="upload-card">
+          <div
+            class="upload-dropzone"
+            [class.dragging]="isDraggingFile"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event)"
+            (click)="triggerFileInput()"
+            role="button"
+            tabindex="0">
+            <!-- Green File Icon inside light circle -->
+            <div class="upload-icon-circle mb-3">
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#0d9488"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
+
+            <h3 class="dropzone-title mb-1">Tải lên tài liệu PDF của bạn</h3>
+            <p class="dropzone-desc text-muted mb-3">Kéo và thả file vào đây, hoặc nhấp để chọn</p>
+
+            <!-- File specifications badge -->
+            <div class="d-flex align-items-center justify-content-center gap-2 mb-4">
+              <span class="pdf-type-badge">PDF</span>
+              <span class="file-size-limit text-muted">Tối đa 10MB</span>
+            </div>
+
+            <!-- "Chọn file" Teal Button -->
+            <app-button
+              label="Chọn file"
+              variant="custom"
+              size="md"
+              [customStyle]="{
+                backgroundColor: '#0b5952',
+                backgroundColorHover: '#073f3a',
+                color: '#ffffff',
+                borderRadius: '8px',
+                fontWeight: '600',
+                minWidth: '120px',
+                height: '40px',
+                boxShadow: '0 2px 6px rgba(11, 89, 82, 0.2)'
+              }"
+              (btnClick)="triggerFileInput(); $event.stopPropagation()">
+            </app-button>
+          </div>
+        </div>
+
+        <!-- Sample documents quick picker -->
+        <div class="sample-docs-container mt-4 text-center">
+          <span class="sample-label small text-muted me-2">Hoặc thử với tài liệu mẫu:</span>
+          <div class="d-inline-flex flex-wrap gap-2 mt-2 mt-sm-0">
+            <button
+              type="button"
+              class="btn-sample-doc"
+              (click)="selectSampleFile('01. Gioi thieu Design Patterns.pdf', '2.4 MB', 28)">
+              <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
+              01. Gioi thieu Design Patterns.pdf
+            </button>
+            <button
+              type="button"
+              class="btn-sample-doc"
+              (click)="selectSampleFile('Hop_dong_dich_vu_phan_mem_2026.pdf', '1.8 MB', 12)">
+              <i class="bi bi-file-earmark-pdf text-danger me-1"></i>
+              Hop_dong_dich_vu_phan_mem.pdf
+            </button>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <!-- ======================================================= -->
+      <!-- STATE 2: DOCUMENT LOADED & CHAT VIEW (MATCHING IMAGE 2) -->
+      <!-- ======================================================= -->
+      <div class="pdf-chat-view-wrapper flex-grow-1 d-flex flex-column">
+
+        <!-- Header Panel inside Card -->
+        <div class="pdf-doc-header-card mx-3 mt-3 p-4 bg-white rounded-3 shadow-sm border">
+          <!-- Document Analysis Title & Subtitle -->
+          <div class="doc-header-top mb-3">
+            <h2 class="doc-analysis-title mb-1">Phân Tích Tài Liệu</h2>
+            <p class="doc-analysis-sub text-muted mb-0">
+              Đặt câu hỏi về tài liệu của bạn và nhận được phản tích thông minh từ AI
+            </p>
+          </div>
+
+          <!-- Document Info Bar (Matching Image 2) -->
+          <div class="document-info-bar d-flex align-items-center justify-content-between p-3 rounded-3 border">
+            <!-- Left: Red PDF Icon & File info -->
+            <div class="d-flex align-items-center gap-3 overflow-hidden">
+              <div class="pdf-icon-box flex-shrink-0">
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#ef4444"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+              </div>
+              <div class="doc-meta-info text-truncate">
+                <h4 class="doc-name mb-0 text-truncate" [title]="currentDocument?.name">
+                  {{ currentDocument?.name }}
+                </h4>
+                <span class="doc-desc text-muted small">
+                  PDF Document • {{ currentDocument?.size }} • {{ currentDocument?.pages }} trang
+                </span>
+              </div>
+            </div>
+
+            <!-- Right: Action Buttons (Eye, Download, Delete) -->
+            <div class="doc-actions d-flex align-items-center gap-2 flex-shrink-0">
+              <!-- Eye / View Preview -->
+              <button
+                type="button"
+                class="btn-doc-action"
+                title="Xem trước tài liệu"
+                (click)="openPreviewModal()"
+                aria-label="Xem trước tài liệu">
+                <i class="bi bi-eye"></i>
+              </button>
+
+              <!-- Download Button -->
+              <button
+                type="button"
+                class="btn-doc-action"
+                title="Tải xuống tài liệu"
+                (click)="downloadDocument()"
+                aria-label="Tải xuống tài liệu">
+                <i class="bi bi-download"></i>
+              </button>
+
+              <!-- Delete / Remove Button -->
+              <button
+                type="button"
+                class="btn-doc-action btn-doc-delete"
+                title="Gỡ bỏ tài liệu này"
+                (click)="removeCurrentDocument()"
+                aria-label="Gỡ bỏ tài liệu này">
+                <i class="bi bi-trash3"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scrollable Messages Stream -->
+        <div class="pdf-chat-scroller flex-grow-1 custom-scrollbar px-3 py-3" #messagesContainer>
+          <div class="messages-stream-inner">
+
+            <!-- Summary / Messages list -->
+            @for (msg of activeConversation?.messages; track msg.id) {
+              @if (msg.sender === 'user') {
+                <!-- User Question -->
+                <div class="message-row user-row d-flex justify-content-end mb-4">
+                  <div class="message-bubble user-bubble">
+                    <div class="message-text">{{ msg.content }}</div>
+                    <div class="message-meta text-end mt-1">
+                      <span class="message-time">{{ msg.timestamp }}</span>
+                    </div>
+                  </div>
+                  <div class="user-avatar-chat ms-3 flex-shrink-0">
+                    {{ authService.currentUser()?.initials || 'NV' }}
+                  </div>
+                </div>
+              } @else {
+                <!-- Assistant Answer / Summary -->
+                <div class="message-row assistant-row d-flex mb-4">
+                  <div class="assistant-avatar-chat me-3 flex-shrink-0">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#ffffff"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
+                      <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
+                      <path d="M7 21h10"/>
+                      <path d="M12 3v18"/>
+                      <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
+                    </svg>
+                  </div>
+
+                  <div class="assistant-message-content flex-grow-1">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <span class="assistant-name">Trợ lý Pháp lý AI</span>
+                      @if (msg.isSummary) {
+                        <tellerapp-badge color="blue" size="sm">Tóm tắt tự động</tellerapp-badge>
+                      } @else {
+                        <tellerapp-badge color="green" size="sm">Trích dẫn PDF</tellerapp-badge>
+                      }
+                      <span class="message-time text-muted small ms-1">{{ msg.timestamp }}</span>
+                    </div>
+
+                    <div class="message-bubble assistant-bubble" [class.summary-bubble]="msg.isSummary">
+                      <div
+                        class="assistant-html-content"
+                        [innerHTML]="formatMessageContent(msg.content)">
+                      </div>
+
+                      <!-- Page citations if any -->
+                      @if (msg.pageReferences && msg.pageReferences.length > 0) {
+                        <div class="page-references-row mt-3 pt-2 border-top d-flex align-items-center gap-2">
+                          <span class="small text-muted fw-semibold">Tham chiếu trang:</span>
+                          @for (p of msg.pageReferences; track p) {
+                            <span class="badge bg-light text-dark border">Trang {{ p }}</span>
+                          }
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Action Bar -->
+                    <div class="message-action-bar d-flex align-items-center gap-2 mt-2">
+                      <button
+                        type="button"
+                        class="btn-message-action"
+                        [title]="copiedMessageId === msg.id ? 'Đã sao chép' : 'Sao chép'"
+                        (click)="copyMessage(msg.content, msg.id)">
+                        <i [class]="copiedMessageId === msg.id ? 'bi bi-check2 text-success' : 'bi bi-copy'"></i>
+                        <span>{{ copiedMessageId === msg.id ? 'Đã sao chép' : 'Sao chép' }}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        class="btn-message-action"
+                        [class.active]="messageFeedback[msg.id] === 'like'"
+                        title="Hữu ích"
+                        (click)="setFeedback(msg.id, 'like')">
+                        <i class="bi bi-hand-thumbs-up"></i>
+                      </button>
+
+                      <button
+                        type="button"
+                        class="btn-message-action"
+                        [class.active]="messageFeedback[msg.id] === 'dislike'"
+                        title="Chưa chính xác"
+                        (click)="setFeedback(msg.id, 'dislike')">
+                        <i class="bi bi-hand-thumbs-down"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            }
+
+            <!-- AI Thinking Indicator -->
+            @if (chatPdfService.isAiThinking()) {
+              <div class="message-row assistant-row d-flex mb-4">
+                <div class="assistant-avatar-chat me-3 flex-shrink-0 thinking-pulse">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#ffffff"
+                    stroke-width="2">
+                    <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
+                    <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
+                    <path d="M7 21h10"/>
+                    <path d="M12 3v18"/>
+                    <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
+                  </svg>
+                </div>
+                <div class="message-bubble assistant-bubble thinking-bubble">
+                  <app-loading-spinner
+                    [visible]="true"
+                    [inline]="true"
+                    [size]="24"
+                    message="Đang tra cứu các điều khoản trong tài liệu PDF...">
+                  </app-loading-spinner>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- BOTTOM CHAT INPUT BOX (MATCHING IMAGE 2)              -->
+        <!-- ===================================================== -->
+        <div class="chat-input-outer-wrapper px-3 pb-3 pt-2">
+          <div class="chat-input-center-container">
+            <div class="chat-input-box" [class.is-processing]="isAnalyzing">
+              <textarea
+                #chatTextarea
+                class="chat-textarea"
+                rows="2"
+                [placeholder]="isAnalyzing ? 'Đang xử lý...' : 'Hỏi bất kỳ điều gì về tài liệu này...'"
+                [(ngModel)]="userInput"
+                (keydown)="handleKeyDown($event)"
+                (input)="onTextareaInput($event)"
+                [disabled]="isAnalyzing || chatPdfService.isAiThinking()"></textarea>
+
+              <div class="input-bottom-bar d-flex align-items-center justify-content-between">
+                <!-- Keyboard hints -->
+                <div class="keyboard-hints d-flex align-items-center gap-3">
+                  <span class="kbd-guide">
+                    <kbd>Enter</kbd> gửi
+                  </span>
+                  <span class="kbd-guide">
+                    <kbd>Shift + Enter</kbd> xuống dòng
+                  </span>
+                </div>
+
+                <!-- Action button (Spinner when analyzing, send button when ready) -->
+                <div class="send-actions-wrapper d-flex align-items-center gap-2">
+                  @if (isAnalyzing) {
+                    <div class="processing-spinner-box" title="Đang xử lý tài liệu...">
+                      <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                        <span class="visually-hidden">Đang xử lý...</span>
+                      </div>
+                    </div>
+                  } @else {
+                    <button
+                      type="button"
+                      class="btn-send-chat"
+                      [disabled]="!userInput.trim() || chatPdfService.isAiThinking()"
+                      (click)="sendMessage()"
+                      title="Gửi câu hỏi"
+                      aria-label="Gửi câu hỏi">
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                      </svg>
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <p class="chat-disclaimer text-center mt-2 mb-0">
+              AI có thể mắc lỗi. Hãy kiểm tra thông tin quan trọng trong văn bản gốc.
+            </p>
+          </div>
+        </div>
+      </div>
+    }
+  </main>
+</div>
+
+<!-- ========================================================= -->
+<!-- DELETE CONVERSATION POPUP (ConfirmPopupComponent)         -->
+<!-- ========================================================= -->
+@if (showDeleteConfirm) {
+  <tellerapp-confirm-popup
+    [title]="'Xóa cuộc trò chuyện'"
+    [prompt]="'Bạn có chắc chắn muốn xóa phiên làm việc \u0022' + (conversationToDelete?.title || '') + '\u0022 không? Toàn bộ tài liệu và lịch sử hỏi đáp sẽ bị xóa.'"
+    confirmButtonMode="delete"
+    confirmButtonLabel="Xác nhận xóa"
+    cancelButtonLabel="Quay lại"
+    (confirm)="confirmDelete()"
+    (cancel)="cancelDelete()"
+    (closed)="cancelDelete()">
+  </tellerapp-confirm-popup>
+}
+
+<!-- ========================================================= -->
+<!-- DOCUMENT PREVIEW MODAL (ModalCustomComponent)             -->
+<!-- ========================================================= -->
+<lib-modal-custom
+  [title]="currentDocument?.name || 'Xem trước tài liệu'"
+  [isOpen]="isPreviewModalOpen"
+  [size]="'lg'"
+  (closeDialog)="closePreviewModal()">
+  <div class="pdf-preview-modal-body p-3">
+    <div class="alert alert-info d-flex align-items-center gap-2 mb-3">
+      <i class="bi bi-info-circle-fill"></i>
+      <div>
+        Đang xem trước văn bản: <strong>{{ currentDocument?.name }}</strong> ({{ currentDocument?.size }}, {{ currentDocument?.pages }} trang)
+      </div>
+    </div>
+    <div class="mock-pdf-reader-sheet p-4 bg-light rounded border text-secondary">
+      <div class="sheet-header border-bottom pb-2 mb-3 d-flex justify-content-between">
+        <span class="fw-bold">{{ currentDocument?.name }}</span>
+        <span>Trang 1 / {{ currentDocument?.pages }}</span>
+      </div>
+      <p class="mb-2"><strong>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</strong><br>Độc lập - Tự do - Hạnh phúc</p>
+      <hr>
+      <p class="small">
+        Nội dung tài liệu đã được số hóa và trích xuất chỉ mục ngữ nghĩa. Bạn có thể sử dụng khung chat bên dưới để truy vấn nội dung bất kỳ mà không cần đọc thủ công toàn bộ tài liệu.
+      </p>
+    </div>
+  </div>
+</lib-modal-custom>
+
+<!-- ========================================================= -->
+<!-- TOAST NOTIFICATION COMPONENT                              -->
+<!-- ========================================================= -->
+<app-toast-message
+  [visible]="toastVisible"
+  [type]="toastType"
+  [title]="toastTitle"
+  [message]="toastMessage"
+  [duration]="3"
+  (close)="toastVisible = false">
+</app-toast-message>

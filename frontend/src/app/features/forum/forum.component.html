@@ -1,0 +1,233 @@
+<div class="forum-page-wrapper">
+    <section class="forum-header-section py-4">
+        <div class="container">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                <!-- Title & Subtitle -->
+                <div>
+                    <h1 class="forum-main-heading mb-1">Diễn đàn Pháp luật</h1>
+                    <p class="forum-subheading text-muted mb-0">Trao đổi, hỏi đáp và cập nhật kiến thức về luật pháp</p>
+                </div>
+
+                <!-- Search Bar & Create Topic Button -->
+                <div class="d-flex align-items-center gap-3">
+                    <div class="forum-search-box position-relative">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" class="form-control forum-search-input" placeholder="Tìm kiếm chủ đề..."
+                            [(ngModel)]="searchKeyword" />
+                    </div>
+
+                    <app-button label="+ Tạo chủ đề mới" variant="custom" size="md" [customStyle]="{
+              backgroundColor: '#053b37',
+              backgroundColorHover: '#032623',
+              color: '#ffffff',
+              borderRadius: '8px',
+              fontWeight: '600',
+              height: '42px',
+              minWidth: '150px',
+              fontSize: '14px',
+              boxShadow: '0 2px 6px rgba(5, 59, 55, 0.2)'
+            }" (btnClick)="openCreateModal()">
+                    </app-button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- 3. MAIN CONTENT (2 Columns)                                               -->
+    <!-- ========================================================================= -->
+    <main class="forum-main-content pb-5">
+        <div class="container">
+            <div class="row g-4">
+
+                <!-- ==================== LEFT COLUMN ==================== -->
+                <div class="col-lg-8">
+
+                    <!-- CARD: Bài viết mới nhất -->
+                    <div class="forum-card p-4 mb-4">
+                        <h2 class="forum-card-title mb-4">Bài viết mới nhất</h2>
+
+                        <!-- Filter Controls Row -->
+                        <div class="filter-controls-grid d-flex flex-wrap align-items-center gap-3 mb-3">
+                            <!-- Danh mục -->
+                            <div class="filter-group d-flex align-items-center gap-2">
+                                <span class="filter-label text-muted">Danh mục:</span>
+                                <div class="filter-select-wrapper" style="width: 200px;">
+                                    <app-select-dropdown [options]="categoryOptions" [(ngModel)]="selectedCategory">
+                                    </app-select-dropdown>
+                                </div>
+                            </div>
+
+                            <!-- Sắp xếp -->
+                            <div class="filter-group d-flex align-items-center gap-2">
+                                <span class="filter-label text-muted">Sắp xếp:</span>
+                                <div class="filter-select-wrapper" style="width: 200px;">
+                                    <app-select-dropdown [options]="sortOptions" [(ngModel)]="selectedSort">
+                                    </app-select-dropdown>
+                                </div>
+                            </div>
+
+                            <!-- Thời gian -->
+                            <div class="filter-group d-flex align-items-center gap-2 ms-auto">
+                                <span class="filter-label text-muted">Thời gian:</span>
+                                <div class="filter-select-wrapper" style="width: 150px;">
+                                    <app-select-dropdown [options]="timeOptions" [(ngModel)]="selectedTime">
+                                    </app-select-dropdown>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Filter Pills -->
+                        <div class="quick-filters-row d-flex align-items-center gap-2 mb-4">
+                            <span class="filter-label text-muted">Lọc nhanh:</span>
+                            <button type="button" class="quick-filter-pill" [class.active]="isPinnedActive"
+                                (click)="toggleQuickFilter('pinned')">
+                                📌 Ghim
+                            </button>
+                            <button type="button" class="quick-filter-pill" [class.active]="isHotActive"
+                                (click)="toggleQuickFilter('hot')">
+                                🔥 Hot
+                            </button>
+                            <button type="button" class="quick-filter-pill" [class.active]="isLawyerAnsweredActive"
+                                (click)="toggleQuickFilter('lawyer')">
+                                👨‍⚖️ Luật sư trả lời
+                            </button>
+
+                            <!-- Hiển thị -->
+                            <div class="filter-group d-flex align-items-center gap-2 ms-auto">
+                                <span class="filter-label text-muted">Hiển thị:</span>
+                                <div class="filter-select-wrapper" style="width: 150px;">
+                                    <app-select-dropdown [options]="limitOptions" [(ngModel)]="selectedLimit">
+                                    </app-select-dropdown>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="forum-divider my-4" />
+
+                        <!-- Posts List / Empty State -->
+                        @if (posts.length === 0) {
+                        <div class="empty-state-container text-center py-5 text-muted">
+                            <p class="mb-0">Chưa có bài viết nào</p>
+                        </div>
+                        } @else {
+                        <div class="posts-list d-flex flex-column gap-3">
+                            @for (post of posts; track post.id) {
+                            <div class="post-item p-3 border rounded">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <tellerapp-badge [color]="'blue'">{{ post.category }}</tellerapp-badge>
+                                    <span class="text-muted small">{{ post.createdAt }}</span>
+                                </div>
+                                <h5 class="post-title fw-bold text-dark mb-2">{{ post.title }}</h5>
+                                <div class="d-flex align-items-center justify-content-between text-muted small">
+                                    <span>Đăng bởi: <strong>{{ post.author }}</strong></span>
+                                    <div class="d-flex gap-3">
+                                        <span><i class="bi bi-chat-left-text me-1"></i> {{ post.repliesCount }} trả
+                                            lời</span>
+                                        <span><i class="bi bi-eye me-1"></i> {{ post.viewsCount }} lượt xem</span>
+                                    </div>
+                                </div>
+                            </div>
+                            }
+                        </div>
+                        }
+
+                        <hr class="forum-divider my-4" />
+
+                        <!-- Pagination Bar -->
+                        <div class="d-flex align-items-center justify-content-between small text-muted">
+                            <span>Hiển thị {{ posts.length > 0 ? 1 : 0 }} đến {{ posts.length }} trong {{ totalResults
+                                }} kết quả</span>
+                            <div class="pagination-nav-group d-flex align-items-center gap-1">
+                                <button type="button" class="btn-page-arrow" disabled>
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <button type="button" class="btn-page-number active">
+                                    1
+                                </button>
+                                <button type="button" class="btn-page-arrow" disabled>
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- SECTION: Danh mục Diễn đàn -->
+                    <div class="mb-5">
+                        <h2 class="section-title mb-4">Danh mục Diễn đàn</h2>
+                        <div class="forum-card p-5 text-center text-muted">
+                            <p class="mb-0">Chưa có danh mục nào</p>
+                        </div>
+                    </div>
+
+                    <!-- CARD: Thống kê diễn đàn -->
+                    <div class="forum-card p-4">
+                        <h2 class="forum-card-title mb-4">Thống kê diễn đàn</h2>
+                        <div class="row text-center g-3">
+                            <div class="col-6 col-sm-3">
+                                <div class="stat-highlight-number">{{ forumStats.members }}</div>
+                                <div class="stat-highlight-label text-muted small">Thành viên</div>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <div class="stat-highlight-number">{{ forumStats.topics }}</div>
+                                <div class="stat-highlight-label text-muted small">Chủ đề</div>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <div class="stat-highlight-number">{{ forumStats.posts }}</div>
+                                <div class="stat-highlight-label text-muted small">Bài viết</div>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <div class="stat-highlight-number">{{ forumStats.online }}</div>
+                                <div class="stat-highlight-label text-muted small">Đang online</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ==================== RIGHT COLUMN (Sidebar) ==================== -->
+                <div class="col-lg-4">
+                    <aside class="forum-sidebar d-flex flex-column gap-4">
+
+                        <!-- Card 1: Đang trực tuyến -->
+                        <div class="forum-card p-4">
+                            <h3 class="forum-card-title mb-3">Đang trực tuyến</h3>
+                            <hr class="forum-divider mb-3" />
+                            <p class="text-muted small mb-0">Tổng số người đang online: {{ onlineUsersCount }}</p>
+                        </div>
+
+                        <!-- Card 2: Chủ đề phổ biến -->
+                        <div class="forum-card p-4">
+                            <h3 class="forum-card-title mb-0">Chủ đề phổ biến</h3>
+                        </div>
+
+                        <!-- Card 3: Chuyên mục sôi nổi -->
+                        <div class="forum-card p-4">
+                            <h3 class="forum-card-title mb-0">Chuyên mục sôi nổi</h3>
+                        </div>
+
+                        <!-- Card 4: Thống kê nhanh -->
+                        <div class="forum-card p-4">
+                            <h3 class="forum-card-title mb-3">Thống kê nhanh</h3>
+                            <p class="text-muted small mb-0">Không có dữ liệu</p>
+                        </div>
+
+                        <!-- Card 5: Tags phổ biến -->
+                        <div class="forum-card p-4">
+                            <h3 class="forum-card-title mb-0">Tags phổ biến</h3>
+                        </div>
+
+                    </aside>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+
+
+    <!-- Scroll to top -->
+    <tellerapp-scroll-to-top></tellerapp-scroll-to-top>
+
+</div>

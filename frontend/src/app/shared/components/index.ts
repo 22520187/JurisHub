@@ -14,3 +14,5 @@ export * from './scroll-to-top/scroll-to-top.component';
 export * from './select-dropdown/select-dropdown.component';
 export * from './tab-card/tab-card.component';
 export * from './toast-message/toast-message.component';
+export * from './navbar/navbar.component';
+export * from './footer/footer.component';

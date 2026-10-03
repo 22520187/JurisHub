@@ -1,0 +1,349 @@
+<div class="chat-page-container">
+    <aside class="chat-sidebar" [class.collapsed]="isSidebarCollapsed">
+        <!-- Sidebar Header -->
+        <div class="sidebar-header d-flex align-items-center justify-content-between">
+            <h2 class="sidebar-title mb-0">Cuộc trò chuyện</h2>
+
+            <div class="sidebar-actions d-flex align-items-center gap-1">
+                <!-- Add New Conversation Button -->
+                <button type="button" class="btn-icon-sidebar" title="Cuộc trò chuyện mới" (click)="handleNewChat()"
+                    aria-label="Cuộc trò chuyện mới">
+                    <i class="bi bi-plus-circle fs-5"></i>
+                </button>
+
+                <!-- Collapse Sidebar Button -->
+                <button type="button" class="btn-icon-sidebar" title="Thu gọn thanh bên" (click)="toggleSidebar()"
+                    aria-label="Thu gọn thanh bên">
+                    <i class="bi bi-chevron-left fs-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Search Conversation -->
+        <div class="sidebar-search-box px-3 py-2">
+            <div class="search-input-wrapper position-relative">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" class="form-control sidebar-search-input" placeholder="Tìm kiếm hội thoại..."
+                    [(ngModel)]="searchHistoryQuery" />
+                @if (searchHistoryQuery) {
+                <button type="button" class="btn-clear-search" (click)="searchHistoryQuery = ''"
+                    aria-label="Xóa tìm kiếm">
+                    <i class="bi bi-x"></i>
+                </button>
+                }
+            </div>
+        </div>
+
+        <!-- Conversation List -->
+        <div class="sidebar-conversations-list flex-grow-1 custom-scrollbar">
+            @if (filteredConversations.length === 0) {
+            <div class="empty-conversations-state text-center py-4 px-3">
+                <i class="bi bi-chat-square-dots text-muted fs-3 mb-2 d-block"></i>
+                <p class="text-muted small mb-2">Chưa có cuộc trò chuyện nào</p>
+                <app-button label="Tạo mới" variant="outline" size="sm" [customStyle]="{
+              borderColor: '#0b5952',
+              color: '#0b5952',
+              borderRadius: '6px'
+            }" (btnClick)="handleNewChat()">
+                </app-button>
+            </div>
+            } @else {
+            <div class="conversation-group">
+                @for (conv of filteredConversations; track conv.id) {
+                <div class="conversation-item d-flex align-items-center justify-content-between"
+                    [class.active]="activeConversation?.id === conv.id" (click)="handleSelectChat(conv.id)" tabindex="0"
+                    role="button" [attr.aria-selected]="activeConversation?.id === conv.id">
+                    <div class="d-flex align-items-center gap-2 overflow-hidden flex-grow-1">
+                        <i class="bi bi-chat-left-text item-icon flex-shrink-0"></i>
+                        <span class="conversation-title text-truncate" [title]="conv.title">
+                            {{ conv.title }}
+                        </span>
+                    </div>
+
+                    <!-- Delete Action Button -->
+                    <button type="button" class="btn-delete-conversation flex-shrink-0" title="Xóa cuộc trò chuyện"
+                        (click)="openDeleteModal(conv, $event)" aria-label="Xóa cuộc trò chuyện">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </div>
+                }
+            </div>
+            }
+        </div>
+
+        <!-- Sidebar Footer / User indicator -->
+        <div class="sidebar-footer p-3 border-top d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2">
+                <div class="user-avatar-mini">
+                    {{ authService.currentUser()?.initials || 'NV' }}
+                </div>
+                <div class="user-info-text">
+                    <span class="user-name text-truncate d-block">{{ authService.currentUser()?.name || 'Người dùng'
+                        }}</span>
+                    <span class="user-status-label small text-muted">Trực tuyến</span>
+                </div>
+            </div>
+            <tellerapp-badge color="green" size="sm">Cơ bản</tellerapp-badge>
+        </div>
+    </aside>
+
+    <!-- Collapsed Sidebar Floating Toggle -->
+    @if (isSidebarCollapsed) {
+    <div class="sidebar-collapsed-strip d-flex flex-column align-items-center py-3 gap-2">
+        <button type="button" class="btn-icon-collapsed" title="Mở rộng danh sách hội thoại" (click)="toggleSidebar()">
+            <i class="bi bi-chevron-right fs-5"></i>
+        </button>
+
+        <button type="button" class="btn-icon-collapsed mt-1" title="Tạo cuộc trò chuyện mới" (click)="handleNewChat()">
+            <i class="bi bi-plus-lg fs-5"></i>
+        </button>
+    </div>
+    }
+
+    <main class="chat-main-area flex-grow-1 d-flex flex-column">
+
+        <!-- Active Conversation Header (Shown when there is message history) -->
+        @if (hasMessages) {
+        <div class="chat-top-header d-flex align-items-center justify-content-between px-4 py-2 border-bottom">
+            <div class="d-flex align-items-center gap-2 overflow-hidden">
+                @if (isSidebarCollapsed) {
+                <button type="button" class="btn-toggle-inline me-2" title="Mở thanh bên" (click)="toggleSidebar()">
+                    <i class="bi bi-layout-sidebar"></i>
+                </button>
+                }
+                <div class="header-icon-box">
+                    <i class="bi bi-chat-dots-fill text-teal"></i>
+                </div>
+                <div>
+                    <h3 class="active-chat-title mb-0 text-truncate">{{ activeConversation?.title }}</h3>
+                    <span class="chat-status-sub small text-muted">
+                        Cơ sở dữ liệu pháp luật Việt Nam cập nhật 2026
+                    </span>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn-header-action" title="Cuộc trò chuyện mới" (click)="handleNewChat()">
+                    <i class="bi bi-plus-lg me-1"></i>
+                    <span class="d-none d-sm-inline">Tạo mới</span>
+                </button>
+            </div>
+        </div>
+        }
+
+        <!-- Chat Body Area -->
+        <div class="chat-content-scroller flex-grow-1 custom-scrollbar" #messagesContainer>
+            <!-- STATE 1: WELCOME SCREEN (No messages) - MATCHING SCREENSHOT EXACTLY -->
+            @if (!hasMessages) {
+            <div class="welcome-container d-flex flex-column align-items-center justify-content-center">
+                <!-- Center Balance Scale Icon Box -->
+                <div class="welcome-icon-box mb-4">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                        <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                        <path d="M7 21h10" />
+                        <path d="M12 3v18" />
+                        <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" />
+                    </svg>
+                </div>
+
+                <!-- Main Heading -->
+                <h1 class="welcome-heading text-center mb-4">
+                    Tôi có thể giúp gì cho bạn hôm nay?
+                </h1>
+
+                <!-- 4 Suggestion Cards (2x2 Grid) -->
+                <div class="suggestion-cards-grid mb-5">
+                    @for (card of suggestionCards; track card.id) {
+                    <div class="suggestion-card" (click)="onSelectSuggestion(card)" tabindex="0" role="button">
+                        <div class="card-icon-title-row d-flex align-items-center gap-2 mb-2">
+                            <div class="card-icon-wrapper" [style.color]="card.iconColor"
+                                [style.background-color]="card.bgColor">
+                                <i [class]="card.iconClass"></i>
+                            </div>
+                            <h3 class="card-title mb-0">{{ card.title }}</h3>
+                        </div>
+                        <p class="card-desc mb-0">{{ card.description }}</p>
+                    </div>
+                    }
+                </div>
+            </div>
+            } @else {
+            <!-- STATE 2: ACTIVE CHAT MESSAGES STREAM -->
+            <div class="messages-stream-container py-4">
+                @for (msg of activeConversation?.messages; track msg.id) {
+                @if (msg.sender === 'user') {
+                <!-- USER MESSAGE -->
+                <div class="message-row user-row d-flex justify-content-end mb-4">
+                    <div class="message-bubble user-bubble">
+                        <div class="message-text">{{ msg.content }}</div>
+                        <div class="message-meta text-end mt-1">
+                            <span class="message-time">{{ msg.timestamp }}</span>
+                        </div>
+                    </div>
+                    <div class="user-avatar-chat ms-3 flex-shrink-0">
+                        {{ authService.currentUser()?.initials || 'NV' }}
+                    </div>
+                </div>
+                } @else {
+                <!-- ASSISTANT (LEGAL AI) MESSAGE -->
+                <div class="message-row assistant-row d-flex mb-4">
+                    <div class="assistant-avatar-chat me-3 flex-shrink-0">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                            <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                            <path d="M7 21h10" />
+                            <path d="M12 3v18" />
+                            <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" />
+                        </svg>
+                    </div>
+
+                    <div class="assistant-message-content flex-grow-1">
+                        <!-- AI Header -->
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="assistant-name">Trợ lý Pháp lý AI</span>
+                            <tellerapp-badge color="green" size="sm">Cơ sở dữ liệu 2026</tellerapp-badge>
+                            <span class="message-time text-muted small ms-1">{{ msg.timestamp }}</span>
+                        </div>
+
+                        <!-- AI Content Body -->
+                        <div class="message-bubble assistant-bubble">
+                            <div class="assistant-html-content" [innerHTML]="formatMessageContent(msg.content)">
+                            </div>
+
+                            <!-- Legal References Box (Căn cứ pháp lý) -->
+                            @if (msg.legalReferences && msg.legalReferences.length > 0) {
+                            <div class="legal-references-container mt-3 pt-3 border-top">
+                                <div class="legal-ref-header d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-shield-check text-success"></i>
+                                    <span class="fw-semibold small text-dark">Căn cứ pháp lý viện dẫn:</span>
+                                </div>
+                                <div class="legal-ref-chips d-flex flex-wrap gap-2">
+                                    @for (ref of msg.legalReferences; track ref.article) {
+                                    <div class="legal-ref-chip" [title]="ref.summary">
+                                        <i class="bi bi-journal-bookmark me-1 text-teal"></i>
+                                        <strong>{{ ref.lawName }}</strong>: {{ ref.article }}
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                            }
+                        </div>
+
+                        <!-- Assistant Message Action Bar -->
+                        <div class="message-action-bar d-flex align-items-center gap-2 mt-2">
+                            <button type="button" class="btn-message-action"
+                                [title]="copiedMessageId === msg.id ? 'Đã sao chép' : 'Sao chép câu trả lời'"
+                                (click)="copyMessage(msg.content, msg.id)">
+                                <i
+                                    [class]="copiedMessageId === msg.id ? 'bi bi-check2 text-success' : 'bi bi-copy'"></i>
+                                <span>{{ copiedMessageId === msg.id ? 'Đã sao chép' : 'Sao chép' }}</span>
+                            </button>
+
+                            <button type="button" class="btn-message-action"
+                                [class.active]="messageFeedback[msg.id] === 'like'" title="Hữu ích"
+                                (click)="setFeedback(msg.id, 'like')">
+                                <i class="bi bi-hand-thumbs-up"></i>
+                            </button>
+
+                            <button type="button" class="btn-message-action"
+                                [class.active]="messageFeedback[msg.id] === 'dislike'" title="Chưa chính xác"
+                                (click)="setFeedback(msg.id, 'dislike')">
+                                <i class="bi bi-hand-thumbs-down"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                }
+                }
+
+                <!-- AI Thinking Indicator -->
+                @if (chatService.isAiThinking()) {
+                <div class="message-row assistant-row d-flex mb-4">
+                    <div class="assistant-avatar-chat me-3 flex-shrink-0 thinking-pulse">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
+                            <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                            <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                            <path d="M7 21h10" />
+                            <path d="M12 3v18" />
+                            <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" />
+                        </svg>
+                    </div>
+                    <div class="message-bubble assistant-bubble thinking-bubble d-flex align-items-center gap-3">
+                        <app-loading-spinner [visible]="true" [inline]="true" [size]="24"
+                            message="Đang tra cứu văn bản pháp luật và soạn thảo câu trả lời...">
+                        </app-loading-spinner>
+                    </div>
+                </div>
+                }
+            </div>
+            }
+        </div>
+
+        <div class="chat-input-outer-wrapper px-3 py-3">
+            <div class="chat-input-center-container">
+                <!-- Input Box with Vibrant Green/Teal Border -->
+                <div class="chat-input-box" [class.focused]="userInput.length > 0">
+                    <textarea #chatTextarea class="chat-textarea" rows="2"
+                        placeholder="Hỏi bất kỳ điều gì về luật dân sự, lao động, hình sự, doanh nghiệp..."
+                        [(ngModel)]="userInput" (keydown)="handleKeyDown($event)" (input)="onTextareaInput($event)"
+                        [disabled]="chatService.isAiThinking()"></textarea>
+
+                    <!-- Bottom Action Bar inside Input Box -->
+                    <div class="input-bottom-bar d-flex align-items-center justify-content-between">
+                        <!-- Left: Keyboard shortcuts hint -->
+                        <div class="keyboard-hints d-flex align-items-center gap-3">
+                            <span class="kbd-guide">
+                                <kbd>Enter</kbd> gửi
+                            </span>
+                            <span class="kbd-guide">
+                                <kbd>Shift + Enter</kbd> xuống dòng
+                            </span>
+                        </div>
+
+                        <!-- Right: Status indicator & Send button -->
+                        <div class="send-actions-wrapper d-flex align-items-center gap-3">
+                            <!-- Purple status dot & text -->
+                            <div class="status-indicator d-flex align-items-center gap-2">
+                                <span class="status-dot-purple" [class.pulsing]="chatService.isAiThinking()"></span>
+                                <span class="status-text">
+                                    {{ chatService.isAiThinking() ? 'Đang trả lời...' : 'Sẵn sàng gửi' }}
+                                </span>
+                            </div>
+
+                            <!-- Send Button: Teal rounded button with paper airplane icon -->
+                            <button type="button" class="btn-send-chat"
+                                [disabled]="!userInput.trim() || chatService.isAiThinking()" (click)="sendMessage()"
+                                title="Gửi câu hỏi" aria-label="Gửi câu hỏi">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disclaimer Footer Text -->
+                <p class="chat-disclaimer text-center mt-2 mb-0">
+                    AI có thể mắc lỗi. Hãy kiểm tra thông tin quan trọng.
+                </p>
+            </div>
+        </div>
+    </main>
+</div>
+
+@if (showDeleteConfirm) {
+<tellerapp-confirm-popup [title]="'Xóa cuộc trò chuyện'"
+    [prompt]="'Bạn có chắc chắn muốn xóa cuộc trò chuyện \u0022' + (conversationToDelete?.title || '') + '\u0022 không? Toàn bộ nội dung trao đổi sẽ không thể khôi phục.'"
+    confirmButtonMode="delete" confirmButtonLabel="Xác nhận xóa" cancelButtonLabel="Quay lại"
+    (confirm)="confirmDelete()" (cancel)="cancelDelete()" (closed)="cancelDelete()">
+</tellerapp-confirm-popup>
+}
+
+<app-toast-message [visible]="toastVisible" [type]="toastType" [title]="toastTitle" [message]="toastMessage"
+    [duration]="3" (close)="toastVisible = false">
+</app-toast-message>

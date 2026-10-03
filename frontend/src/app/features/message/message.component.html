@@ -1,0 +1,314 @@
+<div class="message-page-wrapper py-4 py-md-5">
+  <div class="container">
+    <div class="message-container">
+
+      <!-- Page Header matching user screenshot -->
+      <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
+        <div>
+          <h1 class="page-title mb-1">Tin nhắn</h1>
+          <p class="page-subtitle text-muted mb-0">Trao đổi trực tiếp với các thành viên và luật sư</p>
+        </div>
+
+        <div>
+          <app-button
+            label="+ New Conversation"
+            variant="custom"
+            size="md"
+            [customStyle]="{
+              backgroundColor: '#08544e',
+              backgroundColorHover: '#053b37',
+              color: '#ffffff',
+              borderRadius: '6px',
+              fontWeight: '600',
+              height: '40px',
+              minWidth: '160px',
+              fontSize: '14px',
+              boxShadow: '0 2px 6px rgba(8, 84, 78, 0.2)'
+            }"
+            (btnClick)="openNewModal()">
+          </app-button>
+        </div>
+      </div>
+
+      <!-- Main Chat Grid (Left Sidebar + Right Chat Pane) -->
+      <div class="row g-4 message-grid">
+        
+        <!-- ==================== LEFT COLUMN: CONVERSATION LIST ==================== -->
+        <div class="col-lg-4 col-md-5">
+          <div class="conversations-card p-3 p-md-4">
+            <h2 class="card-title mb-3 fs-6 fw-bold">Cuộc trò chuyện</h2>
+
+            <!-- Search Box -->
+            <div class="search-input-wrapper position-relative mb-3">
+              <i class="bi bi-search search-icon"></i>
+              <input
+                type="text"
+                class="form-control message-search-input"
+                placeholder="Tìm kiếm cuộc trò chuyện..."
+                [(ngModel)]="searchQuery" />
+            </div>
+
+            <!-- Conversations List -->
+            <div class="conversations-list-container custom-scrollbar">
+              @if (conversations.length === 0) {
+                <!-- Empty State matching user screenshot -->
+                <div class="empty-conversations text-center py-5">
+                  <p class="text-muted mb-0">Chưa có cuộc trò chuyện nào</p>
+                </div>
+              } @else {
+                <div class="conversations-list d-flex flex-column gap-1">
+                  @for (conv of conversations; track conv.id) {
+                    <div
+                      class="conversation-item p-2 rounded-3 d-flex align-items-center gap-3"
+                      [class.active]="activeConversation?.id === conv.id"
+                      (click)="selectConversation(conv.id)"
+                      role="button"
+                      tabindex="0">
+                      
+                      <!-- Avatar with online dot -->
+                      <div class="conv-avatar position-relative flex-shrink-0">
+                        <span class="avatar-letter">{{ getInitials(conv.participant.name) }}</span>
+                        @if (conv.participant.isOnline) {
+                          <span class="online-dot" title="Đang trực tuyến"></span>
+                        }
+                      </div>
+
+                      <!-- Info -->
+                      <div class="conv-info flex-grow-1 overflow-hidden">
+                        <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
+                          <span class="conv-name text-truncate fw-semibold">{{ conv.participant.name }}</span>
+                          <span class="conv-time text-muted small flex-shrink-0">{{ conv.lastMessageTime }}</span>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between gap-1">
+                          <span class="conv-last-msg text-truncate text-muted small">
+                            {{ conv.lastMessage || 'Chưa có tin nhắn' }}
+                          </span>
+                          @if (conv.unreadCount && conv.unreadCount > 0) {
+                            <span class="badge rounded-pill bg-danger unread-badge">{{ conv.unreadCount }}</span>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== RIGHT COLUMN: CHAT WINDOW ==================== -->
+        <div class="col-lg-8 col-md-7">
+          <div class="chat-window-card d-flex flex-column">
+            
+            @if (!activeConversation) {
+              <!-- Empty State matching user screenshot -->
+              <div class="empty-chat-pane text-center d-flex flex-column align-items-center justify-content-center flex-grow-1 p-5">
+                <div class="empty-chat-icon mb-3">
+                  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                </div>
+                <h3 class="empty-chat-title fw-bold fs-5 mb-2">Chọn cuộc trò chuyện</h3>
+                <p class="empty-chat-desc text-muted mb-0">Chọn một cuộc trò chuyện từ danh sách để bắt đầu nhắn tin</p>
+              </div>
+            } @else {
+              <!-- Active Chat Thread -->
+              
+              <!-- 1. Chat Header -->
+              <div class="chat-thread-header p-3 px-4 border-bottom d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="conv-avatar position-relative flex-shrink-0">
+                    <span class="avatar-letter">{{ getInitials(activeConversation.participant.name) }}</span>
+                    @if (activeConversation.participant.isOnline) {
+                      <span class="online-dot"></span>
+                    }
+                  </div>
+
+                  <div>
+                    <div class="d-flex align-items-center gap-2">
+                      <h3 class="chat-partner-name mb-0 fs-6 fw-bold">{{ activeConversation.participant.name }}</h3>
+                      <tellerapp-badge [color]="activeConversation.participant.role === 'LAWYER' ? 'green' : 'default'" size="sm">
+                        {{ activeConversation.participant.roleDisplay }}
+                      </tellerapp-badge>
+                    </div>
+                    @if (activeConversation.participant.specialty) {
+                      <p class="text-muted small mb-0">{{ activeConversation.participant.specialty }}</p>
+                    } @else {
+                      <p class="text-muted small mb-0">{{ activeConversation.participant.isOnline ? 'Đang trực tuyến' : 'Ngoại tuyến' }}</p>
+                    }
+                  </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" (click)="selectConversation(activeConversation.id)" title="Làm mới">
+                    <i class="bi bi-arrow-clockwise"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 2. Messages Scroll Area -->
+              <div class="chat-thread-messages p-4 flex-grow-1 custom-scrollbar" #messagesScroll>
+                @if (activeConversation.messages.length === 0) {
+                  <div class="text-center py-5 text-muted small">
+                    <i class="bi bi-chat-text fs-3 d-block mb-2 text-muted"></i>
+                    Bắt đầu cuộc trò chuyện với {{ activeConversation.participant.name }}
+                  </div>
+                } @else {
+                  <div class="d-flex flex-column gap-3">
+                    @for (msg of activeConversation.messages; track msg.id) {
+                      <div class="message-bubble-wrapper d-flex" [class.my-message]="msg.isMine" [class.partner-message]="!msg.isMine">
+                        <div class="message-bubble">
+                          <p class="message-text mb-1">{{ msg.content }}</p>
+                          <span class="message-timestamp">{{ msg.timestamp }}</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <!-- 3. Message Input Footer -->
+              <div class="chat-thread-footer p-3 px-4 border-top">
+                <form (ngSubmit)="sendMessage()" class="d-flex align-items-center gap-2">
+                  <input
+                    type="text"
+                    class="form-control chat-input"
+                    placeholder="Nhập tin nhắn..."
+                    [(ngModel)]="messageText"
+                    name="messageText"
+                    autocomplete="off" />
+
+                  <button type="submit" class="btn-send-message" [disabled]="!messageText.trim()" title="Gửi tin nhắn">
+                    <i class="bi bi-send-fill"></i>
+                  </button>
+                </form>
+              </div>
+
+            }
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ==================== NEW CONVERSATION MODAL ==================== -->
+<lib-modal-custom
+  class="new-conv-modal"
+  [isOpen]="isNewModalOpen"
+  title="Bắt đầu cuộc trò chuyện mới"
+  size="md"
+  [showFooter]="false"
+  (closeDialog)="closeNewModal()">
+
+  <div class="new-conv-modal-body p-2">
+    <!-- Filter Tabs (Tất cả / Luật sư / Thành viên) -->
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <button
+        type="button"
+        class="filter-pill"
+        [class.active]="contactFilter === 'ALL'"
+        (click)="contactFilter = 'ALL'">
+        Tất cả
+      </button>
+      <button
+        type="button"
+        class="filter-pill"
+        [class.active]="contactFilter === 'LAWYER'"
+        (click)="contactFilter = 'LAWYER'">
+        Luật sư
+      </button>
+      <button
+        type="button"
+        class="filter-pill"
+        [class.active]="contactFilter === 'USER'"
+        (click)="contactFilter = 'USER'">
+        Thành viên
+      </button>
+    </div>
+
+    <!-- Contact List -->
+    <div class="contacts-list mb-3 custom-scrollbar">
+      <label class="form-label fw-semibold small mb-2">Chọn người nhận:</label>
+      <div class="d-flex flex-column gap-2">
+        @for (contact of filteredContacts; track contact.id) {
+          <div
+            class="contact-item p-3 rounded-3 border d-flex align-items-center justify-content-between"
+            [class.selected]="selectedContact?.id === contact.id"
+            (click)="chooseContact(contact)"
+            role="button"
+            tabindex="0">
+            
+            <div class="d-flex align-items-center gap-3">
+              <div class="conv-avatar">
+                <span class="avatar-letter">{{ getInitials(contact.name) }}</span>
+              </div>
+              <div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="fw-semibold text-dark">{{ contact.name }}</span>
+                  <tellerapp-badge [color]="contact.role === 'LAWYER' ? 'green' : 'default'" size="sm">
+                    {{ contact.roleDisplay }}
+                  </tellerapp-badge>
+                </div>
+                <p class="text-muted small mb-0">{{ contact.specialty || contact.email }}</p>
+              </div>
+            </div>
+
+            <div>
+              <i class="bi" [class.bi-check-circle-fill]="selectedContact?.id === contact.id" [class.text-success]="selectedContact?.id === contact.id" [class.bi-circle]="selectedContact?.id !== contact.id" [class.text-muted]="selectedContact?.id !== contact.id"></i>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Optional initial message -->
+    <div class="mb-4">
+      <label class="form-label fw-semibold small mb-2">Tin nhắn đầu tiên (tùy chọn):</label>
+      <textarea
+        class="form-control"
+        rows="3"
+        placeholder="Chào bạn, tôi muốn trao đổi về..."
+        [(ngModel)]="initialMessageText">
+      </textarea>
+    </div>
+
+    <!-- Footer Buttons -->
+    <div class="d-flex align-items-center justify-content-end gap-2">
+      <app-button
+        variant="outline"
+        size="sm"
+        label="Hủy"
+        [customStyle]="{
+          borderRadius: '6px',
+          borderColor: '#e2e8f0',
+          color: '#475569',
+          minWidth: '75px',
+          height: '38px'
+        }"
+        (btnClick)="closeNewModal()">
+      </app-button>
+
+      <app-button
+        variant="custom"
+        size="sm"
+        label="Bắt đầu nhắn tin"
+        [disabled]="!selectedContact"
+        [customStyle]="{
+          backgroundColor: '#08544e',
+          backgroundColorHover: '#053b37',
+          color: '#ffffff',
+          borderRadius: '6px',
+          fontWeight: '600',
+          minWidth: '140px',
+          height: '38px',
+          boxShadow: '0 2px 6px rgba(8, 84, 78, 0.2)'
+        }"
+        (btnClick)="startNewChat()">
+      </app-button>
+    </div>
+  </div>
+</lib-modal-custom>
