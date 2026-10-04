@@ -76,6 +76,11 @@ public class LegalAiController {
     public ResponseEntity<?> uploadPdf(
             @RequestParam("file") MultipartFile file,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        if (userPrincipal == null) {
+            log.warn("[PDF] Unauthorized upload attempt");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Vui lòng đăng nhập để sử dụng tính năng tải lên tài liệu"));
+        }
         try {
             log.info("[PDF] User {} uploading: {}", userPrincipal.getId(), file.getOriginalFilename());
 
@@ -112,7 +117,7 @@ public class LegalAiController {
 
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            log.error("[PDF] Upload error for user {}: {}", userPrincipal.getId(), e.getMessage());
+            log.error("[PDF] Upload error: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Lỗi tải lên PDF: " + e.getMessage()));
         }
