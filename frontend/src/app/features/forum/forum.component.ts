@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -11,16 +11,27 @@ import {
   ScrollToTopComponent
 } from '../../shared/components';
 import { AuthService } from '../../core/services/auth.service';
-import { ForumService } from '../../core/services/forum.service';
+import {
+  ForumService,
+  PopularTopicItem,
+  CategoryStatItem,
+  PopularTagItem,
+  ForumCategoryItem,
+  ForumStatsData
+} from '../../core/services/forum.service';
 
 export interface ForumPost {
-  id: string;
+  id: string | number;
   title: string;
-  category: string;
-  author: string;
+  slug?: string;
+  category: any;
+  categorySlug?: string;
+  author: any;
   createdAt: string;
   repliesCount: number;
+  replyCount?: number;
   viewsCount: number;
+  view?: number;
   isPinned?: boolean;
   isHot?: boolean;
   hasLawyerAnswer?: boolean;
@@ -55,10 +66,155 @@ export class ForumComponent implements OnInit {
   readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly forumService = inject(ForumService);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  popularTopics: PopularTopicItem[] = [];
+  categoryStats: CategoryStatItem[] = [];
+  popularTags: PopularTagItem[] = [];
+  categoriesList: ForumCategoryItem[] = [];
+  statsData: ForumStatsData = {
+    totalTopics: 10,
+    totalPosts: 25,
+    totalMembers: 13,
+    topicsToday: 0,
+    postsToday: 0,
+    membersToday: 0
+  };
+  onlineUsersCount: number = 0;
 
   ngOnInit(): void {
-    this.posts = this.forumService.posts() as unknown as ForumPost[];
-    this.totalResults = this.posts.length;
+    this.loadPosts();
+    this.loadPopularTopics();
+    this.loadCategoryStats();
+    this.loadPopularTags();
+    this.loadCategories();
+    this.loadForumStats();
+    this.loadOnlineUsers();
+  }
+
+  loadPopularTopics(): void {
+    this.forumService.getPopularTopics(5).subscribe({
+      next: (data) => {
+        this.popularTopics = data;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  loadCategoryStats(): void {
+    this.forumService.getCategoryStats().subscribe({
+      next: (data) => {
+        this.categoryStats = data;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  loadPopularTags(): void {
+    this.forumService.getPopularTags(10).subscribe({
+      next: (data) => {
+        this.popularTags = data;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  loadCategories(): void {
+    this.forumService.getAllCategories().subscribe({
+      next: (data) => {
+        this.categoriesList = data;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  loadForumStats(): void {
+    this.forumService.getForumStats().subscribe({
+      next: (data) => {
+        this.statsData = data;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  loadOnlineUsers(): void {
+    this.forumService.getOnlineUsers().subscribe({
+      next: (res) => {
+        this.onlineUsersCount = res.totalOnline || 0;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  loadPosts(): void {
+    const catId = this.getCategoryId(this.selectedCategory);
+    this.forumService.getAllPosts(this.currentPage - 1, this.selectedLimit, catId, this.selectedTime).subscribe({
+      next: (res) => {
+        this.posts = res.posts as unknown as ForumPost[];
+        this.totalResults = res.totalElements;
+        this.totalPages = res.totalPages;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Lỗi khi gọi getAllPosts:', err);
+        this.posts = this.forumService.posts() as unknown as ForumPost[];
+        this.totalResults = this.posts.length;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  getCategoryId(categorySlug: string): number | undefined {
+    const mapping: Record<string, number> = {
+      civil: 1,
+      criminal: 2,
+      land: 3,
+      marriage: 4,
+      labor: 5,
+      corporate: 6
+    };
+    return mapping[categorySlug];
+  }
+
+  navigateToPost(post: ForumPost): void {
+    const categorySlug = this.getCategorySlug(post);
+    const postSlug = post.slug || post.id;
+    this.router.navigate(['/forum/categories', categorySlug, 'posts', postSlug]);
+  }
+
+  getCategoryName(cat: any): string {
+    if (!cat) return 'Chung';
+    if (typeof cat === 'object') return cat.name || 'Chung';
+    return String(cat);
+  }
+
+  getAuthorName(author: any): string {
+    if (!author) return 'Thành viên';
+    if (typeof author === 'object') return author.name || 'Thành viên';
+    return String(author);
+  }
+
+  getCategorySlug(post: ForumPost): string {
+    if (post.categorySlug) return post.categorySlug;
+    const cat = post.category as any;
+    if (cat && typeof cat === 'object' && cat.slug) {
+      return cat.slug;
+    }
+    return 'kinh-doanh';
+  }
+
+  selectCategoryBySlug(slug: string): void {
+    this.selectedCategory = slug;
+    this.loadPosts();
+  }
+
+  filterByTag(tag: string): void {
+    this.searchKeyword = tag;
+    this.loadPosts();
+  }
+
+  formatRelativeTime(dateStr?: string): string {
+    return this.forumService.formatRelativeTime(dateStr);
   }
 
   // Search
@@ -114,15 +270,6 @@ export class ForumComponent implements OnInit {
   currentPage: number = 1;
   totalPages: number = 1;
   totalResults: number = 0;
-  onlineUsersCount: number = 0;
-
-  // Stats banner
-  readonly forumStats = {
-    members: '1,245',
-    topics: '5,678',
-    posts: '23,456',
-    online: '156'
-  };
 
   // Create Topic Modal State
   isCreateModalOpen: boolean = false;

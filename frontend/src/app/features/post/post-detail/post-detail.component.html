@@ -1,0 +1,325 @@
+<div class="post-detail-wrapper py-4 py-md-5">
+  <div class="container">
+
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="loading-state text-center py-5">
+        <div class="spinner-border text-teal mb-3" role="status"></div>
+        <p class="text-muted">Đang tải nội dung bài viết...</p>
+      </div>
+    } @else if (!post) {
+      <div class="not-found-card text-center py-5 bg-white rounded-3 border">
+        <i class="bi bi-exclamation-circle text-muted fs-1 d-block mb-3"></i>
+        <h4 class="mb-2">Không tìm thấy bài viết</h4>
+        <p class="text-muted mb-4">Bài viết không tồn tại hoặc đã bị xóa.</p>
+        <a routerLink="/forum" class="btn btn-outline-teal">Quay lại Diễn đàn</a>
+      </div>
+    } @else {
+
+      <!-- TOP HEADER: Title & Metadata matching Screenshot 2 -->
+      <div class="post-header-section mb-4">
+        <!-- Back Link -->
+        <div class="mb-2">
+          <a routerLink="/forum" class="text-decoration-none text-muted small d-inline-flex align-items-center gap-1 hover-teal">
+            <i class="bi bi-chevron-left"></i> Quay lại Diễn đàn
+          </a>
+        </div>
+
+        <!-- Main Title -->
+        <h1 class="post-main-title mb-2">{{ post.title }}</h1>
+
+        <!-- Meta Sub-bar -->
+        <div class="post-meta-bar d-flex flex-wrap align-items-center gap-2 text-muted small">
+          <span>{{ post.views || 0 }} lượt xem</span>
+          <span class="meta-dot">•</span>
+          <span>{{ formatDateTime(post.createdAt) }}</span>
+          <span class="meta-dot">•</span>
+          <span>{{ post.replyCount || replies.length }} trả lời</span>
+
+          <!-- Tags List -->
+          @if (post.tags && post.tags.length > 0) {
+            <div class="tags-group-wrapper d-inline-flex flex-wrap align-items-center gap-1 ms-md-2">
+              @for (tag of post.tags; track tag) {
+                <span class="post-tag-badge">{{ tag }}</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- CARD 1: QUESTION CARD (Card câu hỏi chính) -->
+      <div class="card post-content-card question-card mb-4 shadow-sm">
+        <div class="card-body p-0">
+          <div class="row g-0">
+
+            <!-- Left Column: Author Info -->
+            <div class="col-12 col-md-auto author-col p-3 p-md-4 d-flex flex-column align-items-center justify-content-start text-center">
+              <img
+                [src]="getAvatar(post.author)"
+                [alt]="post.author.name"
+                class="author-avatar mb-2"
+                loading="lazy" />
+              <h4 class="author-name fw-bold mb-1 fs-6">{{ post.author.name }}</h4>
+
+              @if (isLawyer(post.author.role)) {
+                <span class="badge-role-lawyer mb-1">Luật sư</span>
+              } @else {
+                <span class="author-role-text mb-1">{{ getRoleLabel(post.author.role) }}</span>
+              }
+
+              <span class="author-id-text text-muted">ID: {{ post.author.id }}</span>
+            </div>
+
+            <!-- Right Column: Question Content -->
+            <div class="col-12 col-md content-col p-3 p-md-4 d-flex flex-column justify-content-between">
+              <div>
+                <!-- Top Row: Date & Action Buttons -->
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 pb-2 border-bottom-subtle">
+                  <span class="content-date text-muted small">{{ formatDateTime(post.createdAt) }}</span>
+
+                  <div class="action-buttons-group d-flex align-items-center gap-3">
+                    <span class="badge-author-tag">Tác giả bài viết</span>
+
+                    <button
+                      type="button"
+                      class="btn-action-text"
+                      [class.active]="isSaved"
+                      (click)="toggleSave()">
+                      <i class="bi" [class.bi-bookmark-fill]="isSaved" [class.bi-bookmark]="!isSaved" [class.text-warning]="isSaved"></i>
+                      <span>{{ isSaved ? 'Đã lưu' : 'Lưu' }}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn-action-text"
+                      (click)="openReportModal()">
+                      <i class="bi bi-flag"></i>
+                      <span>Báo cáo</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Post Main Body Content -->
+                <div class="post-body-text mb-4">
+                  {{ post.content }}
+                </div>
+              </div>
+
+              <!-- Bottom Meta Info -->
+              <div class="post-card-footer pt-3 border-top-subtle d-flex align-items-center gap-2 text-muted small">
+                <span>{{ post.views || 0 }} lượt xem</span>
+                <span>•</span>
+                <span>{{ post.replyCount || replies.length }} trả lời</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 2+: REPLIES LIST (Các câu trả lời phía dưới) -->
+      <div class="replies-list-section d-flex flex-column gap-3 mb-5">
+        @for (reply of replies; track reply.id) {
+          <div class="card post-content-card reply-card shadow-sm" [id]="'reply-' + reply.id">
+            <div class="card-body p-0">
+              <div class="row g-0">
+
+                <!-- Left Column: Reply Author Info -->
+                <div class="col-12 col-md-auto author-col p-3 p-md-4 d-flex flex-column align-items-center justify-content-start text-center">
+                  <img
+                    [src]="getAvatar(reply.author)"
+                    [alt]="reply.author.name"
+                    class="author-avatar mb-2"
+                    loading="lazy" />
+                  <h4 class="author-name fw-bold mb-1 fs-6">{{ reply.author.name }}</h4>
+
+                  @if (isLawyer(reply.author.role)) {
+                    <span class="badge-role-lawyer mb-1">Luật sư</span>
+                  } @else {
+                    <span class="author-role-text mb-1">{{ getRoleLabel(reply.author.role) }}</span>
+                  }
+
+                  <span class="author-id-text text-muted">ID: {{ reply.author.id }}</span>
+                </div>
+
+                <!-- Right Column: Reply Content -->
+                <div class="col-12 col-md content-col p-3 p-md-4 d-flex flex-column justify-content-between">
+                  <div>
+                    <!-- Top Row: Date & Reply Action -->
+                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom-subtle">
+                      <span class="content-date text-muted small">{{ formatDateTime(reply.createdAt) }}</span>
+
+                      <button
+                        type="button"
+                        class="btn-reply-action"
+                        (click)="setReplyingTo(reply)">
+                        <i class="bi bi-arrow-return-left me-1"></i>
+                        <span>Trả lời</span>
+                      </button>
+                    </div>
+
+                    <!-- Solution Badge (if answer is accepted solution) -->
+                    @if (reply.isSolution) {
+                      <div class="solution-badge mb-2">
+                        <i class="bi bi-check-circle-fill me-1 text-success"></i>
+                        <span class="text-success fw-semibold small">Câu trả lời được chấp nhận</span>
+                      </div>
+                    }
+
+                    <!-- Reply Content -->
+                    <div class="post-body-text whitespace-pre-wrap">
+                      {{ reply.content }}
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- SECTION: TRẢ LỜI / COMMENT EDITOR BOX (Screenshot 3 & 4) -->
+      <div class="reply-editor-wrapper mt-4 pt-2" id="reply-editor-box">
+        <h3 class="editor-heading mb-3 fw-bold">Trả lời</h3>
+
+        <!-- Orange Replying Quote Banner (Screenshot 4) -->
+        @if (replyingTo) {
+          <div class="replying-banner p-3 mb-3 d-flex align-items-start justify-content-between">
+            <div class="pe-2">
+              <div class="replying-author-label mb-1">
+                Đang trả lời: <strong>{{ replyingTo.author.name }}</strong>
+              </div>
+              <div class="replying-snippet text-muted small">
+                {{ truncateSnippet(replyingTo.content, 140) }}
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn-close-reply"
+              title="Hủy trả lời trích dẫn"
+              (click)="cancelReplying()">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        }
+
+        <!-- Rich Text Editor Container -->
+        <div class="editor-box-card rounded-3 overflow-hidden bg-white mb-3">
+          <!-- Toolbar (Screenshot 3 & 4) -->
+          <div class="editor-toolbar px-3 py-2 border-bottom d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-1 flex-wrap">
+              <button type="button" class="toolbar-btn fw-bold" (click)="applyFormat('bold')" title="In đậm">B</button>
+              <button type="button" class="toolbar-btn fst-italic" (click)="applyFormat('italic')" title="In nghiêng">I</button>
+              <button type="button" class="toolbar-btn fw-semibold" (click)="applyFormat('heading')" title="Tiêu đề H2">H2</button>
+              <button type="button" class="toolbar-btn" (click)="applyFormat('ul')" title="Danh sách gạch đầu dòng">
+                <i class="bi bi-list-ul"></i>
+              </button>
+              <button type="button" class="toolbar-btn" (click)="applyFormat('ol')" title="Danh sách số">
+                <i class="bi bi-list-ol"></i>
+              </button>
+              <button type="button" class="toolbar-btn" (click)="applyFormat('quote')" title="Trích dẫn">
+                <i class="bi bi-quote"></i>
+              </button>
+              <button type="button" class="toolbar-btn" (click)="applyFormat('link')" title="Chèn liên kết">
+                <i class="bi bi-link-45deg"></i>
+              </button>
+            </div>
+
+            <!-- Undo / Redo Actions -->
+            <div class="d-flex align-items-center gap-1">
+              <button type="button" class="toolbar-btn" (click)="undo()" title="Hoàn tác (Undo)">
+                <i class="bi bi-arrow-counterclockwise"></i>
+              </button>
+              <button type="button" class="toolbar-btn" (click)="redo()" title="Làm lại (Redo)">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Textarea -->
+          <textarea
+            #replyTextarea
+            id="reply-main-textarea"
+            class="editor-textarea form-control border-0 p-3"
+            rows="6"
+            placeholder="Viết câu trả lời của bạn..."
+            [(ngModel)]="replyContent"
+            (keydown.ctrl.enter)="submitReply()">
+          </textarea>
+        </div>
+
+        <!-- Action Buttons Footer -->
+        <div class="d-flex align-items-center justify-content-end gap-2">
+          @if (replyingTo) {
+            <button
+              type="button"
+              class="btn btn-cancel-action px-4 py-2"
+              (click)="cancelReplying()">
+              Hủy
+            </button>
+          }
+
+          <button
+            type="button"
+            class="btn btn-submit-reply px-4 py-2"
+            [disabled]="isSubmitting || !replyContent.trim()"
+            (click)="submitReply()">
+            @if (isSubmitting) {
+              <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+              Đang gửi...
+            } @else {
+              Gửi trả lời
+            }
+          </button>
+        </div>
+      </div>
+
+    }
+  </div>
+</div>
+
+<!-- Report Modal -->
+@if (isReportModalOpen) {
+  <div class="modal-backdrop-custom d-flex align-items-center justify-content-center">
+    <div class="modal-box-card bg-white rounded-3 shadow p-4">
+      <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+        <h5 class="modal-title fw-bold mb-0">Báo cáo bài viết</h5>
+        <button type="button" class="btn-close" (click)="closeReportModal()"></button>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold small">Lý do báo cáo</label>
+        <select class="form-select" [(ngModel)]="reportReason">
+          <option value="Spam hoặc quảng cáo trái phép">Spam hoặc quảng cáo trái phép</option>
+          <option value="Thông tin pháp lý sai lệch, gây hiểu lầm">Thông tin pháp lý sai lệch, gây hiểu lầm</option>
+          <option value="Nội dung quấy rối hoặc xúc phạm">Nội dung quấy rối hoặc xúc phạm</option>
+          <option value="Khác">Lý do khác</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold small">Chi tiết (tùy chọn)</label>
+        <textarea
+          class="form-control"
+          rows="3"
+          placeholder="Mô tả cụ thể vấn đề bạn nhận thấy..."
+          [(ngModel)]="reportDetails">
+        </textarea>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-light" (click)="closeReportModal()">Hủy</button>
+        <button type="button" class="btn btn-danger" (click)="submitReport()">Gửi báo cáo</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Toast Feedback -->
+<app-toast-message
+  [visible]="showToast"
+  [type]="toastType"
+  [message]="toastMessage"
+  (close)="showToast = false">
+</app-toast-message>

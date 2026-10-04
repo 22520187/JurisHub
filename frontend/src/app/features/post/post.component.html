@@ -90,7 +90,7 @@
                       }
                     </div>
                     <h3 class="post-item-title mb-1 fs-6">
-                      <a [routerLink]="['/forum']" class="text-decoration-none text-dark fw-semibold">
+                      <a [routerLink]="post.categorySlug && post.slug ? ['/forum/categories', post.categorySlug, 'posts', post.slug] : ['/post', post.id]" class="text-decoration-none text-dark fw-semibold hover-teal">
                         {{ post.title }}
                       </a>
                     </h3>
@@ -102,7 +102,7 @@
                   </div>
 
                   <div class="post-item-actions d-flex align-items-center gap-2">
-                    <a [routerLink]="['/forum']" class="btn btn-sm btn-outline-secondary">
+                    <a [routerLink]="post.categorySlug && post.slug ? ['/forum/categories', post.categorySlug, 'posts', post.slug] : ['/post', post.id]" class="btn btn-sm btn-outline-secondary">
                       Xem bài viết
                     </a>
                   </div>
@@ -127,7 +127,7 @@
                       <span class="badge bg-light text-dark border">{{ post.category }}</span>
                     </div>
                     <h3 class="post-item-title mb-1 fs-6">
-                      <a [routerLink]="['/forum']" class="text-decoration-none text-dark fw-semibold">
+                      <a [routerLink]="post.categorySlug && post.slug ? ['/forum/categories', post.categorySlug, 'posts', post.slug] : ['/post', post.id]" class="text-decoration-none text-dark fw-semibold hover-teal">
                         {{ post.title }}
                       </a>
                     </h3>
@@ -138,7 +138,7 @@
                     </div>
                   </div>
                   <div class="post-item-actions">
-                    <a [routerLink]="['/forum']" class="btn btn-sm btn-outline-secondary">
+                    <a [routerLink]="post.categorySlug && post.slug ? ['/forum/categories', post.categorySlug, 'posts', post.slug] : ['/post', post.id]" class="btn btn-sm btn-outline-secondary">
                       Xem bài viết
                     </a>
                   </div>

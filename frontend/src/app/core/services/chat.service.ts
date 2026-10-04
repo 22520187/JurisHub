@@ -1,4 +1,5 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { LegalAiService, ChatHistoryItem } from './legal-ai.service';
 
 export interface LegalReference {
   lawName: string;
@@ -28,6 +29,7 @@ export interface Conversation {
   providedIn: 'root'
 })
 export class ChatService {
+  private readonly legalAiService = inject(LegalAiService);
   private readonly STORAGE_KEY = 'jurishub_conversations';
   private readonly ACTIVE_ID_KEY = 'jurishub_active_conversation_id';
 
@@ -175,21 +177,46 @@ export class ChatService {
     );
     this.saveToStorage();
 
-    // Trigger AI response with realistic delay
+    // Trigger AI response via RAG API
     this.isAiThinking.set(true);
 
     try {
-      await this.simulateDelay(800 + Math.random() * 600);
-      const aiResponse = this.generateAiLegalResponse(trimmed);
+      // Xây dựng chat history để gửi context
+      const currentMessages = this.activeConversation()?.messages ?? [];
+      const chatHistory: ChatHistoryItem[] = currentMessages
+        .slice(-10) // giới hạn 10 tin nhắn gần nhất
+        .map(m => ({ role: m.sender as 'user' | 'assistant', content: m.content }));
+
+      let aiContent: string;
+      let aiReferences: LegalReference[] = [];
+
+      try {
+        const ragResponse = await this.legalAiService.askRag(trimmed, chatHistory);
+        aiContent = ragResponse.answer;
+        // Map sources thành legalReferences
+        if (ragResponse.sources && ragResponse.sources.length > 0) {
+          aiReferences = ragResponse.sources.map(s => ({
+            lawName: s.lawName || 'Văn bản pháp luật',
+            article: s.article || '',
+            summary: s.content ? s.content.substring(0, 120) + '...' : ''
+          }));
+        }
+      } catch (apiError) {
+        // Fallback nếu RAG API lỗi
+        console.error('RAG API error, using fallback:', apiError);
+        const fallback = this.generateAiLegalResponse(trimmed);
+        aiContent = fallback.content;
+        aiReferences = fallback.references;
+      }
 
       const aiMsgTime = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
       const aiMsg: ChatMessage = {
         id: 'msg_ai_' + Date.now(),
         sender: 'assistant',
-        content: aiResponse.content,
+        content: aiContent,
         timestamp: aiMsgTime,
         date: new Date().toISOString(),
-        legalReferences: aiResponse.references
+        legalReferences: aiReferences.length > 0 ? aiReferences : undefined
       };
 
       this.conversations.update(list =>
@@ -233,6 +260,7 @@ export class ChatService {
     return query.length > 38 ? query.substring(0, 35) + '...' : query;
   }
 
+  /** @deprecated Chỉ dùng làm fallback khi RAG API không khả dụng */
   private simulateDelay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }

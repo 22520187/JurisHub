@@ -11,6 +11,8 @@ import { PostComponent } from './features/post/post.component';
 import { CreatePostComponent } from './features/post/create-post/create-post.component';
 import { MessageComponent } from './features/message/message.component';
 
+import { PostDetailComponent } from './features/post/post-detail/post-detail.component';
+
 export const routes: Routes = [
   {
     path: '',
@@ -20,12 +22,17 @@ export const routes: Routes = [
       { path: 'home', component: HomeComponent },
       { path: 'forum', component: ForumComponent },
       { path: 'forum/create', component: CreatePostComponent },
+      { path: 'forum/categories/:categorySlug/posts/:postSlug', component: PostDetailComponent },
+      { path: 'categories/:categorySlug/posts/:postSlug', component: PostDetailComponent },
+      { path: 'forum/post/:id', component: PostDetailComponent },
       { path: 'chat', component: ChatComponent },
       { path: 'chatbot', component: ChatComponent },
       { path: 'chat-pdf', component: ChatPdfComponent },
       { path: 'profile', component: ProfileComponent },
       { path: 'post', component: PostComponent },
       { path: 'post/create', component: CreatePostComponent },
+      { path: 'post/:categorySlug/:postSlug', component: PostDetailComponent },
+      { path: 'post/:id', component: PostDetailComponent },
       { path: 'my-posts', redirectTo: 'post' },
       { path: 'message', component: MessageComponent },
       { path: 'messages', redirectTo: 'message' },
