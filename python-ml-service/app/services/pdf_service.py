@@ -25,15 +25,15 @@ class PDFService:
         # Initialize embeddings for vector search
         logger.info("Initializing PDF embeddings...")
         self.embeddings = HuggingFaceEmbeddings(
-            model_name=self.settings.embedding_model,
+            model_name=self.settings.EMBEDDING_MODEL,
             model_kwargs={'device': 'cpu'},
             encode_kwargs={'normalize_embeddings': True}
         )
 
         # Text splitter for chunking
         self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=self.settings.chunk_size,
-            chunk_overlap=self.settings.chunk_overlap,
+            chunk_size=self.settings.CHUNK_SIZE,
+            chunk_overlap=self.settings.CHUNK_OVERLAP,
             separators=["\n\n", "\n", ".", "!", "?", ",", " ", ""]
         )
 
