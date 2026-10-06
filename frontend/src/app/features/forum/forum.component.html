@@ -13,7 +13,7 @@
                     <div class="forum-search-box position-relative">
                         <i class="bi bi-search search-icon"></i>
                         <input type="text" class="form-control forum-search-input" placeholder="Tìm kiếm chủ đề..."
-                            [(ngModel)]="searchKeyword" />
+                            [(ngModel)]="searchKeyword" (keyup.enter)="loadPosts()" />
                     </div>
 
                     <app-button label="+ Tạo chủ đề mới" variant="custom" size="md" [customStyle]="{

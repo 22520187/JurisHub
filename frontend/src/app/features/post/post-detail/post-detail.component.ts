@@ -84,10 +84,14 @@ export class PostDetailComponent implements OnInit {
         this.isSaved = this.forumService.isPostSaved(postData.id);
         this.isLoading = false;
         this.loadReplies(postData.id);
+        this.forumService.incrementPostViews(categorySlug, postSlug).subscribe({
+          error: () => {}
+        });
         this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Lỗi khi tải chi tiết bài viết theo slug:', err);
+        this.post = null;
         this.isLoading = false;
         this.cdr.markForCheck();
       }
@@ -108,6 +112,7 @@ export class PostDetailComponent implements OnInit {
       },
       error: (err) => {
         console.error('Lỗi khi tải chi tiết bài viết:', err);
+        this.post = null;
         this.isLoading = false;
         this.cdr.markForCheck();
       }
@@ -122,6 +127,8 @@ export class PostDetailComponent implements OnInit {
       },
       error: (err) => {
         console.error('Lỗi khi tải câu trả lời:', err);
+        this.replies = [];
+        this.cdr.markForCheck();
       }
     });
   }

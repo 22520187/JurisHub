@@ -147,8 +147,26 @@ export class ForumComponent implements OnInit {
   }
 
   loadPosts(): void {
-    const catId = this.getCategoryId(this.selectedCategory);
-    this.forumService.getAllPosts(this.currentPage - 1, this.selectedLimit, catId, this.selectedTime).subscribe({
+    const page = this.currentPage - 1;
+    const size = this.selectedLimit;
+    const sort = this.mapSortParam(this.selectedSort);
+    const keyword = this.searchKeyword?.trim() || '';
+    const hasCategory = this.selectedCategory && this.selectedCategory !== 'all';
+
+    let request$;
+
+    if (keyword && hasCategory) {
+      request$ = this.forumService.searchPostsByCategory(keyword, this.selectedCategory, page, size, sort);
+    } else if (keyword) {
+      request$ = this.forumService.searchPosts(keyword, page, size, sort);
+    } else if (hasCategory) {
+      request$ = this.forumService.getPostsByCategory(this.selectedCategory, page, size, sort);
+    } else {
+      const catId = this.getCategoryId(this.selectedCategory);
+      request$ = this.forumService.getAllPosts(page, size, catId, this.selectedTime, sort);
+    }
+
+    request$.subscribe({
       next: (res) => {
         this.posts = res.posts as unknown as ForumPost[];
         this.totalResults = res.totalElements;
@@ -156,24 +174,30 @@ export class ForumComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: (err) => {
-        console.error('Lỗi khi gọi getAllPosts:', err);
-        this.posts = this.forumService.posts() as unknown as ForumPost[];
-        this.totalResults = this.posts.length;
+        console.error('Lỗi khi tải danh sách bài viết:', err);
+        this.posts = [];
+        this.totalResults = 0;
+        this.totalPages = 1;
         this.cdr.markForCheck();
       }
     });
   }
 
+  private mapSortParam(sortValue: string): string {
+    switch (sortValue) {
+      case 'views':
+        return 'views,desc';
+      case 'replies':
+        return 'replyCount,desc';
+      case 'newest':
+      default:
+        return 'createdAt,desc';
+    }
+  }
+
   getCategoryId(categorySlug: string): number | undefined {
-    const mapping: Record<string, number> = {
-      civil: 1,
-      criminal: 2,
-      land: 3,
-      marriage: 4,
-      labor: 5,
-      corporate: 6
-    };
-    return mapping[categorySlug];
+    if (!categorySlug || categorySlug === 'all') return undefined;
+    return this.forumService.resolveCategoryId(categorySlug);
   }
 
   navigateToPost(post: ForumPost): void {

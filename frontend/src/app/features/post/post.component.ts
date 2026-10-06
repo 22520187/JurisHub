@@ -31,7 +31,7 @@ export class PostComponent implements OnInit {
   }
 
   loadPosts(): void {
-    this.forumService.fetchPosts().subscribe({
+    this.forumService.fetchPosts(0, 50).subscribe({
       next: () => {
         this.myPosts = this.forumService.getMyPosts();
         this.savedPosts = this.forumService.getSavedPosts();
