@@ -162,4 +162,63 @@ public interface ForumRepository extends JpaRepository<Post, Long> {
             nativeQuery = true)
     List<Object[]> findPopularTags(@Param("limit") int limit);
 
+    /**
+     * Analytics: Count posts grouped by date
+     */
+    @Query("SELECT DATE(p.createdAt) as date, COUNT(p) as count " +
+            "FROM Post p " +
+            "WHERE p.createdAt >= :startDate AND p.isActive = true " +
+            "GROUP BY DATE(p.createdAt) " +
+            "ORDER BY date")
+    List<Object[]> countPostsGroupedByDate(@Param("startDate") LocalDateTime startDate);
+
+    /**
+     * Analytics: Count posts created between dates
+     */
+    long countByCreatedAtBetweenAndIsActiveTrue(LocalDateTime start, LocalDateTime end);
+
+    /**
+     * Analytics: Count posts by category with time range
+     */
+    @Query("SELECT c.name as category, COUNT(p) as count " +
+            "FROM Post p JOIN p.category c " +
+            "WHERE p.createdAt >= :startDate AND p.isActive = true " +
+            "GROUP BY c.id, c.name " +
+            "ORDER BY count DESC")
+    List<Object[]> countPostsByCategoryGrouped(@Param("startDate") LocalDateTime startDate);
+
+    /**
+     * Analytics: Get daily views aggregation (approximate using created date as proxy)
+     */
+    @Query("SELECT DATE(p.createdAt) as date, SUM(p.views) as views " +
+            "FROM Post p " +
+            "WHERE p.createdAt >= :startDate AND p.isActive = true " +
+            "GROUP BY DATE(p.createdAt) " +
+            "ORDER BY date")
+    List<Object[]> sumViewsGroupedByDate(@Param("startDate") LocalDateTime startDate);
+
+    @Query("SELECT HOUR(p.createdAt) as hour, COUNT(p) as count " +
+            "FROM Post p " +
+            "WHERE p.createdAt >= :startDate AND p.isActive = true " +
+            "GROUP BY HOUR(p.createdAt) " +
+            "ORDER BY hour")
+    List<Object[]> countPostsGroupedByHour(@Param("startDate") LocalDateTime startDate);
+
+    @Query("SELECT COUNT(p) FROM Post p WHERE p.sentimentLabel = :label AND p.createdAt >= :since AND p.isActive = true")
+    long countBySentimentLabelAndCreatedAtAfter(@Param("label") String label, @Param("since") LocalDateTime since);
+
+    @Query("SELECT p FROM Post p WHERE p.sentimentLabel = 'positive' AND p.isActive = true AND p.createdAt >= :since ORDER BY p.sentimentScore DESC")
+    List<Post> findTopPositivePosts(@Param("since") LocalDateTime since, Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE p.sentimentLabel = 'negative' AND p.isActive = true AND p.createdAt >= :since ORDER BY p.sentimentScore DESC")
+    List<Post> findTopNegativePosts(@Param("since") LocalDateTime since, Pageable pageable);
+
+    @Query("SELECT DATE(p.createdAt) as date, p.sentimentLabel as label, COUNT(p) as count " +
+            "FROM Post p " +
+            "WHERE p.createdAt >= :since AND p.isActive = true AND p.sentimentLabel IS NOT NULL " +
+            "GROUP BY DATE(p.createdAt), p.sentimentLabel " +
+            "ORDER BY date")
+    List<Object[]> countPostSentimentGroupedByDate(@Param("since") LocalDateTime since);
+
+
 }

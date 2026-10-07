@@ -4,7 +4,6 @@ from app.schemas.pdf import QuestionRequest, PDFResponse
 from app.services.pdf_service import get_pdf_service
 
 router = APIRouter(
-    prefix="/pdf",
     tags=["PDF Document AI"]
 )
 

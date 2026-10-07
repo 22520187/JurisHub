@@ -13,7 +13,7 @@
                     <div class="forum-search-box position-relative">
                         <i class="bi bi-search search-icon"></i>
                         <input type="text" class="form-control forum-search-input" placeholder="Tìm kiếm chủ đề..."
-                            [(ngModel)]="searchKeyword" />
+                            [(ngModel)]="searchKeyword" (keyup.enter)="loadPosts()" />
                     </div>
 
                     <app-button label="+ Tạo chủ đề mới" variant="custom" size="md" [customStyle]="{
@@ -53,7 +53,7 @@
                             <div class="filter-group d-flex align-items-center gap-2">
                                 <span class="filter-label text-muted">Danh mục:</span>
                                 <div class="filter-select-wrapper" style="width: 200px;">
-                                    <app-select-dropdown [options]="categoryOptions" [(ngModel)]="selectedCategory">
+                                    <app-select-dropdown [options]="categoryOptions" [(ngModel)]="selectedCategory" (ngModelChange)="loadPosts()">
                                     </app-select-dropdown>
                                 </div>
                             </div>
@@ -62,7 +62,7 @@
                             <div class="filter-group d-flex align-items-center gap-2">
                                 <span class="filter-label text-muted">Sắp xếp:</span>
                                 <div class="filter-select-wrapper" style="width: 200px;">
-                                    <app-select-dropdown [options]="sortOptions" [(ngModel)]="selectedSort">
+                                    <app-select-dropdown [options]="sortOptions" [(ngModel)]="selectedSort" (ngModelChange)="loadPosts()">
                                     </app-select-dropdown>
                                 </div>
                             </div>
@@ -71,7 +71,7 @@
                             <div class="filter-group d-flex align-items-center gap-2 ms-auto">
                                 <span class="filter-label text-muted">Thời gian:</span>
                                 <div class="filter-select-wrapper" style="width: 150px;">
-                                    <app-select-dropdown [options]="timeOptions" [(ngModel)]="selectedTime">
+                                    <app-select-dropdown [options]="timeOptions" [(ngModel)]="selectedTime" (ngModelChange)="loadPosts()">
                                     </app-select-dropdown>
                                 </div>
                             </div>
@@ -97,7 +97,7 @@
                             <div class="filter-group d-flex align-items-center gap-2 ms-auto">
                                 <span class="filter-label text-muted">Hiển thị:</span>
                                 <div class="filter-select-wrapper" style="width: 150px;">
-                                    <app-select-dropdown [options]="limitOptions" [(ngModel)]="selectedLimit">
+                                    <app-select-dropdown [options]="limitOptions" [(ngModel)]="selectedLimit" (ngModelChange)="loadPosts()">
                                     </app-select-dropdown>
                                 </div>
                             </div>
@@ -113,18 +113,24 @@
                         } @else {
                         <div class="posts-list d-flex flex-column gap-3">
                             @for (post of posts; track post.id) {
-                            <div class="post-item p-3 border rounded">
+                            <div class="post-item p-3 border rounded" style="cursor: pointer;" (click)="navigateToPost(post)">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <tellerapp-badge [color]="'blue'">{{ post.category }}</tellerapp-badge>
+                                    <tellerapp-badge [color]="'blue'">{{ getCategoryName(post.category) }}</tellerapp-badge>
                                     <span class="text-muted small">{{ post.createdAt }}</span>
                                 </div>
-                                <h5 class="post-title fw-bold text-dark mb-2">{{ post.title }}</h5>
+                                <h5 class="post-title fw-bold text-dark mb-2">
+                                    <a [routerLink]="['/forum/categories', getCategorySlug(post), 'posts', post.slug || post.id]"
+                                       (click)="$event.stopPropagation()"
+                                       class="text-decoration-none text-dark hover-teal">
+                                        {{ post.title }}
+                                    </a>
+                                </h5>
                                 <div class="d-flex align-items-center justify-content-between text-muted small">
-                                    <span>Đăng bởi: <strong>{{ post.author }}</strong></span>
+                                    <span>Đăng bởi: <strong>{{ getAuthorName(post.author) }}</strong></span>
                                     <div class="d-flex gap-3">
-                                        <span><i class="bi bi-chat-left-text me-1"></i> {{ post.repliesCount }} trả
+                                        <span><i class="bi bi-chat-left-text me-1"></i> {{ post.replyCount != null ? post.replyCount : post.repliesCount }} trả
                                             lời</span>
-                                        <span><i class="bi bi-eye me-1"></i> {{ post.viewsCount }} lượt xem</span>
+                                        <span><i class="bi bi-eye me-1"></i> {{ post.view != null ? post.view : post.viewsCount }} lượt xem</span>
                                     </div>
                                 </div>
                             </div>
@@ -156,9 +162,71 @@
                     <!-- SECTION: Danh mục Diễn đàn -->
                     <div class="mb-5">
                         <h2 class="section-title mb-4">Danh mục Diễn đàn</h2>
-                        <div class="forum-card p-5 text-center text-muted">
-                            <p class="mb-0">Chưa có danh mục nào</p>
-                        </div>
+                        @if (categoriesList.length === 0) {
+                            <div class="forum-card p-5 text-center text-muted">
+                                <p class="mb-0">Đang tải danh mục...</p>
+                            </div>
+                        } @else {
+                            <div class="categories-list-container d-flex flex-column gap-3">
+                                @for (cat of categoriesList; track cat.id) {
+                                    <div class="forum-card p-3 p-md-4 category-item-card">
+                                        <div class="row align-items-center g-3">
+                                            <!-- Category Icon & Info -->
+                                            <div class="col-12 col-md-6 d-flex align-items-center gap-3">
+                                                <div class="category-icon-box flex-shrink-0 d-flex align-items-center justify-content-center">
+                                                    {{ cat.icon || '📁' }}
+                                                </div>
+                                                <div class="category-info">
+                                                    <h4 class="category-title mb-1 fw-bold fs-6">
+                                                        <a [routerLink]="['/forum']" (click)="selectCategoryBySlug(cat.slug)" class="text-decoration-none text-dark hover-teal">
+                                                            {{ cat.name }}
+                                                        </a>
+                                                    </h4>
+                                                    <p class="category-description text-muted small mb-0 text-truncate-2">
+                                                        {{ cat.description }}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Stats -->
+                                            <div class="col-6 col-md-3 d-flex align-items-center justify-content-around text-center">
+                                                <div>
+                                                    <div class="cat-stat-number fw-bold">{{ cat.threadCount != null ? cat.threadCount : 0 }}</div>
+                                                    <div class="cat-stat-label text-muted small">Chủ đề</div>
+                                                </div>
+                                                <div>
+                                                    <div class="cat-stat-number fw-bold">{{ cat.postCount != null ? cat.postCount : 0 }}</div>
+                                                    <div class="cat-stat-label text-muted small">Trả lời</div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Last Post Info -->
+                                            <div class="col-6 col-md-3">
+                                                @if (cat.lastPost) {
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <img [src]="cat.lastPost.authorAvatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100'"
+                                                             [alt]="cat.lastPost.authorName"
+                                                             class="rounded-circle last-post-avatar flex-shrink-0" />
+                                                        <div class="last-post-content overflow-hidden">
+                                                            <h6 class="last-post-title text-truncate mb-0 fs-7">
+                                                                <a [routerLink]="['/forum/categories', cat.slug, 'posts', cat.lastPost.slug]" class="text-decoration-none text-dark hover-teal">
+                                                                    {{ cat.lastPost.title }}
+                                                                </a>
+                                                            </h6>
+                                                            <div class="last-post-meta text-muted small text-truncate">
+                                                                {{ cat.lastPost.authorName }} • {{ formatRelativeTime(cat.lastPost.createdAt) }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                } @else {
+                                                    <span class="text-muted small">Chưa có bài viết</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
                     </div>
 
                     <!-- CARD: Thống kê diễn đàn -->
@@ -166,19 +234,19 @@
                         <h2 class="forum-card-title mb-4">Thống kê diễn đàn</h2>
                         <div class="row text-center g-3">
                             <div class="col-6 col-sm-3">
-                                <div class="stat-highlight-number">{{ forumStats.members }}</div>
+                                <div class="stat-highlight-number">{{ statsData.totalMembers }}</div>
                                 <div class="stat-highlight-label text-muted small">Thành viên</div>
                             </div>
                             <div class="col-6 col-sm-3">
-                                <div class="stat-highlight-number">{{ forumStats.topics }}</div>
+                                <div class="stat-highlight-number">{{ statsData.totalTopics }}</div>
                                 <div class="stat-highlight-label text-muted small">Chủ đề</div>
                             </div>
                             <div class="col-6 col-sm-3">
-                                <div class="stat-highlight-number">{{ forumStats.posts }}</div>
+                                <div class="stat-highlight-number">{{ statsData.totalPosts }}</div>
                                 <div class="stat-highlight-label text-muted small">Bài viết</div>
                             </div>
                             <div class="col-6 col-sm-3">
-                                <div class="stat-highlight-number">{{ forumStats.online }}</div>
+                                <div class="stat-highlight-number">{{ onlineUsersCount }}</div>
                                 <div class="stat-highlight-label text-muted small">Đang online</div>
                             </div>
                         </div>
@@ -199,23 +267,103 @@
 
                         <!-- Card 2: Chủ đề phổ biến -->
                         <div class="forum-card p-4">
-                            <h3 class="forum-card-title mb-0">Chủ đề phổ biến</h3>
+                            <h3 class="forum-card-title mb-3">Chủ đề phổ biến</h3>
+                            <hr class="forum-divider mb-3" />
+                            @if (popularTopics.length === 0) {
+                                <p class="text-muted small mb-0">Chưa có chủ đề phổ biến</p>
+                            } @else {
+                                <div class="popular-topics-list d-flex flex-column gap-3">
+                                    @for (topic of popularTopics; track topic.id) {
+                                        <div class="popular-topic-item d-flex align-items-center justify-content-between gap-2">
+                                            <div class="topic-info overflow-hidden">
+                                                <h6 class="topic-title text-truncate mb-1">
+                                                    <a [routerLink]="['/forum/categories', topic.categorySlug, 'posts', topic.slug]" class="text-decoration-none text-dark hover-teal">
+                                                        {{ topic.title }}
+                                                    </a>
+                                                </h6>
+                                                <div class="topic-meta text-muted small">
+                                                    {{ topic.views }} lượt xem • {{ topic.replyCount }} trả lời
+                                                </div>
+                                            </div>
+                                            <div class="topic-badge-icon flex-shrink-0">
+                                                <span class="badge-flame">🔥</span>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
                         </div>
 
                         <!-- Card 3: Chuyên mục sôi nổi -->
                         <div class="forum-card p-4">
-                            <h3 class="forum-card-title mb-0">Chuyên mục sôi nổi</h3>
+                            <h3 class="forum-card-title mb-3">Chuyên mục sôi nổi</h3>
+                            <hr class="forum-divider mb-3" />
+                            @if (categoryStats.length === 0) {
+                                <p class="text-muted small mb-0">Chưa có dữ liệu</p>
+                            } @else {
+                                <div class="category-stats-list d-flex flex-column gap-2">
+                                    @for (cat of categoryStats; track cat.id) {
+                                        <div class="category-stat-row d-flex align-items-center justify-content-between py-1 px-2 rounded cursor-pointer"
+                                             (click)="selectCategoryBySlug(cat.slug)">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="cat-icon">{{ cat.icon }}</span>
+                                                <span class="cat-name fw-medium">{{ cat.name }}</span>
+                                            </div>
+                                            <span class="cat-count text-muted small">{{ cat.topicCount }}</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
                         </div>
 
                         <!-- Card 4: Thống kê nhanh -->
                         <div class="forum-card p-4">
                             <h3 class="forum-card-title mb-3">Thống kê nhanh</h3>
-                            <p class="text-muted small mb-0">Không có dữ liệu</p>
+                            <hr class="forum-divider mb-3" />
+                            <div class="quick-stats-list d-flex flex-column gap-2 text-muted small">
+                                <div class="d-flex justify-content-between">
+                                    <span>Chủ đề mới hôm nay:</span>
+                                    <span class="fw-semibold text-dark">{{ statsData.topicsToday || 0 }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>Bài viết mới hôm nay:</span>
+                                    <span class="fw-semibold text-dark">{{ statsData.postsToday || 0 }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>Thành viên mới hôm nay:</span>
+                                    <span class="fw-semibold text-dark">{{ statsData.membersToday || 0 }}</span>
+                                </div>
+                                <hr class="my-2 forum-divider" />
+                                <div class="d-flex justify-content-between">
+                                    <span>Tổng chủ đề:</span>
+                                    <span class="fw-semibold text-dark">{{ statsData.totalTopics }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>Tổng bài viết:</span>
+                                    <span class="fw-semibold text-dark">{{ statsData.totalPosts }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>Tổng thành viên:</span>
+                                    <span class="fw-semibold text-dark">{{ statsData.totalMembers }}</span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Card 5: Tags phổ biến -->
                         <div class="forum-card p-4">
-                            <h3 class="forum-card-title mb-0">Tags phổ biến</h3>
+                            <h3 class="forum-card-title mb-3">Tags phổ biến</h3>
+                            <hr class="forum-divider mb-3" />
+                            @if (popularTags.length === 0) {
+                                <p class="text-muted small mb-0">Chưa có tags</p>
+                            } @else {
+                                <div class="popular-tags-cloud d-flex flex-wrap gap-2">
+                                    @for (tagItem of popularTags; track tagItem.tag) {
+                                        <button type="button" class="btn-tag-pill" (click)="filterByTag(tagItem.tag)">
+                                            {{ tagItem.tag }}
+                                        </button>
+                                    }
+                                </div>
+                            }
                         </div>
 
                     </aside>

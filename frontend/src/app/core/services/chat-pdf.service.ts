@@ -1,10 +1,12 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { LegalAiService } from './legal-ai.service';
 
 export interface PdfDocument {
   name: string;
   size: string;
   pages: number;
   uploadDate: string;
+  pythonFileId?: string; // ID từ Python ML sau khi upload
 }
 
 export interface PdfChatMessage {
@@ -30,6 +32,7 @@ export interface PdfConversation {
   providedIn: 'root'
 })
 export class ChatPdfService {
+  private readonly legalAiService = inject(LegalAiService);
   private readonly STORAGE_KEY = 'jurishub_pdf_conversations';
   private readonly ACTIVE_ID_KEY = 'jurishub_active_pdf_conversation_id';
 
@@ -153,42 +156,51 @@ export class ChatPdfService {
     this.saveToStorage();
   }
 
-  async attachPdfAndSummarize(file: { name: string; size: string; pages: number }): Promise<void> {
+  async attachPdfAndSummarize(fileObj: { name: string; size: string; pages: number; rawFile?: File }): Promise<void> {
     let active = this.activeConversation();
     if (!active) {
-      active = this.createNewConversation(file.name);
+      active = this.createNewConversation(fileObj.name);
     }
 
     const now = new Date();
     const docInfo: PdfDocument = {
-      name: file.name,
-      size: file.size,
-      pages: file.pages,
+      name: fileObj.name,
+      size: fileObj.size,
+      pages: fileObj.pages,
       uploadDate: now.toLocaleDateString('vi-VN')
     };
 
-    // Update conversation with document and start analyzing state
+    // Cập nhật trạng thái đang phân tích
     this.conversations.update(list =>
       list.map(c => {
         if (c.id === active!.id) {
-          return {
-            ...c,
-            title: file.name,
-            document: docInfo,
-            isAnalyzing: true,
-            messages: [],
-            updatedAt: now.toISOString()
-          };
+          return { ...c, title: fileObj.name, document: docInfo, isAnalyzing: true, messages: [], updatedAt: now.toISOString() };
         }
         return c;
       })
     );
     this.saveToStorage();
 
-    // Simulate AI document processing and summary generation
-    await new Promise(resolve => setTimeout(resolve, 1600));
+    let summaryText: string;
+    let pythonFileId: string | undefined;
 
-    const summaryText = this.generateDocumentSummary(file.name);
+    if (fileObj.rawFile) {
+      // Gọi Python ML thật
+      try {
+        const uploadResult = await this.legalAiService.uploadPdf(fileObj.rawFile);
+        pythonFileId = uploadResult.pythonFileId;
+        const summarizeResult = await this.legalAiService.summarizePdf(pythonFileId);
+        summaryText = summarizeResult?.data?.summary ?? summarizeResult?.data?.answer ?? this.generateDocumentSummary(fileObj.name);
+      } catch (err) {
+        console.error('PDF ML error, using fallback summary:', err);
+        summaryText = this.generateDocumentSummary(fileObj.name);
+      }
+    } else {
+      // Sample files → mock
+      await new Promise(resolve => setTimeout(resolve, 1600));
+      summaryText = this.generateDocumentSummary(fileObj.name);
+    }
+
     const summaryMsg: PdfChatMessage = {
       id: 'msg_summary_' + Date.now(),
       sender: 'assistant',
@@ -204,6 +216,7 @@ export class ChatPdfService {
           return {
             ...c,
             isAnalyzing: false,
+            document: { ...c.document!, pythonFileId },
             messages: [summaryMsg],
             updatedAt: new Date().toISOString()
           };
@@ -248,25 +261,44 @@ export class ChatPdfService {
     this.isAiThinking.set(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 500));
+      const currentActive = this.activeConversation();
+      const pythonFileId = currentActive?.document?.pythonFileId;
 
-      const aiResponse = this.generateDocumentAnswer(trimmed, active.document.name);
+      let aiContent: string;
+      let aiPages: number[] = [];
+
+      if (pythonFileId) {
+        // Gọi Python ML thật
+        try {
+          const askResult = await this.legalAiService.askPdf(pythonFileId, trimmed);
+          aiContent = askResult?.data?.answer ?? 'Không có kết quả từ AI.';
+          aiPages = (askResult?.data?.page_references as number[] | undefined) ?? [];
+        } catch (apiErr) {
+          console.error('PDF ask fallback:', apiErr);
+          const fb = this.generateDocumentAnswer(trimmed, currentActive?.document?.name ?? '');
+          aiContent = fb.content;
+          aiPages = fb.pages;
+        }
+      } else {
+        // Không có pythonFileId → fallback mock
+        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 500));
+        const fb = this.generateDocumentAnswer(trimmed, active.document.name);
+        aiContent = fb.content;
+        aiPages = fb.pages;
+      }
+
       const aiMsg: PdfChatMessage = {
         id: 'msg_ai_' + Date.now(),
         sender: 'assistant',
-        content: aiResponse.content,
+        content: aiContent,
         timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-        pageReferences: aiResponse.pages
+        pageReferences: aiPages.length > 0 ? aiPages : undefined
       };
 
       this.conversations.update(list =>
         list.map(c => {
           if (c.id === active.id) {
-            return {
-              ...c,
-              updatedAt: new Date().toISOString(),
-              messages: [...c.messages, aiMsg]
-            };
+            return { ...c, updatedAt: new Date().toISOString(), messages: [...c.messages, aiMsg] };
           }
           return c;
         })

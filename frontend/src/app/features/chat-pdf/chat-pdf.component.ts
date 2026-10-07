@@ -183,13 +183,14 @@ export class ChatPdfComponent implements OnInit, AfterViewChecked {
 
   private processFile(file: File): void {
     const sizeInMB = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
-    // Estimate page count based on size for realistic simulation
     const estimatedPages = Math.max(3, Math.min(60, Math.round(file.size / 70000)));
 
+    // Truyền rawFile để service có thể gọi Python ML thật
     this.chatPdfService.attachPdfAndSummarize({
       name: file.name,
       size: sizeInMB,
-      pages: estimatedPages
+      pages: estimatedPages,
+      rawFile: file   // <-- file thật để upload lên ML
     });
 
     this.showToast('info', 'Đang phân tích', `Hệ thống đang tự động trích xuất và tóm tắt văn bản "${file.name}"...`);

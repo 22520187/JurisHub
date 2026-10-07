@@ -21,6 +21,11 @@ class Settings(BaseSettings):
     PDF_UPLOAD_DIR: str = "./data/uploads/pdfs"
     COLLECTION_NAME: str = "vietnamese_legal_docs"
 
+    # RAG settings
+    TOP_K: int = 5
+    CHUNK_SIZE: int = 1000
+    CHUNK_OVERLAP: int = 200
+
     # AI & LLM Settings
     EMBEDDING_MODEL: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     LLM_PROVIDER: str = "google"  # openrouter, google, openai

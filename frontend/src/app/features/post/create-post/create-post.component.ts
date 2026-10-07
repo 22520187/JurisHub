@@ -1,10 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ToastMessageComponent } from '../../../shared/components/toast-message/toast-message.component';
-import { ForumService } from '../../../core/services/forum.service';
+import { ForumService, ForumCategoryItem, CategoryLabelItem } from '../../../core/services/forum.service';
 
 @Component({
   selector: 'app-create-post',
@@ -19,7 +19,7 @@ import { ForumService } from '../../../core/services/forum.service';
   templateUrl: './create-post.component.html',
   styleUrl: './create-post.component.scss'
 })
-export class CreatePostComponent {
+export class CreatePostComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly forumService = inject(ForumService);
 
@@ -30,6 +30,11 @@ export class CreatePostComponent {
   tags: string[] = [];
   content: string = '';
 
+  // Labels state
+  rawCategories: ForumCategoryItem[] = [];
+  availableLabels: CategoryLabelItem[] = [];
+  selectedLabelIds: number[] = [];
+
   errorMessage: string = '';
   isSubmitting: boolean = false;
 
@@ -38,14 +43,81 @@ export class CreatePostComponent {
   toastType: 'success' | 'error' = 'success';
   toastMessage: string = '';
 
-  readonly categories = [
-    { value: 'civil', label: 'Luật Dân sự' },
-    { value: 'criminal', label: 'Luật Hình sự' },
-    { value: 'land', label: 'Luật Đất đai' },
-    { value: 'corporate', label: 'Luật Doanh nghiệp' },
-    { value: 'labor', label: 'Luật Lao động' },
-    { value: 'marriage', label: 'Hôn nhân & Gia đình' }
+  // Fallback categories list before API response
+  categories: { value: string; label: string; id: number; icon?: string }[] = [
+    { value: 'dan-su', label: 'Dân sự', id: 1 },
+    { value: 'hinh-su', label: 'Hình sự', id: 2 },
+    { value: 'dat-dai', label: 'Đất đai', id: 3 },
+    { value: 'hon-nhan-gia-dinh', label: 'Hôn nhân và gia đình', id: 4 },
+    { value: 'lao-dong', label: 'Lao động', id: 5 },
+    { value: 'kinh-doanh', label: 'Kinh doanh & Doanh nghiệp', id: 6 },
+    { value: 'giao-thong', label: 'Giao thông', id: 7 },
+    { value: 'khac', label: 'Khác', id: 8 }
   ];
+
+  ngOnInit(): void {
+    this.loadCategories();
+  }
+
+  loadCategories(): void {
+    this.forumService.getAllCategories().subscribe({
+      next: (cats) => {
+        if (cats && cats.length > 0) {
+          this.rawCategories = cats;
+          this.categories = cats.map(c => ({
+            value: c.slug,
+            label: c.name,
+            id: c.id,
+          }));
+
+          // If a category was already selected, populate its labels
+          if (this.category) {
+            this.updateLabelsForCategory(this.category);
+          }
+        }
+      },
+      error: (e) => {
+        console.warn('Could not load dynamic categories, using default list:', e);
+      }
+    });
+  }
+
+  onCategoryChange(slug: string): void {
+    this.category = slug;
+    this.updateLabelsForCategory(slug);
+  }
+
+  updateLabelsForCategory(slug: string): void {
+    const found = this.rawCategories.find(c => c.slug === slug || String(c.id) === String(slug));
+    if (found && found.labels && Array.isArray(found.labels)) {
+      this.availableLabels = found.labels.filter(l => l.isActive !== false);
+    } else {
+      this.availableLabels = [];
+    }
+    // Reset selected labels when switching category to ensure valid IDs
+    this.selectedLabelIds = [];
+  }
+
+  toggleLabel(labelId: number): void {
+    if (this.selectedLabelIds.includes(labelId)) {
+      this.selectedLabelIds = this.selectedLabelIds.filter(id => id !== labelId);
+    } else {
+      if (this.selectedLabelIds.length >= 5) {
+        this.errorMessage = 'Chỉ được chọn tối đa 5 nhãn cho bài viết.';
+        return;
+      }
+      this.errorMessage = '';
+      this.selectedLabelIds.push(labelId);
+    }
+  }
+
+  isLabelSelected(labelId: number): boolean {
+    return this.selectedLabelIds.includes(labelId);
+  }
+
+  clearSelectedLabels(): void {
+    this.selectedLabelIds = [];
+  }
 
   addTag(): void {
     const rawTag = this.tagInput.trim().replace(/^#/, '');
@@ -126,22 +198,33 @@ export class CreatePostComponent {
 
     const catObj = this.categories.find(c => c.value === this.category);
     const categoryName = catObj ? catObj.label : 'Thảo luận chung';
+    const categoryId = catObj?.id ?? this.forumService.resolveCategoryId(this.category);
 
     this.forumService.createPost({
       title: this.title.trim(),
       content: this.content.trim(),
+      categoryId: categoryId,
+      labelIds: this.selectedLabelIds.length > 0 ? this.selectedLabelIds : undefined,
       category: categoryName,
       categorySlug: this.category,
       tags: [...this.tags]
+    }).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.toastType = 'success';
+        this.toastMessage = 'Đăng bài viết thành công!';
+        this.showToast = true;
+
+        setTimeout(() => {
+          this.router.navigate(['/post']);
+        }, 800);
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        console.error('Lỗi khi đăng bài viết:', err);
+        this.errorMessage = err?.error?.message || 'Có lỗi xảy ra khi đăng bài viết. Vui lòng thử lại!';
+      }
     });
-
-    this.toastType = 'success';
-    this.toastMessage = 'Đăng bài viết thành công!';
-    this.showToast = true;
-
-    setTimeout(() => {
-      this.router.navigate(['/post']);
-    }, 800);
   }
 
   goBack(): void {

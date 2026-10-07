@@ -40,20 +40,73 @@
           <!-- Field 1: Chuyên mục -->
           <div class="mb-4">
             <label class="form-label fw-semibold small mb-2">Chuyên mục <span class="text-danger">*</span></label>
-            <select class="form-select custom-topic-select" [(ngModel)]="category" name="category">
+            <select
+              class="form-select custom-topic-select"
+              [(ngModel)]="category"
+              name="category"
+              (ngModelChange)="onCategoryChange($event)">
               <option value="" disabled selected>Chọn chuyên mục</option>
               @for (cat of categories; track cat.value) {
-                <option [value]="cat.value">{{ cat.label }}</option>
+                <option [value]="cat.value">
+                  {{ cat.icon ? cat.icon + ' ' : '' }}{{ cat.label }}
+                </option>
               }
             </select>
           </div>
 
           <!-- Field 2: Nhãn (Label) -->
           <div class="mb-4">
-            <label class="form-label fw-semibold small mb-1">Nhãn (Label)</label>
-            <p class="text-muted small mb-0">
-              {{ category ? 'Chọn các nhãn phù hợp với nội dung câu hỏi' : 'Vui lòng chọn chuyên mục để hiển thị các nhãn' }}
-            </p>
+            <div class="d-flex align-items-center justify-content-between mb-1">
+              <label class="form-label fw-semibold small mb-0">
+                Nhãn (Label)
+                @if (selectedLabelIds.length > 0) {
+                  <span class="badge-label-counter ms-2">
+                    Đã chọn: {{ selectedLabelIds.length }}/5
+                  </span>
+                }
+              </label>
+              @if (selectedLabelIds.length > 0) {
+                <button
+                  type="button"
+                  class="btn-clear-labels"
+                  (click)="clearSelectedLabels()">
+                  Xóa chọn
+                </button>
+              }
+            </div>
+
+            @if (!category) {
+              <div class="labels-notice-box d-flex align-items-center gap-2 p-3 rounded-3 text-muted small mt-2">
+                <i class="bi bi-info-circle text-teal fs-6"></i>
+                <span>Vui lòng chọn chuyên mục ở trên để hiển thị danh sách nhãn phù hợp.</span>
+              </div>
+            } @else if (availableLabels.length === 0) {
+              <div class="labels-notice-box d-flex align-items-center gap-2 p-3 rounded-3 text-muted small mt-2">
+                <i class="bi bi-tag text-muted fs-6"></i>
+                <span>Chuyên mục này hiện chưa có nhãn nào.</span>
+              </div>
+            } @else {
+              <p class="text-muted small mb-2 mt-1">
+                Chọn tối đa 5 nhãn phù hợp với nội dung câu hỏi:
+              </p>
+              <div class="labels-selection-container d-flex flex-wrap gap-2 pt-1">
+                @for (lbl of availableLabels; track lbl.id) {
+                  <button
+                    type="button"
+                    class="label-badge-pill"
+                    [class.active]="isLabelSelected(lbl.id)"
+                    [style.--label-color]="lbl.color || '#08544e'"
+                    [title]="lbl.description || lbl.name"
+                    (click)="toggleLabel(lbl.id)">
+                    <span class="label-color-dot" [style.background-color]="lbl.color || '#08544e'"></span>
+                    <span class="label-name">{{ lbl.name }}</span>
+                    @if (isLabelSelected(lbl.id)) {
+                      <i class="bi bi-check2 ms-1 check-icon"></i>
+                    }
+                  </button>
+                }
+              </div>
+            }
           </div>
 
           <!-- Field 3: Tiêu đề -->
