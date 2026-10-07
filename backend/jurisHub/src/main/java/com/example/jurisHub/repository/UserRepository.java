@@ -12,12 +12,18 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+
     Optional<User> findByEmail(String email);
+
     boolean existsByEmail(String email);
+
     long countByCreatedAtAfter(LocalDateTime since);
 
     Page<User> findByRole(User.Role role, Pageable pageable);
+
     List<User> findByRole(User.Role role);
+
+    long countByRole(User.Role role);
 
     @Query("SELECT DATE(u.createdAt) as date, u.role, COUNT(u) as count " +
             "FROM User u " +
@@ -25,4 +31,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "GROUP BY DATE(u.createdAt), u.role " +
             "ORDER BY date, u.role")
     List<Object[]> countUsersByRoleGroupedByDate(@Param("startDate") LocalDateTime startDate);
+
+    Page<User> findByFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+            String fullName, String email, Pageable pageable);
+
+    List<User> findTop5ByOrderByCreatedAtDesc();
+
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+    long countByRoleAndCreatedAtBetween(User.Role role, LocalDateTime start, LocalDateTime end);
 }

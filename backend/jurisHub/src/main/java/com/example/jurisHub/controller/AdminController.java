@@ -1,237 +1,602 @@
 package com.example.jurisHub.controller;
 
-import com.example.jurisHub.dto.chat.ChatMessage;
-import com.example.jurisHub.dto.chat.OnlineUsersResponse;
-import com.example.jurisHub.security.UserPrincipal;
-import com.example.jurisHub.service.OnlineUserService;
+import com.example.jurisHub.dto.admin.*;
+import com.example.jurisHub.dto.analytics.*;
+import com.example.jurisHub.dto.common.ApiResponse;
+import com.example.jurisHub.dto.forum.PostCategoryDto;
+import com.example.jurisHub.service.AdminService;
+import com.example.jurisHub.service.AnalyticsService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.List;
 
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.CrossOrigin;
-
+@RestController
+@RequestMapping("/api/admin")
+@RequiredArgsConstructor
 @Slf4j
-@Controller
-@RequestMapping("/api/chat")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://localhost:4200"})
-public class ChatController {
-    private final OnlineUserService onlineUserService;
-    private final SimpMessagingTemplate messagingTemplate;
+@PreAuthorize("hasRole('ADMIN')")
+public class AdminController {
 
-    public ChatController(OnlineUserService onlineUserService, SimpMessagingTemplate messagingTemplate) {
-        this.onlineUserService = onlineUserService;
-        this.messagingTemplate = messagingTemplate;
+    private final AdminService adminService;
+    private final AnalyticsService analyticsService;
+
+    @GetMapping("/dashboard/stats")
+    public ResponseEntity<ApiResponse<AdminDashboardStatsDto>> getDashboardStats() {
+        log.info("Getting admin dashboard statistics");
+
+        AdminDashboardStatsDto stats = adminService.getDashboardStatistics();
+        return ResponseEntity.ok(ApiResponse.<AdminDashboardStatsDto>builder()
+                .success(true)
+                .message("Admin dashboard statistics retrieved successfully")
+                .data(stats)
+                .build());
     }
 
-    @MessageMapping("/chat.join")
-    @SendTo("/topic/public")
-    public ChatMessage joinChat(Principal principal, SimpMessageHeaderAccessor headerAccessor) {
-        UserPrincipal userPrincipal = getUserFromPrincipal(principal);
-        if (userPrincipal == null) {
-            log.warn("Unauthorized join attempt");
-            return null;
+    @GetMapping("/users")
+    public ResponseEntity<ApiResponse<Page<UserManagementDto>>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String role) {
+
+        Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc") ?
+                    Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<UserManagementDto> usersPage = adminService.getAllUsers(search, role, pageable);
+
+        return ResponseEntity.ok(ApiResponse.<Page<UserManagementDto>>builder()
+                .success(true)
+                .message("Users retrieved successfully")
+                .data(usersPage)
+                .build());
+    }
+
+    @PutMapping("/users/{userId}/status")
+    public ResponseEntity<ApiResponse<String>> updateUserStatus(
+            @PathVariable Long userId,
+            @RequestParam Boolean isEnabled) {
+
+        adminService.updateUserStatus(userId, isEnabled);
+
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .success(true)
+                .message("User status updated successfully")
+                .data("User " + (isEnabled ? "enabled" : "disabled"))
+                .build());
+    }
+
+    @GetMapping("/posts")
+    public ResponseEntity<ApiResponse<Page<PostModerationDto>>> getPostsForModeration(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean isActive) {
+
+        Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc") ?
+                Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<PostModerationDto> posts = adminService.getPostsForModeration(search, isActive, pageable);
+
+        return ResponseEntity.ok(ApiResponse.<Page<PostModerationDto>>builder()
+                .success(true)
+                .message("Posts retrieved successfully")
+                .data(posts)
+                .build());
+    }
+
+    @PutMapping("/posts/{postId}/status")
+    public ResponseEntity<ApiResponse<String>> updatePostStatus(
+            @PathVariable Long postId,
+            @RequestParam Boolean isActive) {
+
+        adminService.updatePostStatus(postId, isActive);
+
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .success(true)
+                .message("Post status updated successfully")
+                .data("Post " + (isActive ? "activated" : "deactivated"))
+                .build());
+    }
+
+    @DeleteMapping("/posts/{postId}")
+    public ResponseEntity<ApiResponse<String>> deletePost(@PathVariable Long postId) {
+        log.info("Deleting post ID: {}", postId);
+
+        adminService.deletePost(postId);
+
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .success(true)
+                .message("Post deleted successfully")
+                .data("Post deleted")
+                .build());
+    }
+
+    @PutMapping("/posts/{postId}/pin")
+    public ResponseEntity<ApiResponse<String>> updatePostPinStatus(
+            @PathVariable Long postId,
+            @RequestParam Boolean isPinned) {
+
+        log.info("Updating post ID: {} pin status to: {}", postId, isPinned);
+
+        adminService.updatePostPinStatus(postId, isPinned);
+
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .success(true)
+                .message("Post pin status updated successfully")
+                .data("Post " + (isPinned ? "pinned" : "unpinned"))
+                .build());
+    }
+
+    @PutMapping("/posts/{postId}/hot")
+    public ResponseEntity<ApiResponse<String>> updatePostHotStatus(
+            @PathVariable Long postId,
+            @RequestParam Boolean isHot) {
+
+        log.info("Updating post ID: {} hot status to: {}", postId, isHot);
+
+        adminService.updatePostHotStatus(postId, isHot);
+
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .success(true)
+                .message("Post hot status updated successfully")
+                .data("Post " + (isHot ? "marked as hot" : "unmarked as hot"))
+                .build());
+    }
+
+    @GetMapping("/posts/{postId}")
+    public ResponseEntity<ApiResponse<PostModerationDto>> getPostDetails(@PathVariable Long postId) {
+
+        PostModerationDto post = adminService.getPostForModeration(postId);
+
+        return ResponseEntity.ok(ApiResponse.<PostModerationDto>builder()
+                .success(true)
+                .message("Post details retrieved successfully")
+                .data(post)
+                .build());
+    }
+
+    @GetMapping("/violations")
+    public ResponseEntity<ApiResponse<Page<PostModerationDto>>> getViolationPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean isActive) {
+
+        Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc") ?
+                Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<PostModerationDto> violationPosts = adminService.getViolationPosts(search, isActive, pageable);
+
+        return ResponseEntity.ok(ApiResponse.<Page<PostModerationDto>>builder()
+                .success(true)
+                .message("Violation posts retrieved successfully")
+                .data(violationPosts)
+                .build());
+    }
+
+    @GetMapping("/violations/replies")
+    public ResponseEntity<ApiResponse<Page<PostModerationDto>>> getViolationReplies(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean isActive) {
+
+        Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc") ?
+                Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<PostModerationDto> violationReplies = adminService.getViolationReplies(search, isActive, pageable);
+
+        return ResponseEntity.ok(ApiResponse.<Page<PostModerationDto>>builder()
+                .success(true)
+                .message("Violation replies retrieved successfully")
+                .data(violationReplies)
+                .build());
+    }
+
+    @PutMapping("/replies/{replyId}/status")
+    public ResponseEntity<ApiResponse<String>> updateReplyStatus(
+            @PathVariable Long replyId,
+            @RequestParam Boolean isActive) {
+
+        adminService.updateReplyStatus(replyId, isActive);
+
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .success(true)
+                .message("Reply status updated successfully")
+                .data("Reply " + (isActive ? "activated" : "deactivated"))
+                .build());
+    }
+
+
+    @GetMapping("/lawyer-applications")
+    public ResponseEntity<ApiResponse<Page<LawyerApplicationDto>>> getLawyerApplications(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search) {
+
+        Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc") ?
+                Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<LawyerApplicationDto> applications = adminService.getLawyerApplications(status, search, pageable);
+
+        return ResponseEntity.ok(ApiResponse.<Page<LawyerApplicationDto>>builder()
+                .success(true)
+                .message("Lawyer applications retrieved successfully")
+                .data(applications)
+                .build());
+    }
+
+    @PutMapping("/lawyer-applications/{applicationId}/approve")
+    public ResponseEntity<ApiResponse<String>> approveLawyerApplication(
+            @PathVariable Long applicationId,
+            @RequestParam(required = false) String adminNotes) {
+
+        adminService.approveLawyerApplication(applicationId, adminNotes);
+
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .success(true)
+                .message("Lawyer application approved successfully")
+                .data("Application approved and user role updated to lawyer")
+                .build());
+    }
+
+    @PutMapping("/lawyer-applications/{applicationId}/reject")
+    public ResponseEntity<ApiResponse<String>> rejectLawyerApplication(
+            @PathVariable Long applicationId,
+            @RequestParam(required = false) String adminNotes) {
+
+        adminService.rejectLawyerApplication(applicationId, adminNotes);
+
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .success(true)
+                .message("Lawyer application rejected successfully")
+                .data("Application rejected with admin notes")
+                .build());
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<ApiResponse<Page<PostCategoryDto>>> getAllCategoriesForAdmin(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "displayOrder") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(required = false) String search) {
+
+        Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc") ?
+                Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<PostCategoryDto> categories = adminService.getAllCategoriesForAdmin(search, pageable);
+
+        return ResponseEntity.ok(ApiResponse.<Page<PostCategoryDto>>builder()
+                .success(true)
+                .message("Categories retrieved successfully")
+                .data(categories)
+                .build());
+    }
+
+    @PostMapping("/categories")
+    public ResponseEntity<ApiResponse<PostCategoryDto>> createCategory(
+            @RequestBody @Valid CategoryCreateDto categoryCreateDto) {
+
+        log.info("Creating new category: {}", categoryCreateDto.getName());
+
+        PostCategoryDto createdCategory = adminService.createCategory(categoryCreateDto);
+
+        return ResponseEntity.ok(ApiResponse.<PostCategoryDto>builder()
+                .success(true)
+                .message("Category created successfully")
+                .data(createdCategory)
+                .build());
+    }
+
+    @PutMapping("/categories/{categoryId}")
+    public ResponseEntity<ApiResponse<PostCategoryDto>> updateCategory(
+            @PathVariable Long categoryId,
+            @RequestBody @Valid CategoryUpdateDto categoryUpdateDto) {
+
+        log.info("Updating category ID: {} with data: {}", categoryId, categoryUpdateDto.getName());
+
+        PostCategoryDto updatedCategory = adminService.updateCategory(categoryId, categoryUpdateDto);
+
+        return ResponseEntity.ok(ApiResponse.<PostCategoryDto>builder()
+                .success(true)
+                .message("Category updated successfully")
+                .data(updatedCategory)
+                .build());
+    }
+
+    @DeleteMapping("/categories/{categoryId}")
+    public ResponseEntity<ApiResponse<String>> deleteCategory(@PathVariable Long categoryId) {
+
+        log.info("Deleting category ID: {}", categoryId);
+
+        adminService.deleteCategory(categoryId);
+
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .success(true)
+                .message("Category deleted successfully")
+                .data("Category and associated posts have been removed")
+                .build());
+    }
+
+    @PutMapping("/categories/{categoryId}/status")
+    public ResponseEntity<ApiResponse<String>> toggleCategoryStatus(
+            @PathVariable Long categoryId,
+            @RequestParam Boolean isActive) {
+
+        log.info("Toggling category ID: {} status to: {}", categoryId, isActive);
+
+        adminService.updateCategoryStatus(categoryId, isActive);
+
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .success(true)
+                .message("Category status updated successfully")
+                .data("Category " + (isActive ? "activated" : "deactivated"))
+                .build());
+    }
+
+    @GetMapping("/analytics/user-growth")
+    public ResponseEntity<ApiResponse<List<UserGrowthData>>> getUserGrowthReport(
+            @RequestParam(defaultValue = "30days") String timeRange) {
+        log.info("Getting user growth report for timeRange: {}", timeRange);
+
+        try {
+            List<UserGrowthData> data = analyticsService.getUserGrowthData(timeRange);
+            return ResponseEntity.ok(ApiResponse.<List<UserGrowthData>>builder()
+                    .success(true)
+                    .message("User growth report generated successfully")
+                    .data(data)
+                    .build());
+        } catch (Exception e) {
+            log.error("Error generating user growth report", e);
+            return ResponseEntity.ok(ApiResponse.<List<UserGrowthData>>builder()
+                    .success(false)
+                    .message("An unexpected error occurred")
+                    .data(null)
+                    .build());
         }
-
-        String userId = userPrincipal.getId().toString();
-        String userName = userPrincipal.getFullName();
-
-        headerAccessor.getSessionAttributes().put("userId", userId);
-        headerAccessor.getSessionAttributes().put("userName", userName);
-
-        log.info("User {} joined chat", userName);
-
-        ChatMessage chatMessage = ChatMessage.builder()
-                .id(UUID.randomUUID().toString())
-                .senderId(userId)
-                .senderName(userName)
-                .type(ChatMessage.MessageType.JOIN)
-                .timestamp(LocalDateTime.now())
-                .content(userName + " joined the chat")
-                .build();
-
-        return chatMessage;
     }
 
-    @MessageMapping("/chat.send")
-    @SendTo("/topic/public")
-    public ChatMessage sendMessage(@Payload ChatMessage chatMessage, Principal principal) {
-        UserPrincipal userPrincipal = getUserFromPrincipal(principal);
-        if (userPrincipal == null) {
-            log.warn("Unauthorized message attempt");
-            return null;
-        }
+    @GetMapping("/analytics/user-retention")
+    public ResponseEntity<ApiResponse<List<UserRetentionData>>> getUserRetentionReport(
+            @RequestParam(defaultValue = "30days") String timeRange) {
+        log.info("Getting user retention report for timeRange: {}", timeRange);
 
-        String userId = userPrincipal.getId().toString();
-        String userName = userPrincipal.getFullName();
-
-        log.info("Message from {} to public: {}", userName, chatMessage.getContent());
-
-        chatMessage.setSenderId(userId);
-        chatMessage.setSenderName(userName);
-        chatMessage.setType(ChatMessage.MessageType.CHAT);
-        chatMessage.setTimestamp(LocalDateTime.now());
-        chatMessage.setId(UUID.randomUUID().toString());
-        onlineUserService.updateLastSeen(userId);
-
-        return chatMessage;
-    }
-
-    @MessageMapping("/chat.private")
-    public void sendPrivateMessage(@Payload ChatMessage chatMessage, Principal principal) {
-        UserPrincipal userPrincipal = getUserFromPrincipal(principal);
-        if (userPrincipal == null) {
-            log.warn("Unauthorized private message attempt");
-            return;
-        }
-
-        String userId = userPrincipal.getId().toString();
-        String userName = userPrincipal.getFullName();
-        String principalName = principal.getName();
-
-        log.info("[WS] principal.getName(): {} | senderId: {} | senderName: {} | receiverId: {} | content: {}", principalName, userId, userName, chatMessage.getReceiverId(), chatMessage.getContent());
-
-        chatMessage.setSenderId(userId);
-        chatMessage.setSenderName(userName);
-        chatMessage.setType(ChatMessage.MessageType.CHAT);
-        chatMessage.setTimestamp(LocalDateTime.now());
-        chatMessage.setId(UUID.randomUUID().toString());
-
-        onlineUserService.updateLastSeen(userId);
-
-        log.info("[WS] Sending to receiverId: {} (convertAndSendToUser)", chatMessage.getReceiverId());
-        messagingTemplate.convertAndSendToUser(
-                chatMessage.getReceiverId(),
-                "/queue/private",
-                chatMessage
-        );
-
-        log.info("[WS] principal.getName() của người nhận (receiverId): {}", chatMessage.getReceiverId());
-        log.info("[WS] Sending to sender principal: {} (convertAndSendToUser)", principalName);
-        messagingTemplate.convertAndSendToUser(
-                principalName,
-                "/queue/private",
-                chatMessage
-        );
-
-        if (chatMessage.getConversationId() != null) {
-            String topic = "/topic/conversation/" + chatMessage.getConversationId();
-            log.info("[WS] Broadcasting to topic: {}", topic);
-            messagingTemplate.convertAndSend(topic, chatMessage);
+        try {
+            List<UserRetentionData> data = analyticsService.getUserRetentionData(timeRange);
+            return ResponseEntity.ok(ApiResponse.<List<UserRetentionData>>builder()
+                    .success(true)
+                    .message("User retention report generated successfully")
+                    .data(data)
+                    .build());
+        } catch (Exception e) {
+            log.error("Error generating user retention report", e);
+            return ResponseEntity.ok(ApiResponse.<List<UserRetentionData>>builder()
+                    .success(false)
+                    .message("An unexpected error occurred")
+                    .data(null)
+                    .build());
         }
     }
 
-    @MessageMapping("/chat.typing")
-    public void handleTyping(@Payload ChatMessage chatMessage, Principal principal) {
-        UserPrincipal userPrincipal = getUserFromPrincipal(principal);
-        if (userPrincipal == null) return;
+    @GetMapping("/analytics/content-stats")
+    public ResponseEntity<ApiResponse<ContentStatsData>> getContentStatsReport(
+            @RequestParam(defaultValue = "30days") String timeRange) {
+        log.info("Getting content stats report for timeRange: {}", timeRange);
 
-        String userId = userPrincipal.getId().toString();
-        String userName = userPrincipal.getFullName();
-
-        log.debug("User {} is typing to {}", userName, chatMessage.getReceiverId());
-
-        chatMessage.setSenderId(userId);
-        chatMessage.setSenderName(userName);
-        chatMessage.setType(ChatMessage.MessageType.TYPING);
-        chatMessage.setTimestamp(LocalDateTime.now());
-
-        if (chatMessage.getReceiverId() != null) {
-            messagingTemplate.convertAndSendToUser(
-                    chatMessage.getReceiverId(),
-                    "/queue/typing",
-                    chatMessage
-            );
-        } else {
-            messagingTemplate.convertAndSend("/topic/typing", chatMessage);
+        try {
+            ContentStatsData data = analyticsService.getContentStatsData(timeRange);
+            return ResponseEntity.ok(ApiResponse.<ContentStatsData>builder()
+                    .success(true)
+                    .message("Content stats report generated successfully")
+                    .data(data)
+                    .build());
+        } catch (Exception e) {
+            log.error("Error generating content stats report", e);
+            return ResponseEntity.ok(ApiResponse.<ContentStatsData>builder()
+                    .success(false)
+                    .message("An unexpected error occurred")
+                    .data(null)
+                    .build());
         }
     }
 
-    /**
-     * Xử lý khi user dừng typing
-     */
-    @MessageMapping("/chat.stop-typing")
-    public void handleStopTyping(@Payload ChatMessage chatMessage, Principal principal) {
-        UserPrincipal userPrincipal = getUserFromPrincipal(principal);
-        if (userPrincipal == null) return;
+    @GetMapping("/analytics/engagement")
+    public ResponseEntity<ApiResponse<List<EngagementData>>> getEngagementReport(
+            @RequestParam(defaultValue = "30days") String timeRange) {
+        log.info("Getting engagement report for timeRange: {}", timeRange);
 
-        String userId = userPrincipal.getId().toString();
-        String userName = userPrincipal.getFullName();
-
-        log.debug("User {} stopped typing to {}", userName, chatMessage.getReceiverId());
-
-        chatMessage.setSenderId(userId);
-        chatMessage.setSenderName(userName);
-        chatMessage.setType(ChatMessage.MessageType.STOP_TYPING);
-        chatMessage.setTimestamp(LocalDateTime.now());
-
-        if (chatMessage.getReceiverId() != null) {
-            messagingTemplate.convertAndSendToUser(
-                    chatMessage.getReceiverId(),
-                    "/queue/typing",
-                    chatMessage
-            );
-        } else {
-            messagingTemplate.convertAndSend("/topic/typing", chatMessage);
+        try {
+            List<EngagementData> data = analyticsService.getEngagementData(timeRange);
+            return ResponseEntity.ok(ApiResponse.<List<EngagementData>>builder()
+                    .success(true)
+                    .message("Engagement report generated successfully")
+                    .data(data)
+                    .build());
+        } catch (Exception e) {
+            log.error("Error generating engagement report", e);
+            return ResponseEntity.ok(ApiResponse.<List<EngagementData>>builder()
+                    .success(false)
+                    .message("An unexpected error occurred")
+                    .data(null)
+                    .build());
         }
     }
 
-    /**
-     * API endpoint để lấy danh sách user online (REST API)
-     */
-    @GetMapping("/online-users")
-    @ResponseBody
-    public OnlineUsersResponse getOnlineUsers() {
-        OnlineUsersResponse response = onlineUserService.getOnlineUsers();
+    @GetMapping("/analytics/lawyer-performance")
+    public ResponseEntity<ApiResponse<List<LawyerPerformanceData>>> getLawyerPerformanceReport(
+            @RequestParam(defaultValue = "30days") String timeRange) {
+        log.info("Getting lawyer performance report for timeRange: {}", timeRange);
 
-        log.info("Online users API called - Users: {}, Lawyers: {}, Total: {}",
-                response.getUsers().size(),
-                response.getLawyers().size(),
-                response.getTotalOnline());
-
-        response.getUsers().forEach(user ->
-                log.info(" User: id={}, name={}, type={}, online={}",
-                        user.getUserId(), user.getUserName(), user.getUserType(), user.isOnline()));
-
-        response.getLawyers().forEach(lawyer ->
-                log.info(" Lawyer: id={}, name={}, type={}, online={}",
-                        lawyer.getUserId(), lawyer.getUserName(), lawyer.getUserType(), lawyer.isOnline()));
-
-        return response;
-    }
-
-    /**
-     * Message mapping để client có thể request danh sách user online qua WebSocket
-     */
-    @MessageMapping("/users.online")
-    @SendTo("/topic/online-users")
-    public OnlineUsersResponse requestOnlineUsers() {
-        return onlineUserService.getOnlineUsers();
-    }
-
-    /**
-     * Helper method để lấy UserPrincipal từ Principal
-     */
-    private UserPrincipal getUserFromPrincipal(Principal principal) {
-        if (principal instanceof Authentication) {
-            Authentication authentication = (Authentication) principal;
-            if (authentication.getPrincipal() instanceof UserPrincipal) {
-                return (UserPrincipal) authentication.getPrincipal();
-            }
+        try {
+            List<LawyerPerformanceData> data = analyticsService.getLawyerPerformanceData(timeRange);
+            return ResponseEntity.ok(ApiResponse.<List<LawyerPerformanceData>>builder()
+                    .success(true)
+                    .message("Lawyer performance report generated successfully")
+                    .data(data)
+                    .build());
+        } catch (Exception e) {
+            log.error("Error generating lawyer performance report", e);
+            return ResponseEntity.ok(ApiResponse.<List<LawyerPerformanceData>>builder()
+                    .success(false)
+                    .message("An unexpected error occurred")
+                    .data(null)
+                    .build());
         }
-        return null;
     }
 
+    @GetMapping("/analytics/category-distribution")
+    public ResponseEntity<ApiResponse<List<CategoryDistributionData>>> getCategoryDistributionReport(
+            @RequestParam(defaultValue = "30days") String timeRange) {
+        log.info("Getting category distribution report for timeRange: {}", timeRange);
 
+        try {
+            List<CategoryDistributionData> data = analyticsService.getCategoryDistributionData(timeRange);
+            return ResponseEntity.ok(ApiResponse.<List<CategoryDistributionData>>builder()
+                    .success(true)
+                    .message("Category distribution report generated successfully")
+                    .data(data)
+                    .build());
+        } catch (Exception e) {
+            log.error("Error generating category distribution report", e);
+            return ResponseEntity.ok(ApiResponse.<List<CategoryDistributionData>>builder()
+                    .success(false)
+                    .message("An unexpected error occurred")
+                    .data(null)
+                    .build());
+        }
+    }
+
+    @GetMapping("/analytics/hourly-activity")
+    public ResponseEntity<ApiResponse<List<HourlyActivityData>>> getHourlyActivityReport(
+            @RequestParam(defaultValue = "30days") String timeRange) {
+        log.info("Getting hourly activity report for timeRange: {}", timeRange);
+
+        try {
+            List<HourlyActivityData> data = analyticsService.getHourlyActivityData(timeRange);
+            return ResponseEntity.ok(ApiResponse.<List<HourlyActivityData>>builder()
+                    .success(true)
+                    .message("Hourly activity report generated successfully")
+                    .data(data)
+                    .build());
+        } catch (Exception e) {
+            log.error("Error generating hourly activity report", e);
+            return ResponseEntity.ok(ApiResponse.<List<HourlyActivityData>>builder()
+                    .success(false)
+                    .message("An unexpected error occurred")
+                    .data(null)
+                    .build());
+        }
+    }
+
+    @GetMapping("/analytics/ai")
+    public ResponseEntity<ApiResponse<AiStatsData>> getAiReport(
+            @RequestParam(defaultValue = "30days") String timeRange) {
+        log.info("Getting AI report for timeRange: {}", timeRange);
+
+        try {
+            AiStatsData data = analyticsService.getAiStatsData(timeRange);
+            return ResponseEntity.ok(ApiResponse.<AiStatsData>builder()
+                    .success(true)
+                    .message("AI report generated successfully")
+                    .data(data)
+                    .build());
+        } catch (Exception e) {
+            log.error("Error generating AI report", e);
+            return ResponseEntity.ok(ApiResponse.<AiStatsData>builder()
+                    .success(false)
+                    .message("An unexpected error occurred")
+                    .data(null)
+                    .build());
+        }
+    }
+
+    @GetMapping("/analytics/sentiment")
+    public ResponseEntity<ApiResponse<SentimentData>> getSentimentReport(
+            @RequestParam(defaultValue = "30days") String timeRange) {
+        log.info("Getting sentiment report for timeRange: {}", timeRange);
+
+        try {
+            SentimentData data = analyticsService.getSentimentData(timeRange);
+            return ResponseEntity.ok(ApiResponse.<SentimentData>builder()
+                    .success(true)
+                    .message("Sentiment report generated successfully")
+                    .data(data)
+                    .build());
+        } catch (Exception e) {
+            log.error("Error generating sentiment report", e);
+            return ResponseEntity.ok(ApiResponse.<SentimentData>builder()
+                    .success(false)
+                    .message("An unexpected error occurred")
+                    .data(null)
+                    .build());
+        }
+    }
+
+    @GetMapping("/analytics/{reportType}/export")
+    public ResponseEntity<?> exportReport(
+            @PathVariable String reportType,
+            @RequestParam(defaultValue = "30days") String timeRange,
+            @RequestParam(defaultValue = "pdf") String format) {
+        log.info("Exporting {} report as {} for timeRange: {}", reportType, format, timeRange);
+
+        try {
+            byte[] reportBytes = analyticsService.exportReport(reportType, timeRange, format);
+
+            String filename = String.format("%s-report-%s.%s", reportType, timeRange, format);
+            String contentType = switch (format.toLowerCase()) {
+                case "pdf" -> "application/pdf";
+                case "excel" -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                case "csv" -> "text/csv";
+                default -> "application/octet-stream";
+            };
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .body(reportBytes);
+        } catch (UnsupportedOperationException e) {
+            log.warn("Export functionality not yet implemented");
+            return ResponseEntity.ok(ApiResponse.<String>builder()
+                    .success(false)
+                    .message("Export functionality is not yet implemented")
+                    .data(null)
+                    .build());
+        } catch (Exception e) {
+            log.error("Error exporting report", e);
+            return ResponseEntity.ok(ApiResponse.<String>builder()
+                    .success(false)
+                    .message("An error occurred while exporting the report")
+                    .data(null)
+                    .build());
+        }
+    }
 }
