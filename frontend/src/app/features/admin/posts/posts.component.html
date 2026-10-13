@@ -1,12 +1,458 @@
-<div class="card border-0 shadow-xs rounded-3 p-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h3 class="h5 fw-bold text-dark mb-1">Quản lý bài viết</h3>
-      <p class="text-muted small mb-0">Quản lý danh sách các câu hỏi, bài viết thảo luận trên diễn đàn pháp lý.</p>
+<div class="posts-container py-2">
+  <!-- Page Header -->
+  <div class="posts-header mb-4">
+    <h1 class="posts-title mb-1">Quản lý bài viết</h1>
+    <p class="posts-subtitle text-muted mb-0">Quản lý và kiểm duyệt tất cả bài viết trong forum</p>
+  </div>
+
+  <!-- 4 Metric Cards -->
+  <div class="row g-3 g-xl-4 mb-4">
+    <!-- Card 1: Tổng bài viết -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span class="stat-card-title fw-semibold">Tổng bài viết</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <div class="stat-card-value fw-bold fs-2">{{ totalPostsCount() }}</div>
+      </div>
+    </div>
+
+    <!-- Card 2: Bài viết hoạt động -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span class="stat-card-title fw-semibold">Bài viết hoạt động</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <div class="stat-card-value fw-bold fs-2">{{ activePostsCount() }}</div>
+      </div>
+    </div>
+
+    <!-- Card 3: Bài viết ghim -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span class="stat-card-title fw-semibold">Bài viết ghim</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="17" x2="12" y2="22"></line>
+            <path
+              d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.89A2 2 0 0 1 15 10.77V6a3 3 0 0 0-6 0v4.77a2 2 0 0 1-1.11 1.79l-1.78.89A2 2 0 0 0 5 15.24Z">
+            </path>
+          </svg>
+        </div>
+        <div class="stat-card-value fw-bold fs-2">{{ pinnedPostsCount() }}</div>
+      </div>
+    </div>
+
+    <!-- Card 4: Bài viết nổi bật -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span class="stat-card-title fw-semibold">Bài viết nổi bật</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3.5z">
+            </path>
+          </svg>
+        </div>
+        <div class="stat-card-value fw-bold fs-2">{{ hotPostsCount() }}</div>
+      </div>
     </div>
   </div>
-  <div class="text-center py-5 text-muted">
-    <i class="bi bi-file-earmark-text display-4 d-block mb-3 text-secondary"></i>
-    <p>Chức năng quản lý bài viết đang được chuẩn bị.</p>
+
+  <!-- Summary info row -->
+  <div class="posts-summary-info text-muted small mb-3">
+    Hiển thị {{ posts().length }} trong tổng số {{ totalElements() }} bài viết
   </div>
+
+  <!-- Filter Bar Card -->
+  <div class="filter-card bg-white rounded-3 p-3 border shadow-xs mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
+      <!-- Filter Toggle Button (Screenshot 1 & 3) -->
+      <app-button label="Bộ lọc" variant="outline" size="sm" iconLeft='<i class="bi bi-funnel me-1"></i>' [customStyle]="{
+          height: '40px',
+          minWidth: '85px',
+          borderRadius: '8px',
+          borderColor: isFilterOpen ? '#08544e' : '#e2e8f0',
+          color: isFilterOpen ? '#08544e' : '#334155',
+          backgroundColor: isFilterOpen ? '#f0fdfa' : '#ffffff'
+        }" (btnClick)="toggleFilter()">
+      </app-button>
+
+      <!-- Search Input -->
+      <div class="search-input-wrapper flex-grow-1 position-relative">
+        <i class="bi bi-search search-icon position-absolute text-muted"></i>
+        <input type="text" class="form-control search-input" placeholder="Tìm kiếm bài viết..."
+          [(ngModel)]="searchQuery" (keyup.enter)="applyFilter()" />
+      </div>
+
+      <!-- Apply Button -->
+      <app-button label="Áp dụng" variant="custom" size="sm" [customStyle]="{
+          backgroundColor: '#08544e',
+          backgroundColorHover: '#06423d',
+          color: '#ffffff',
+          borderRadius: '8px',
+          fontWeight: '600',
+          height: '40px',
+          minWidth: '85px',
+          boxShadow: '0 2px 6px rgba(8, 84, 78, 0.2)'
+        }" [loading]="isLoading()" (btnClick)="applyFilter()">
+      </app-button>
+    </div>
+
+    <!-- Expanded Filters Panel (Screenshot 3) -->
+    @if (isFilterOpen) {
+    <div class="filter-expanded-panel mt-3 pt-3 border-top">
+      <div class="row g-2 g-md-3">
+        <!-- 1. Trạng thái -->
+        <div class="col-6 col-md-4 col-xl-2">
+          <label class="filter-label small text-muted fw-semibold mb-1 d-block">Trạng thái</label>
+          <select class="form-select filter-select" [(ngModel)]="filterStatus" (change)="applyFilter()">
+            <option value="ALL">Tất cả</option>
+            <option value="ACTIVE">Hoạt động</option>
+            <option value="INACTIVE">Vô hiệu hóa</option>
+          </select>
+        </div>
+
+        <!-- 2. Danh mục -->
+        <div class="col-6 col-md-4 col-xl-2">
+          <label class="filter-label small text-muted fw-semibold mb-1 d-block">Danh mục</label>
+          <select class="form-select filter-select" [(ngModel)]="filterCategory"
+            (change)="applyClientSideFilters(rawPosts())">
+            <option value="ALL">Tất cả danh mục</option>
+            @for (cat of categories; track cat) {
+            <option [value]="cat">{{ cat }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- 3. Ghim -->
+        <div class="col-6 col-md-4 col-xl-2">
+          <label class="filter-label small text-muted fw-semibold mb-1 d-block">Ghim</label>
+          <select class="form-select filter-select" [(ngModel)]="filterPinned"
+            (change)="applyClientSideFilters(rawPosts())">
+            <option value="ALL">Tất cả</option>
+            <option value="PINNED">Đã ghim</option>
+            <option value="UNPINNED">Chưa ghim</option>
+          </select>
+        </div>
+
+        <!-- 4. Nổi bật -->
+        <div class="col-6 col-md-4 col-xl-2">
+          <label class="filter-label small text-muted fw-semibold mb-1 d-block">Nổi bật</label>
+          <select class="form-select filter-select" [(ngModel)]="filterHot"
+            (change)="applyClientSideFilters(rawPosts())">
+            <option value="ALL">Tất cả</option>
+            <option value="HOT">Nổi bật</option>
+            <option value="NOT_HOT">Không nổi bật</option>
+          </select>
+        </div>
+
+        <!-- 5. Vai trò tác giả -->
+        <div class="col-6 col-md-4 col-xl-2">
+          <label class="filter-label small text-muted fw-semibold mb-1 d-block">Vai trò tác giả</label>
+          <select class="form-select filter-select" [(ngModel)]="filterAuthorRole"
+            (change)="applyClientSideFilters(rawPosts())">
+            <option value="ALL">Tất cả vai trò</option>
+            <option value="USER">USER</option>
+            <option value="LAWYER">LAWYER</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </div>
+
+        <!-- 6. Báo cáo vi phạm -->
+        <div class="col-6 col-md-4 col-xl-2">
+          <label class="filter-label small text-muted fw-semibold mb-1 d-block">Báo cáo vi phạm</label>
+          <select class="form-select filter-select" [(ngModel)]="filterReported"
+            (change)="applyClientSideFilters(rawPosts())">
+            <option value="ALL">Tất cả</option>
+            <option value="REPORTED">Có vi phạm</option>
+            <option value="NOT_REPORTED">Không vi phạm</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+
+  <!-- Error State -->
+  @if (hasError()) {
+  <div class="error-state-card bg-white rounded-4 border p-5 text-center my-4 shadow-xs">
+    <div class="error-icon-wrapper mb-3 mx-auto">
+      <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
+    </div>
+    <h3 class="h5 fw-bold text-gray-900 mb-2">Không thể tải danh sách bài viết</h3>
+    <p class="text-danger small mb-4">{{ errorMessage() }}</p>
+    <app-button label="Thử lại" variant="primary" size="sm" [loading]="isLoading()"
+      (btnClick)="loadPosts(currentPage())">
+    </app-button>
+  </div>
+  } @else {
+  <!-- Posts List Table Card -->
+  <div class="posts-list-card bg-white rounded-3 border shadow-xs p-3 p-md-4">
+    <div class="mb-3">
+      <h2 class="card-title fw-bold text-gray-900 mb-1 fs-5">Danh sách bài viết</h2>
+      <p class="text-muted small mb-0">Quản lý và kiểm duyệt tất cả bài viết trong hệ thống</p>
+    </div>
+
+    <!-- 1. Tiêu đề Column Template -->
+    <ng-template #titleTpl let-post="row">
+      <div class="d-flex flex-column align-items-start gap-1 py-1">
+        <span class="post-table-title fw-bold text-dark text-break" [title]="post['title']">
+          {{ post['title'] }}
+        </span>
+        <div class="d-flex align-items-center gap-1 flex-wrap mt-1" *ngIf="post['isPinned'] || post['isHot']">
+          <span *ngIf="post['isPinned']" class="badge-post-tag badge-pinned">
+            <i class="bi bi-pin-angle"></i> Được ghim
+          </span>
+          <span *ngIf="post['isHot']" class="badge-post-tag badge-hot">
+            <i class="bi bi-fire"></i> Nổi bật
+          </span>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- 2. Tác giả Column Template -->
+    <ng-template #authorTpl let-post="row">
+      <div class="d-flex align-items-center gap-2">
+        <div class="author-avatar-circle">
+          @if (post['author']?.avatar) {
+          <img [src]="post['author']?.avatar" [alt]="post['author']?.fullName" class="avatar-img" />
+          } @else {
+          <span>{{ getInitials(post['author']?.fullName) }}</span>
+          }
+        </div>
+        <div class="d-flex flex-column text-start">
+          <span class="author-name fw-semibold text-dark text-truncate" style="max-width: 95px;"
+            [title]="post['author']?.fullName">
+            {{ post['author']?.fullName || 'Người dùng' }}
+          </span>
+          <span class="author-role text-muted small fw-bold">
+            {{ post['author']?.role || 'USER' }}
+          </span>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- 3. Danh mục Column Template -->
+    <ng-template #categoryTpl let-post="row">
+      <span class="badge-category-pill">
+        {{ post['categoryName'] || 'Chung' }}
+      </span>
+    </ng-template>
+
+    <!-- 4. Thống kê Column Template -->
+    <ng-template #statsTpl let-post="row">
+      <div class="d-flex flex-column gap-1 text-muted small">
+        <div class="d-flex align-items-center gap-1">
+          <i class="bi bi-eye"></i>
+          <span>{{ post['views'] || 0 }}</span>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <i class="bi bi-chat-square-text"></i>
+          <span>{{ post['replyCount'] || 0 }}</span>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- 5. Trạng thái Column Template -->
+    <ng-template #statusTpl let-post="row">
+      @if (post['isActive']) {
+      <span class="badge-status-pill badge-active">Hoạt động</span>
+      } @else {
+      <span class="badge-status-pill badge-inactive">Vô hiệu hóa</span>
+      }
+    </ng-template>
+
+    <!-- 6. Ngày tạo Column Template -->
+    <ng-template #createdAtTpl let-post="row">
+      <div class="d-flex align-items-center gap-1 text-muted small">
+        <i class="bi bi-calendar3"></i>
+        <span>{{ timeAgo(post['createdAt']) }}</span>
+      </div>
+    </ng-template>
+
+    <!-- 7. Hành động Column Template (5 Actions) -->
+    <ng-template #actionsTpl let-post="row">
+      <div class="action-buttons-group d-flex align-items-center justify-content-center gap-2">
+        <!-- 1. Xem chi tiết -->
+        <button type="button" class="btn-action-icon" title="Xem chi tiết" (click)="viewPostDetails(post, $event)">
+          <i class="bi bi-eye"></i>
+        </button>
+
+        <!-- 2. Vô hiệu hóa / Kích hoạt -->
+        <button type="button" class="btn-action-icon"
+          [title]="post['isActive'] ? 'Vô hiệu hóa bài viết' : 'Kích hoạt bài viết'"
+          (click)="togglePostStatus(post, $event)">
+          <i class="bi fs-5" [class.bi-toggle-on]="post['isActive']" [class.text-success]="post['isActive']"
+            [class.bi-toggle-off]="!post['isActive']" [class.text-muted]="!post['isActive']">
+          </i>
+        </button>
+
+        <!-- 3. Ghim bài viết -->
+        <button type="button" class="btn-action-icon" [title]="post['isPinned'] ? 'Bỏ ghim bài viết' : 'Ghim bài viết'"
+          (click)="togglePostPin(post, $event)">
+          <i class="bi" [class.bi-pin-angle-fill]="post['isPinned']" [class.text-primary]="post['isPinned']"
+            [class.bi-pin-angle]="!post['isPinned']">
+          </i>
+        </button>
+
+        <!-- 4. Đánh dấu nổi bật -->
+        <button type="button" class="btn-action-icon"
+          [title]="post['isHot'] ? 'Bỏ đánh dấu nổi bật' : 'Đánh dấu nổi bật'" (click)="togglePostHot(post, $event)">
+          <i class="bi" [class.bi-fire]="true" [class.text-danger]="post['isHot']" [class.text-muted]="!post['isHot']">
+          </i>
+        </button>
+
+        <!-- 5. Xóa bài viết -->
+        <button type="button" class="btn-action-icon btn-action-delete" title="Xóa bài viết"
+          (click)="openDeleteConfirm(post, $event)">
+          <i class="bi bi-trash3 text-danger"></i>
+        </button>
+      </div>
+    </ng-template>
+
+    <!-- Custom Data Table Component -->
+    <tellerapp-custom-data-table [columns]="tableColumns" [data]="posts()" [loading]="isLoading()" [bordered]="false"
+      [striped]="false" [selectable]="false" [showIndex]="false" emptyMode="no-results" [pagination]="tablePagination()"
+      [tableStyles]="tableStyles" [cellTemplates]="{
+        title: titleTpl,
+        author: authorTpl,
+        categoryName: categoryTpl,
+        stats: statsTpl,
+        isActive: statusTpl,
+        createdAt: createdAtTpl,
+        actions: actionsTpl
+      }" (pageChange)="onPageChange($event)">
+    </tellerapp-custom-data-table>
+  </div>
+  }
 </div>
+
+<!-- ========================================== -->
+<!-- Modal Chi tiết bài viết  -->
+<!-- ========================================== -->
+<lib-modal-custom [isOpen]="isDetailModalOpen()" [title]="''" [showCloseIcon]="false" [showFooter]="false" size="lg"
+  class="post-detail-modal" (closeDialog)="closeDetailModal()">
+
+  @if (selectedPost(); as post) {
+  <div class="post-modal-body">
+    <!-- Modal Header matching Screenshot 4 -->
+    <div class="d-flex align-items-start justify-content-between pb-3 border-bottom mb-3">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-file-earmark-text fs-4 text-dark"></i>
+        <div>
+          <h3 class="modal-title-custom fw-bold mb-0">Chi tiết bài viết</h3>
+          <p class="modal-subtitle-custom text-muted mb-0 small">Xem nội dung chi tiết và thông tin bài viết</p>
+        </div>
+      </div>
+      <button type="button" class="btn-modal-close" (click)="closeDetailModal()" aria-label="Đóng">
+        <i class="bi bi-x-circle fs-4 text-muted"></i>
+      </button>
+    </div>
+
+    <!-- Post Title -->
+    <h2 class="post-detail-title fw-bold text-dark mt-3 mb-2">{{ post.title }}</h2>
+
+    <!-- Tags Row: Category, Status, Pinned, Hot -->
+    <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+      <span class="badge-category-pill">{{ post.categoryName }}</span>
+      <span class="badge-status-dark">{{ post.isActive ? 'Hoạt động' : 'Vô hiệu hóa' }}</span>
+      @if (post.isPinned) {
+      <span class="badge-post-tag badge-pinned">
+        <i class="bi bi-pin-angle"></i> Được ghim
+      </span>
+      }
+      @if (post.isHot) {
+      <span class="badge-post-tag badge-hot">
+        <i class="bi bi-fire"></i> Nổi bật
+      </span>
+      }
+    </div>
+
+    <!-- Meta row: Author + Date + Views + Replies -->
+    <div class="post-meta-row d-flex align-items-center gap-3 text-muted small mb-4 flex-wrap">
+      <div class="d-flex align-items-center gap-2">
+        <div class="author-avatar-circle small-avatar rounded-circle">
+          @if (post.author.avatar) {
+          <img [src]="post.author.avatar" [alt]="post.author.fullName" class="avatar-img rounded-circle" />
+          } @else {
+          <span>{{ getInitials(post.author.fullName) }}</span>
+          }
+        </div>
+        <span>Bởi <strong>{{ post.author.fullName || 'Người dùng' }}</strong></span>
+      </div>
+      <div class="d-flex align-items-center gap-1">
+        <i class="bi bi-calendar3"></i>
+        <span>{{ timeAgo(post.createdAt) }}</span>
+      </div>
+      <div class="d-flex align-items-center gap-1">
+        <i class="bi bi-eye"></i>
+        <span>{{ post.views || 0 }} lượt xem</span>
+      </div>
+      <div class="d-flex align-items-center gap-1">
+        <i class="bi bi-chat-square-text"></i>
+        <span>{{ post.replyCount || 0 }} phản hồi</span>
+      </div>
+    </div>
+
+    <!-- Post Content Box -->
+    <div class="post-content-box p-4 rounded-4 mb-4">
+      <p class="post-content-text mb-0">{{ post.content }}</p>
+    </div>
+
+    <!-- Author Info Section -->
+    <div class="author-info-section pt-2">
+      <h4 class="section-title fw-bold text-dark fs-6 mb-3">Thông tin tác giả</h4>
+      <div class="author-info-card d-flex align-items-center gap-3 p-3 rounded-3">
+        <div class="author-info-avatar">
+          @if (post.author.avatar) {
+          <img [src]="post.author.avatar" [alt]="post.author.fullName" class="avatar-img" />
+          } @else {
+          <span>{{ getInitials(post.author.fullName) }}</span>
+          }
+        </div>
+        <div class="d-flex flex-column flex-grow-1 align-items-start gap-1">
+          <span class="author-card-name fw-bold text-dark">{{ post.author.fullName || 'Người dùng' }}</span>
+          <span class="author-card-email text-muted small">{{ post.author.email }}</span>
+          <span class="badge-role-user px-3 py-1 rounded-pill small fw-bold mt-1">
+            {{ post.author.role || 'USER' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</lib-modal-custom>
+
+<!-- ========================================== -->
+<!-- Confirm Delete Modal                      -->
+<!-- ========================================== -->
+@if (showDeleteModal() && targetDeletePost(); as deleteTarget) {
+<tellerapp-confirm-popup title="Xác nhận xóa bài viết"
+  [prompt]="'Bạn có chắc chắn muốn xóa vĩnh viễn bài viết: &quot;' + deleteTarget.title + '&quot; không? Hành động này không thể hoàn tác.'"
+  confirmButtonMode="delete" confirmButtonLabel="Xóa bài viết" cancelButtonLabel="Hủy" (confirm)="confirmDeletePost()"
+  (cancel)="closeDeleteModal()" (closed)="closeDeleteModal()">
+</tellerapp-confirm-popup>
+}
+
+<!-- ========================================== -->
+<!-- Toast Message Component                  -->
+<!-- ========================================== -->
+<app-toast-message [visible]="toastVisible" [type]="toastType" [title]="toastTitle" [message]="toastMessage"
+  [duration]="3" (close)="toastVisible = false">
+</app-toast-message>
