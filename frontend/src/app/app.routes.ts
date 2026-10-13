@@ -13,6 +13,8 @@ import { MessageComponent } from './features/message/message.component';
 
 import { PostDetailComponent } from './features/post/post-detail/post-detail.component';
 
+import { adminGuard } from './core/guards/admin.guard';
+
 export const routes: Routes = [
   {
     path: '',
@@ -37,6 +39,11 @@ export const routes: Routes = [
       { path: 'message', component: MessageComponent },
       { path: 'messages', redirectTo: 'message' },
     ]
+  },
+  {
+    path: 'admin',
+    canActivate: [adminGuard],
+    loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
   },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },

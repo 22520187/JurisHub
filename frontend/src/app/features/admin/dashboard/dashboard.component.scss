@@ -1,0 +1,49 @@
+.dashboard-container {
+  min-height: 400px;
+}
+
+.error-state-view {
+  min-height: 380px;
+
+  .error-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .error-text {
+    font-size: 1rem;
+  }
+
+  .btn-retry {
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+}
+
+.stat-card {
+  transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .stat-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+
+    &.badge-success {
+      background-color: #ecfdf5;
+      color: #059669;
+    }
+
+    &.badge-warning {
+      background-color: #fff1f2;
+      color: #e11d48;
+    }
+  }
+}

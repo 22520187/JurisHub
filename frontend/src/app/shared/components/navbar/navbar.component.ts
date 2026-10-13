@@ -17,6 +17,10 @@ export class NavbarComponent {
 
   isDropdownOpen: boolean = false;
 
+  get isAdmin(): boolean {
+    return this.authService.currentUser()?.role?.toLowerCase() === 'admin';
+  }
+
   toggleDropdown(event?: MouseEvent): void {
     if (event) {
       event.stopPropagation();
