@@ -1,12 +1,293 @@
-<div class="card border-0 shadow-xs rounded-3 p-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h3 class="h5 fw-bold text-dark mb-1">Quản lý người dùng</h3>
-      <p class="text-muted small mb-0">Quản lý danh sách tài khoản, phân quyền và trạng thái người dùng trong hệ thống.</p>
+<div class="users-container py-2">
+  <!-- Page Header -->
+  <div class="users-header mb-4">
+    <h1 class="users-title mb-1">Quản lý người dùng</h1>
+    <p class="users-subtitle text-muted mb-0">Quản lý tất cả người dùng trong hệ thống</p>
+  </div>
+
+  <!-- 4 Metric Cards (Row of 4) -->
+  <div class="row g-3 g-xl-4 mb-4">
+    <!-- Card 1: Tổng người dùng -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span class="stat-card-title fw-semibold">Tổng người dùng</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="stat-card-value fw-bold fs-2">{{ totalUsersCount() }}</div>
+      </div>
+    </div>
+
+    <!-- Card 2: Người dùng hoạt động -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span class="stat-card-title fw-semibold">Người dùng hoạt động</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <polyline points="16 11 18 13 22 9"></polyline>
+          </svg>
+        </div>
+        <div class="stat-card-value fw-bold fs-2">{{ activeUsersCount() }}</div>
+      </div>
+    </div>
+
+    <!-- Card 3: Luật sư -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span class="stat-card-title fw-semibold">Luật sư</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path>
+            <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path>
+            <path d="M7 21h10"></path>
+            <path d="M12 3v18"></path>
+            <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path>
+          </svg>
+        </div>
+        <div class="stat-card-value fw-bold fs-2">{{ lawyersCount() }}</div>
+      </div>
+    </div>
+
+    <!-- Card 4: Bị vô hiệu hóa -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span class="stat-card-title fw-semibold">Bị vô hiệu hóa</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <line x1="17" y1="8" x2="22" y2="13"></line>
+            <line x1="22" y1="8" x2="17" y2="13"></line>
+          </svg>
+        </div>
+        <div class="stat-card-value fw-bold fs-2">{{ disabledUsersCount() }}</div>
+      </div>
     </div>
   </div>
-  <div class="text-center py-5 text-muted">
-    <i class="bi bi-people display-4 d-block mb-3 text-secondary"></i>
-    <p>Chức năng quản lý người dùng đang được chuẩn bị.</p>
+
+  <!-- Filter Bar Card -->
+  <div class="filter-card bg-white rounded-3 p-3 border shadow-xs mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
+      <!-- Filter Button (Screenshot 1 & 3) -->
+      <app-button label="Bộ lọc" variant="outline" size="sm" iconLeft='<i class="bi bi-funnel me-1"></i>' [customStyle]="{
+          height: '42px',
+          minWidth: '95px',
+          borderRadius: '8px',
+          borderColor: isFilterDropdownOpen ? '#08544e' : '#e2e8f0',
+          color: isFilterDropdownOpen ? '#08544e' : '#334155',
+          backgroundColor: isFilterDropdownOpen ? '#f0fdfa' : '#ffffff'
+        }" (btnClick)="toggleFilterDropdown($event)">
+      </app-button>
+
+      <!-- Search Input -->
+      <div class="search-input-wrapper flex-grow-1 position-relative">
+        <i class="bi bi-search search-icon position-absolute text-muted"></i>
+        <input type="text" class="form-control search-input" placeholder="Tìm kiếm theo tên hoặc email..."
+          [(ngModel)]="searchQuery" (keyup.enter)="applyFilter()" />
+      </div>
+
+      <!-- Apply Button -->
+      <app-button label="Áp dụng" variant="custom" size="sm" [customStyle]="{
+          backgroundColor: '#08544e',
+          backgroundColorHover: '#06423d',
+          color: '#ffffff',
+          borderRadius: '8px',
+          fontWeight: '600',
+          height: '42px',
+          minWidth: '95px',
+          boxShadow: '0 2px 6px rgba(8, 84, 78, 0.2)'
+        }" [loading]="isLoading()" (btnClick)="applyFilter()">
+      </app-button>
+    </div>
+
+    <!-- Expanded Role Filter Panel (Matching Screenshot 3) -->
+    @if (isFilterDropdownOpen) {
+    <div class="filter-expanded-panel mt-3 pt-3 border-top" (click)="$event.stopPropagation()">
+      <div class="row">
+        <div class="col-12 col-md-5 col-lg-4 col-xl-3">
+          <label class="filter-label small text-muted fw-semibold mb-2 d-block">Vai trò</label>
+          <div class="role-select-box position-relative">
+            <button type="button"
+              class="role-select-btn form-select text-start d-flex align-items-center justify-content-between w-100"
+              (click)="toggleRoleMenu($event)">
+              <span class="text-truncate">{{ getRoleLabel(selectedRole) }}</span>
+            </button>
+
+            @if (isRoleMenuOpen) {
+            <div
+              class="role-menu-options bg-white rounded-2 border shadow-lg mt-1 position-absolute start-0 w-100 z-3 py-1">
+              @for (opt of roleOptions; track opt.value) {
+              <button type="button"
+                class="role-option-item w-100 text-start d-flex align-items-center justify-content-between px-3 py-2 border-0 bg-transparent"
+                [class.active]="selectedRole === opt.value" (click)="selectRole(opt.value)">
+                <span class="small">{{ opt.label }}</span>
+                @if (selectedRole === opt.value) {
+                <i class="bi bi-check2 text-primary fw-bold"></i>
+                }
+              </button>
+              }
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    }
   </div>
+
+  @if (hasError()) {
+  <!-- Error State -->
+  <div class="error-state-card bg-white rounded-4 border p-5 text-center my-4 shadow-xs">
+    <div class="error-icon-wrapper mb-3 mx-auto">
+      <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
+    </div>
+    <h3 class="h5 fw-bold text-gray-900 mb-2">Không thể tải danh sách người dùng</h3>
+    <p class="text-danger small mb-4">{{ errorMessage() || 'Đã có lỗi xảy ra khi kết nối máy chủ.' }}</p>
+    <app-button label="Thử lại" variant="primary" size="sm" [loading]="isLoading()"
+      (btnClick)="loadUsers(currentPage())">
+    </app-button>
+  </div>
+  } @else {
+  <!-- User List Table Card using tellerapp-custom-data-table -->
+  <div class="user-list-card bg-white rounded-3 border shadow-xs p-3 p-md-4">
+    <h2 class="card-title fw-bold text-gray-900 mb-3 fs-5">Danh sách người dùng</h2>
+
+    <!-- Cell Templates for tellerapp-custom-data-table -->
+    <ng-template #userTpl let-user="row">
+      <div class="d-inline-flex align-items-center gap-3 text-start">
+        <div class="user-avatar-circle d-flex align-items-center justify-content-center">
+          @if (user['avatar']) {
+          <img [src]="user['avatar']" [alt]="user['fullName']" class="avatar-img" />
+          } @else {
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          }
+        </div>
+        <div class="d-flex flex-column">
+          <span class="user-full-name fw-semibold text-gray-900">{{ user['fullName'] || 'Người dùng' }}</span>
+          <span class="user-email text-muted small">{{ user['email'] }}</span>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #roleTpl let-user="row">
+      @switch (user['role']?.toUpperCase()) {
+      @case ('ADMIN') {
+      <div class="d-inline-flex align-items-center gap-2">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+        <span class="badge-role badge-role-admin">Admin</span>
+      </div>
+      }
+      @case ('LAWYER') {
+      <div class="d-inline-flex align-items-center gap-2">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+          <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path>
+          <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path>
+          <path d="M7 21h10"></path>
+          <path d="M12 3v18"></path>
+          <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path>
+        </svg>
+        <span class="badge-role badge-role-lawyer">Luật sư</span>
+      </div>
+      }
+      @default {
+      <div class="d-inline-flex align-items-center gap-2">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2">
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+        <span class="badge-role badge-role-user">Người dùng</span>
+      </div>
+      }
+      }
+    </ng-template>
+
+    <ng-template #statusTpl let-user="row">
+      @if (user['isEnabled']) {
+      <span class="badge-status badge-status-active">Hoạt động</span>
+      } @else {
+      <span class="badge-status badge-status-disabled">Vô hiệu hóa</span>
+      }
+    </ng-template>
+
+    <ng-template #createdAtTpl let-user="row">
+      <span class="text-muted small">{{ formatDate(user['createdAt']) }}</span>
+    </ng-template>
+
+    <ng-template #actionsTpl let-user="row">
+      <div class="position-relative d-inline-block">
+        <button type="button" class="btn-action-more" (click)="toggleActionMenu(user['id'], $event)"
+          aria-label="Thao tác">
+          <i class="bi bi-three-dots"></i>
+        </button>
+
+        <!-- Action Popup Menu -->
+        @if (activeActionUserId === user['id']) {
+        <div class="action-dropdown-menu position-absolute end-0 mt-1 bg-white rounded-2 border shadow-lg py-1 z-3"
+          (click)="$event.stopPropagation()">
+          @if (user['isEnabled']) {
+          <button type="button"
+            class="action-item action-item-danger w-100 text-start d-flex align-items-center gap-2 px-3 py-2 border-0 bg-transparent text-danger"
+            (click)="openStatusConfirm(user, false)">
+            <i class="bi bi-slash-circle"></i>
+            <span>Vô hiệu hóa</span>
+          </button>
+          } @else {
+          <button type="button"
+            class="action-item action-item-success w-100 text-start d-flex align-items-center gap-2 px-3 py-2 border-0 bg-transparent text-success"
+            (click)="openStatusConfirm(user, true)">
+            <i class="bi bi-check-circle"></i>
+            <span>Kích hoạt</span>
+          </button>
+          }
+        </div>
+        }
+      </div>
+    </ng-template>
+
+    <!-- custom-data-table Component -->
+    <tellerapp-custom-data-table [columns]="tableColumns" [data]="users()" [loading]="isLoading()" [bordered]="false"
+      [striped]="false" [selectable]="false" [showIndex]="false" emptyMode="no-results" [pagination]="tablePagination()"
+      [tableStyles]="tableStyles" [cellTemplates]="{
+          user: userTpl,
+          role: roleTpl,
+          isEnabled: statusTpl,
+          createdAt: createdAtTpl,
+          actions: actionsTpl
+        }" (pageChange)="onPageChange($event)">
+    </tellerapp-custom-data-table>
+  </div>
+  }
 </div>
+
+<!-- Confirm Modal using existing tellerapp-confirm-popup -->
+@if (showStatusModal && targetUser) {
+<tellerapp-confirm-popup [title]="targetNewStatus ? 'Kích hoạt tài khoản' : 'Vô hiệu hóa tài khoản'"
+  [prompt]="targetNewStatus
+      ? 'Bạn có chắc chắn muốn kích hoạt lại tài khoản ' + (targetUser.fullName || targetUser.email) + ' không?'
+      : 'Bạn có chắc chắn muốn vô hiệu hóa tài khoản ' + (targetUser.fullName || targetUser.email) + ' không? Người dùng này sẽ không thể đăng nhập vào hệ thống.'"
+  [confirmButtonMode]="targetNewStatus ? 'confirm' : 'delete'"
+  [confirmButtonLabel]="targetNewStatus ? 'Kích hoạt' : 'Vô hiệu hóa'" cancelButtonLabel="Hủy"
+  (confirm)="confirmUpdateStatus()" (cancel)="closeStatusModal()" (closed)="closeStatusModal()">
+</tellerapp-confirm-popup>
+}
+
+<!-- Toast Message using existing app-toast-message -->
+<app-toast-message [visible]="toastVisible" [type]="toastType" [title]="toastTitle" [message]="toastMessage"
+  [duration]="3" (close)="toastVisible = false">
+</app-toast-message>
