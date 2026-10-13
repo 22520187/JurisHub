@@ -24,7 +24,6 @@ interface NavItem {
     CommonModule,
     RouterModule,
     ButtonComponent,
-    BadgeComponent,
     ConfirmPopupComponent
   ],
   templateUrl: './admin-sidebar.component.html',

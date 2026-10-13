@@ -1,51 +1,258 @@
-<div class="dashboard-container">
+<div class="dashboard-container py-2">
+  <!-- Top Header -->
+  <div class="dashboard-header d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
+    <div>
+      <h1 class="dashboard-title mb-1">Dashboard</h1>
+      <p class="dashboard-subtitle text-muted mb-0">Tổng quan hệ thống Legal Connect</p>
+    </div>
+    <div>
+      <app-button
+        label="Làm mới"
+        variant="custom"
+        size="sm"
+        [customStyle]="{
+          backgroundColor: '#08544e',
+          backgroundColorHover: '#06423d',
+          color: '#ffffff',
+          borderRadius: '8px',
+          fontWeight: '600',
+          height: '38px',
+          minWidth: '100px',
+          boxShadow: '0 2px 6px rgba(8, 84, 78, 0.2)'
+        }"
+        iconLeft='<i class="bi bi-arrow-clockwise me-1"></i>'
+        [loading]="isLoading()"
+        (btnClick)="loadData()">
+      </app-button>
+    </div>
+  </div>
+
   @if (hasError()) {
-    <!-- Error Retry State matching screenshot exactly if error triggered -->
-    <div class="error-state-view d-flex flex-column align-items-center justify-content-center py-5">
-      <div class="error-icon mb-3">
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
-          <line x1="12" y1="9" x2="12" y2="13"></line>
-          <line x1="12" y1="17" x2="12.01" y2="17"></line>
-        </svg>
+    <!-- Error State -->
+    <div class="error-state-card bg-white rounded-4 border p-5 text-center my-4 shadow-xs">
+      <div class="error-icon-wrapper mb-3 mx-auto">
+        <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
       </div>
-      <p class="error-text text-danger fw-semibold mb-3">{{ errorMessage() }}</p>
+      <h3 class="h5 fw-bold text-gray-900 mb-2">Không thể tải dữ liệu thống kê</h3>
+      <p class="text-danger small mb-4">{{ errorMessage() || 'Đã có lỗi xảy ra khi kết nối máy chủ.' }}</p>
       <app-button
         label="Thử lại"
-        variant="outline"
+        variant="primary"
         size="sm"
         [loading]="isLoading()"
-        (btnClick)="onRetry()"
-      ></app-button>
+        (btnClick)="onRetry()">
+      </app-button>
     </div>
   } @else {
-    <!-- Dashboard Stats Grid -->
-    <div class="row g-4 mb-4">
-      @for (stat of stats; track stat.title) {
-        <div class="col-12 col-sm-6 col-xl-3">
-          <div class="stat-card p-4 rounded-3 border bg-white shadow-xs">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <span class="stat-title text-muted small fw-medium">{{ stat.title }}</span>
-              <span class="stat-badge" [class.badge-success]="stat.isPositive" [class.badge-warning]="!stat.isPositive">
-                {{ stat.change }}
-              </span>
-            </div>
-            <div class="stat-value fw-bold text-dark fs-3">{{ stat.value }}</div>
+    <!-- 8 Metric Cards (4x2 Grid) -->
+    <div class="row g-3 g-xl-4 mb-4">
+      <!-- Card 1: Tổng người dùng -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="dashboard-stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <span class="stat-card-title fw-semibold">Tổng người dùng</span>
+            <i class="bi bi-people stat-card-icon text-muted fs-5"></i>
           </div>
+          <div class="stat-card-value fw-bold fs-2 mb-1">{{ stats()?.totalUsers ?? 0 }}</div>
+          <div class="stat-card-sub text-muted small">+{{ stats()?.newUsersThisMonth ?? 0 }} hôm nay</div>
         </div>
-      }
+      </div>
+
+      <!-- Card 2: Tổng bài viết -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="dashboard-stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <span class="stat-card-title fw-semibold">Tổng bài viết</span>
+            <i class="bi bi-file-earmark-text stat-card-icon text-muted fs-5"></i>
+          </div>
+          <div class="stat-card-value fw-bold fs-2 mb-1">{{ stats()?.totalPosts ?? 0 }}</div>
+          <div class="stat-card-sub text-muted small">+{{ stats()?.newPostsThisMonth ?? 0 }} hôm nay</div>
+        </div>
+      </div>
+
+      <!-- Card 3: Luật sư -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="dashboard-stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <span class="stat-card-title fw-semibold">Luật sư</span>
+            <i class="bi bi-award stat-card-icon text-muted fs-5"></i>
+          </div>
+          <div class="stat-card-value fw-bold fs-2 mb-1">{{ stats()?.totalLawyers ?? 0 }}</div>
+          <div class="stat-card-sub text-muted small">+{{ stats()?.newLawyersThisMonth ?? 0 }} hôm nay</div>
+        </div>
+      </div>
+
+      <!-- Card 4: Cuộc trò chuyện -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="dashboard-stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <span class="stat-card-title fw-semibold">Cuộc trò chuyện</span>
+            <i class="bi bi-folder2 stat-card-icon text-muted fs-5"></i>
+          </div>
+          <div class="stat-card-value fw-bold fs-2 mb-1">{{ stats()?.totalConversations ?? 0 }}</div>
+          <div class="stat-card-sub text-muted small">Cuộc trò chuyện hoạt động</div>
+        </div>
+      </div>
+
+      <!-- Card 5: Đơn chờ duyệt -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="dashboard-stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <span class="stat-card-title fw-semibold">Đơn chờ duyệt</span>
+            <i class="bi bi-clock stat-card-icon text-muted fs-5"></i>
+          </div>
+          <div class="stat-card-value fw-bold fs-2 mb-1">{{ stats()?.pendingApplications ?? 0 }}</div>
+          <div class="stat-card-sub text-muted small">Đơn xin làm luật sư</div>
+        </div>
+      </div>
+
+      <!-- Card 6: Người dùng hoạt động -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="dashboard-stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <span class="stat-card-title fw-semibold">Người dùng hoạt động</span>
+            <i class="bi bi-person-check stat-card-icon text-muted fs-5"></i>
+          </div>
+          <div class="stat-card-value fw-bold fs-2 mb-1">{{ stats()?.activeUsers ?? (stats()?.totalUsers ?? 0) }}</div>
+          <div class="stat-card-sub text-muted small">Tổng người dùng</div>
+        </div>
+      </div>
+
+      <!-- Card 7: Bài viết -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="dashboard-stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <span class="stat-card-title fw-semibold">Bài viết</span>
+            <i class="bi bi-shield-exclamation stat-card-icon text-muted fs-5"></i>
+          </div>
+          <div class="stat-card-value fw-bold fs-2 mb-1">{{ stats()?.totalPosts ?? 0 }}</div>
+          <div class="stat-card-sub text-muted small">Tổng bài viết trong hệ thống</div>
+        </div>
+      </div>
+
+      <!-- Card 8: Cuộc trò chuyện -->
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="dashboard-stat-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <span class="stat-card-title fw-semibold">Cuộc trò chuyện</span>
+            <i class="bi bi-chat-square-text stat-card-icon text-muted fs-5"></i>
+          </div>
+          <div class="stat-card-value fw-bold fs-2 mb-1">{{ stats()?.totalConversations ?? 0 }}</div>
+          <div class="stat-card-sub text-muted small">Cuộc trò chuyện hoạt động</div>
+        </div>
+      </div>
     </div>
 
-    <!-- Quick Action / Welcome Banner -->
-    <div class="welcome-card p-4 rounded-3 border bg-white shadow-xs mb-4">
-      <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-        <div>
-          <h2 class="h5 fw-bold text-dark mb-1">Chào mừng quay trở lại, Quản trị viên!</h2>
-          <p class="text-muted small mb-0">Hệ thống đang hoạt động bình thường. Bạn có thể kiểm tra danh sách luật sư mới chờ xác thực hoặc duyệt báo cáo bài viết.</p>
+    <!-- Charts Row: Tăng trưởng theo tháng & Hoạt động theo tuần -->
+    <div class="row g-3 g-xl-4 mb-4">
+      <!-- Line Chart -->
+      <div class="col-12 col-xl-6">
+        <div class="dashboard-chart-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100 d-flex flex-column">
+          <div class="chart-card-header mb-3">
+            <h2 class="chart-card-title fw-bold text-gray-900 mb-1">Tăng trưởng theo tháng</h2>
+            <p class="chart-card-subtitle text-muted small mb-0">Số lượng người dùng, luật sư và bài viết mới theo tháng</p>
+          </div>
+          <div class="chart-wrapper flex-grow-1 position-relative" style="min-height: 280px;">
+            @if (lineChartData.datasets.length > 0) {
+              <canvas
+                baseChart
+                [data]="lineChartData"
+                [options]="lineChartOptions"
+                type="line">
+              </canvas>
+            } @else {
+              <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted py-5">
+                <i class="bi bi-graph-up fs-2 mb-2 text-secondary opacity-50"></i>
+                <span class="small">Chưa có dữ liệu tăng trưởng</span>
+              </div>
+            }
+          </div>
         </div>
-        <div class="d-flex gap-2">
-          <a routerLink="/admin/lawyers" class="btn btn-sm btn-outline-primary">Duyệt luật sư</a>
-          <a routerLink="/admin/violations" class="btn btn-sm btn-primary">Xem báo cáo</a>
+      </div>
+
+      <!-- Bar Chart -->
+      <div class="col-12 col-xl-6">
+        <div class="dashboard-chart-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100 d-flex flex-column">
+          <div class="chart-card-header mb-3">
+            <h2 class="chart-card-title fw-bold text-gray-900 mb-1">Hoạt động theo tuần</h2>
+            <p class="chart-card-subtitle text-muted small mb-0">Bài viết, trả lời và lượt xem trong tuần</p>
+          </div>
+          <div class="chart-wrapper flex-grow-1 position-relative" style="min-height: 280px;">
+            @if (barChartData.datasets.length > 0) {
+              <canvas
+                baseChart
+                [data]="barChartData"
+                [options]="barChartOptions"
+                type="bar">
+              </canvas>
+            } @else {
+              <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted py-5">
+                <i class="bi bi-bar-chart fs-2 mb-2 text-secondary opacity-50"></i>
+                <span class="small">Chưa có dữ liệu hoạt động</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Row: Phân bố người dùng & Thống kê hệ thống -->
+    <div class="row g-3 g-xl-4 mb-4">
+      <!-- Pie Chart: Phân bố người dùng -->
+      <div class="col-12 col-lg-5 col-xl-4">
+        <div class="dashboard-chart-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100 d-flex flex-column">
+          <div class="chart-card-header mb-3">
+            <h2 class="chart-card-title fw-bold text-gray-900 mb-1">Phân bố người dùng</h2>
+            <p class="chart-card-subtitle text-muted small mb-0">Theo vai trò</p>
+          </div>
+          <div class="chart-wrapper flex-grow-1 d-flex align-items-center justify-content-center position-relative py-2" style="min-height: 260px;">
+            @if (pieChartData.datasets.length > 0) {
+              <canvas
+                baseChart
+                [data]="pieChartData"
+                [options]="pieChartOptions"
+                type="pie">
+              </canvas>
+            } @else {
+              <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted py-5">
+                <i class="bi bi-pie-chart fs-2 mb-2 text-secondary opacity-50"></i>
+                <span class="small">Chưa có dữ liệu phân bố</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Card: Thống kê hệ thống -->
+      <div class="col-12 col-lg-7 col-xl-8">
+        <div class="dashboard-chart-card bg-white rounded-3 p-3 p-md-4 border shadow-xs h-100 d-flex flex-column">
+          <div class="chart-card-header mb-3">
+            <h2 class="chart-card-title fw-bold text-gray-900 mb-1">Thống kê hệ thống</h2>
+            <p class="chart-card-subtitle text-muted small mb-0">Tóm tắt các chỉ số chính</p>
+          </div>
+
+          <div class="system-summary-list flex-grow-1 d-flex flex-column justify-content-around py-1">
+            <div class="summary-row d-flex align-items-center justify-content-between py-2 border-bottom">
+              <span class="summary-label text-gray-700 fw-medium">Tổng người dùng</span>
+              <span class="summary-value fw-bold text-gray-900 fs-6">{{ stats()?.totalUsers ?? 0 }}</span>
+            </div>
+            <div class="summary-row d-flex align-items-center justify-content-between py-2 border-bottom">
+              <span class="summary-label text-gray-700 fw-medium">Luật sư</span>
+              <span class="summary-value fw-bold text-gray-900 fs-6">{{ stats()?.totalLawyers ?? 0 }}</span>
+            </div>
+            <div class="summary-row d-flex align-items-center justify-content-between py-2 border-bottom">
+              <span class="summary-label text-gray-700 fw-medium">Bài viết</span>
+              <span class="summary-value fw-bold text-gray-900 fs-6">{{ stats()?.totalPosts ?? 0 }}</span>
+            </div>
+            <div class="summary-row d-flex align-items-center justify-content-between py-2 border-bottom">
+              <span class="summary-label text-gray-700 fw-medium">Cuộc trò chuyện hoạt động</span>
+              <span class="summary-value fw-bold text-gray-900 fs-6">{{ stats()?.totalConversations ?? 0 }}</span>
+            </div>
+            <div class="summary-row d-flex align-items-center justify-content-between py-2">
+              <span class="summary-label text-gray-700 fw-medium">Đơn chờ duyệt</span>
+              <span class="summary-value fw-bold text-gray-900 fs-6">{{ stats()?.pendingApplications ?? 0 }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
