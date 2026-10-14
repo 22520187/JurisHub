@@ -171,12 +171,81 @@ export class AdminService {
   }
 
   /**
-   * PUT /api/admin/posts/{postId}/status?isActive={true|false}
+   * PUT /api/admin/posts/{postId}/status?isActive={true|false}&reason=...
    */
-  updatePostStatus(postId: number, isActive: boolean): Observable<ApiResponse<string>> {
-    const params = new HttpParams().set('isActive', isActive.toString());
+  updatePostStatus(postId: number, isActive: boolean, reason?: string): Observable<ApiResponse<string>> {
+    let params = new HttpParams().set('isActive', isActive.toString());
+    if (reason && reason.trim()) {
+      params = params.set('reason', reason.trim());
+    }
     return this.http.put<ApiResponse<string>>(
       `${this.apiUrl}/admin/posts/${postId}/status`,
+      {},
+      { params, withCredentials: true }
+    );
+  }
+
+  /**
+   * GET /api/admin/violations
+   */
+  getViolationPosts(params: {
+    page?: number;
+    size?: number;
+    sortBy?: string;
+    sortDir?: string;
+    search?: string;
+    isActive?: boolean;
+  }): Observable<ApiResponse<SpringPage<PostModeration>>> {
+    let httpParams = new HttpParams();
+    if (params.page !== undefined) httpParams = httpParams.set('page', params.page.toString());
+    if (params.size !== undefined) httpParams = httpParams.set('size', params.size.toString());
+    if (params.sortBy) httpParams = httpParams.set('sortBy', params.sortBy);
+    if (params.sortDir) httpParams = httpParams.set('sortDir', params.sortDir);
+    if (params.search && params.search.trim()) httpParams = httpParams.set('search', params.search.trim());
+    if (params.isActive !== undefined && params.isActive !== null) {
+      httpParams = httpParams.set('isActive', params.isActive.toString());
+    }
+
+    return this.http.get<ApiResponse<SpringPage<PostModeration>>>(
+      `${this.apiUrl}/admin/violations`,
+      { params: httpParams, withCredentials: true }
+    );
+  }
+
+  /**
+   * GET /api/admin/violations/replies
+   */
+  getViolationReplies(params: {
+    page?: number;
+    size?: number;
+    sortBy?: string;
+    sortDir?: string;
+    search?: string;
+    isActive?: boolean;
+  }): Observable<ApiResponse<SpringPage<PostModeration>>> {
+    let httpParams = new HttpParams();
+    if (params.page !== undefined) httpParams = httpParams.set('page', params.page.toString());
+    if (params.size !== undefined) httpParams = httpParams.set('size', params.size.toString());
+    if (params.sortBy) httpParams = httpParams.set('sortBy', params.sortBy);
+    if (params.sortDir) httpParams = httpParams.set('sortDir', params.sortDir);
+    if (params.search && params.search.trim()) httpParams = httpParams.set('search', params.search.trim());
+    if (params.isActive !== undefined && params.isActive !== null) {
+      httpParams = httpParams.set('isActive', params.isActive.toString());
+    }
+
+    return this.http.get<ApiResponse<SpringPage<PostModeration>>>(
+      `${this.apiUrl}/admin/violations/replies`,
+      { params: httpParams, withCredentials: true }
+    );
+  }
+
+  /**
+   * PUT /api/admin/replies/{replyId}/status?isActive={true|false}
+   */
+  updateReplyStatus(replyId: number, isActive: boolean): Observable<ApiResponse<string>> {
+    const params = new HttpParams().set('isActive', isActive.toString());
+    return this.http.put<ApiResponse<string>>(
+      `${this.apiUrl}/admin/replies/${replyId}/status`,
       {},
       { params, withCredentials: true }
     );

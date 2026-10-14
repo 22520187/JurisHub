@@ -1,12 +1,435 @@
-<div class="card border-0 shadow-xs rounded-3 p-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h3 class="h5 fw-bold text-dark mb-1">Báo cáo vi phạm</h3>
-      <p class="text-muted small mb-0">Tiếp nhận và xử lý các báo cáo vi phạm nội dung hoặc hành vi từ cộng đồng.</p>
+<div class="violations-container py-2">
+  <!-- Page Header -->
+  <div class="violations-header mb-4">
+    <h1 class="violations-title mb-1">Quản lý vi phạm</h1>
+    <p class="violations-subtitle text-muted mb-0">Kiểm duyệt và xử lý các nội dung bị báo cáo hoặc vi phạm tiêu chuẩn
+    </p>
+  </div>
+
+  <!-- Tabs Bar -->
+  <div class="tabs-bar d-flex align-items-center gap-2 mb-4">
+    <button type="button" class="tab-btn" [class.active]="activeTab() === 'posts'" (click)="switchTab('posts')">
+      Bài viết
+    </button>
+    <button type="button" class="tab-btn" [class.active]="activeTab() === 'replies'" (click)="switchTab('replies')">
+      Bình luận
+    </button>
+  </div>
+
+  <!-- Stat Metric Cards (Screenshot 1) -->
+  <div class="row g-3 mb-4">
+    <!-- Card 1: Tổng vi phạm -->
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="stat-card p-3 p-md-4 rounded-3 bg-white border">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span class="stat-label text-muted fw-semibold small">Tổng vi phạm</span>
+          <i class="bi bi-flag text-muted fs-5"></i>
+        </div>
+        <div class="stat-value fw-bold text-dark fs-3">
+          {{ totalViolations() }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Chờ xử lý -->
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="stat-card p-3 p-md-4 rounded-3 bg-white border">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span class="stat-label text-muted fw-semibold small">Chờ xử lý</span>
+          <i class="bi bi-flag text-warning fs-5"></i>
+        </div>
+        <div class="stat-value fw-bold text-dark fs-3">
+          {{ pendingViolations() }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Đã xử lý -->
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="stat-card p-3 p-md-4 rounded-3 bg-white border">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span class="stat-label text-muted fw-semibold small">Đã xử lý</span>
+          <i class="bi bi-check-circle text-success fs-5"></i>
+        </div>
+        <div class="stat-value fw-bold text-dark fs-3">
+          {{ processedViolations() }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Đã vô hiệu hóa -->
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="stat-card p-3 p-md-4 rounded-3 bg-white border">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span class="stat-label text-muted fw-semibold small">Đã vô hiệu hóa</span>
+          <i class="bi bi-x-circle text-danger fs-5"></i>
+        </div>
+        <div class="stat-value fw-bold text-dark fs-3">
+          {{ deactivatedViolations() }}
+        </div>
+      </div>
     </div>
   </div>
-  <div class="text-center py-5 text-muted">
-    <i class="bi bi-exclamation-triangle display-4 d-block mb-3 text-secondary"></i>
-    <p>Chức năng báo cáo vi phạm đang được chuẩn bị.</p>
+
+  <!-- Filter Card (Screenshot 1 & 2) -->
+  <div class="filter-card bg-white rounded-3 border p-3 p-md-4 mb-4 shadow-xs">
+    <div class="mb-3">
+      <h3 class="filter-title fw-bold text-dark mb-1 fs-6">Bộ lọc</h3>
+      <p class="filter-subtitle text-muted small mb-0">
+        Tìm kiếm và lọc {{ activeTab() === 'posts' ? 'bài viết' : 'bình luận' }} vi phạm theo trạng thái
+      </p>
+    </div>
+
+    <div class="row g-3 align-items-center">
+      <!-- Search Input -->
+      <div class="col-12 col-md-6 col-lg-7">
+        <div class="search-input-wrapper position-relative">
+          <i class="bi bi-search search-icon position-absolute text-muted"></i>
+          <input type="text" class="form-control search-input"
+            [placeholder]="activeTab() === 'posts' ? 'Tìm kiếm theo tiêu đề hoặc tác giả...' : 'Tìm kiếm theo nội dung hoặc người bình luận...'"
+            [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" />
+        </div>
+      </div>
+
+      <!-- Status Select -->
+      <div class="col-12 col-sm-6 col-md-3 col-lg-3">
+        <select class="form-select filter-select" [(ngModel)]="selectedStatus" (change)="onStatusFilterChange()">
+          <option value="ALL">Tất cả trạng thái</option>
+          <option value="ACTIVE">Chờ xử lý (Hoạt động)</option>
+          <option value="INACTIVE">Đã vô hiệu hóa</option>
+        </select>
+      </div>
+
+      <!-- Search Button -->
+      <div class="col-12 col-sm-6 col-md-3 col-lg-2">
+        <app-button label="Tìm kiếm" variant="custom" size="sm" [customStyle]="{
+            backgroundColor: '#08544e',
+            backgroundColorHover: '#06423d',
+            color: '#ffffff',
+            borderRadius: '8px',
+            fontWeight: '600',
+            height: '40px',
+            width: '100%'
+          }" [loading]="isLoading()" (btnClick)="onSearch()">
+        </app-button>
+      </div>
+    </div>
   </div>
+
+  <!-- Error State -->
+  @if (hasError()) {
+  <div class="error-state-card bg-white rounded-4 border p-5 text-center my-4 shadow-xs">
+    <div class="error-icon-wrapper mb-3 mx-auto">
+      <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
+    </div>
+    <h3 class="h5 fw-bold text-gray-900 mb-2">Không thể tải danh sách vi phạm</h3>
+    <p class="text-danger small mb-4">{{ errorMessage() }}</p>
+    <app-button label="Thử lại" variant="primary" size="sm" [loading]="isLoading()"
+      (btnClick)="loadViolations(currentPage())">
+    </app-button>
+  </div>
+  } @else {
+  <!-- Violations Table Card (Screenshot 1, 2, 3) -->
+  <div class="violations-list-card bg-white rounded-3 border shadow-xs p-3 p-md-4">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+      <h2 class="card-title fw-bold text-dark mb-0 fs-5">
+        Danh sách {{ activeTab() === 'posts' ? 'bài viết' : 'bình luận' }} vi phạm
+      </h2>
+      <span class="badge-source-pill">
+        Nguồn: {{ activeTab() === 'posts' ? 'Báo Cáo Người Dùng' : 'Phân tích AI & Báo Cáo' }}
+      </span>
+    </div>
+
+    <!-- 1. Content Template -->
+    <ng-template #contentTpl let-item="row">
+      <div class="post-content-cell py-1">
+        <h4 class="post-cell-title fw-bold text-dark mb-1" [title]="item['title'] || ''">
+          {{ item['title'] || '(Không có tiêu đề)' }}
+        </h4>
+        <p class="post-cell-snippet text-muted small mb-2" [title]="item['content'] || ''">
+          {{ item['content'] || '' }}
+        </p>
+        <span class="badge-category-pill">{{ item['categoryName'] || 'Không có danh mục' }}</span>
+      </div>
+    </ng-template>
+
+    <!-- 2. Author Template -->
+    <ng-template #authorTpl let-item="row">
+      <div class="d-flex align-items-center gap-2 py-1">
+        <div class="author-avatar-circle">
+          @if (item['author']?.avatar) {
+          <img [src]="item['author'].avatar" [alt]="item['author'].fullName" />
+          } @else {
+          <i class="bi bi-person"></i>
+          }
+        </div>
+        <div class="author-info">
+          <div class="author-name fw-bold text-dark small">{{ item['author']?.fullName || 'Người dùng' }}</div>
+          <div class="author-email text-muted font-monospace" style="font-size: 0.75rem;">
+            {{ item['author']?.email || '' }}
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- 3. Report Count Template -->
+    <ng-template #reportCountTpl let-item="row">
+      <div class="d-inline-flex align-items-center gap-1 text-danger fw-semibold">
+        <i class="bi bi-flag-fill" style="font-size: 0.85rem;"></i>
+        <span>{{ item['reportCount'] ?? 1 }}</span>
+      </div>
+    </ng-template>
+
+    <!-- 4. Violation Reason Template -->
+    <ng-template #reasonTpl let-item="row">
+      <div class="reason-cell text-danger small fw-medium"
+        [title]="item['violationReason'] || (item['reportReasons']?.join(', ') || '...')">
+        {{ item['violationReason'] || (item['reportReasons']?.[0] || '...') }}
+      </div>
+    </ng-template>
+
+    <!-- 5. Status Template -->
+    <ng-template #statusTpl let-item="row">
+      <span class="badge-status-pill" [class.badge-status-active]="item['isActive']"
+        [class.badge-status-inactive]="!item['isActive']">
+        {{ item['isActive'] ? 'Hoạt động' : 'Vô hiệu hóa' }}
+      </span>
+    </ng-template>
+
+    <!-- 6. Created At Template -->
+    <ng-template #createdAtTpl let-item="row">
+      <div class="d-inline-flex align-items-center gap-1 text-dark small fw-medium">
+        <i class="bi bi-calendar3 text-muted"></i>
+        <span>{{ formatDate(item['createdAt']) }}</span>
+      </div>
+    </ng-template>
+
+    <!-- 7. Actions Template (Screenshot 2 & 3) -->
+    <ng-template #actionsTpl let-item="row">
+      <div class="d-flex align-items-center justify-content-center gap-2 py-1">
+        <!-- Xem Button -->
+        <button type="button" class="btn-action-view d-inline-flex align-items-center gap-1"
+          (click)="openDetailModal(item)" title="Xem chi tiết vi phạm">
+          <i class="bi bi-eye"></i>
+          <span>Xem</span>
+        </button>
+
+        <!-- Vô hiệu hóa / Kích hoạt Button -->
+        @if (item['isActive']) {
+        <button type="button" class="btn-action-deactivate d-inline-flex align-items-center gap-1"
+          (click)="openDeactivateModal(item)" title="Vô hiệu hóa nội dung này">
+          <i class="bi bi-x-circle"></i>
+          <span>Vô hiệu hóa</span>
+        </button>
+        } @else {
+        <button type="button" class="btn-action-reactivate d-inline-flex align-items-center gap-1"
+          (click)="reactivateItem(item)" title="Kích hoạt lại nội dung này">
+          <i class="bi bi-check-circle"></i>
+          <span>Kích hoạt</span>
+        </button>
+        }
+      </div>
+    </ng-template>
+
+    <!-- Custom Data Table -->
+    <tellerapp-custom-data-table [columns]="activeTab() === 'posts' ? postTableColumns : replyTableColumns"
+      [data]="violationsList()" [loading]="isLoading()" [bordered]="false" [striped]="false" [selectable]="false"
+      [showIndex]="false" [horizontalScroll]="true" emptyMode="no-results" [pagination]="tablePagination()" [tableStyles]="tableStyles"
+      [cellTemplates]="{
+        content: contentTpl,
+        author: authorTpl,
+        reportCount: reportCountTpl,
+        violationReason: reasonTpl,
+        status: statusTpl,
+        createdAt: createdAtTpl,
+        actions: actionsTpl
+      }" (pageChange)="onPageChange($event)">
+    </tellerapp-custom-data-table>
+  </div>
+  }
 </div>
+
+<!-- ======================================================= -->
+<!-- Modal: Chi tiết bài viết / bình luận vi phạm -->
+<!-- ======================================================= -->
+<lib-modal-custom [isOpen]="isDetailModalOpen()" [title]="''" [showCloseIcon]="false" [showFooter]="false" size="lg"
+  class="violation-detail-modal" (closeDialog)="closeDetailModal()">
+
+  @if (selectedItem(); as item) {
+  <div class="violation-modal-body">
+    <!-- Header (Screenshot 4) -->
+    <div class="d-flex align-items-start justify-content-between mb-3">
+      <div>
+        <h3 class="modal-title-custom fw-bold mb-1">
+          Chi tiết {{ activeTab() === 'posts' ? 'bài viết' : 'bình luận' }} vi phạm
+        </h3>
+        <div class="d-flex align-items-center gap-2 small">
+          <span class="text-muted">{{ activeTab() === 'posts' ? 'Bài viết' : 'Bình luận' }} #{{ item.id }} -</span>
+          <span class="badge-status-pill" [class.badge-status-active]="item.isActive"
+            [class.badge-status-inactive]="!item.isActive">
+            {{ item.isActive ? 'Hoạt động' : 'Vô hiệu hóa' }}
+          </span>
+        </div>
+      </div>
+      <button type="button" class="btn-modal-close" (click)="closeDetailModal()" aria-label="Đóng">
+        <i class="bi bi-x-lg text-muted"></i>
+      </button>
+    </div>
+
+    <!-- Title & Content -->
+    <div class="mb-3">
+      <h2 class="detail-main-title fw-bold text-dark mb-2">
+        {{ item.title || '(Không có tiêu đề)' }}
+      </h2>
+      <div class="detail-content-text text-dark mb-3">
+        {{ item.content }}
+      </div>
+      <span class="badge-category-pill">{{ item.categoryName || 'Không có danh mục' }}</span>
+    </div>
+
+    <!-- Section: Thông tin báo cáo (Screenshot 4) -->
+    <div class="report-info-section mb-4">
+      <h4 class="section-title fw-bold text-dark mb-2 fs-6">Thông tin báo cáo</h4>
+      <div class="report-alert-box p-3 rounded-3">
+        <div class="d-flex align-items-center gap-2 text-danger fw-bold mb-2">
+          <i class="bi bi-flag-fill"></i>
+          <span>{{ item.reportCount ?? 1 }} báo cáo vi phạm</span>
+        </div>
+        <div class="report-reasons-wrapper">
+          <div class="fw-bold text-danger small mb-1">Lý do báo cáo:</div>
+          <ul class="list-unstyled mb-0 text-danger small ps-2">
+            @if (item.reportReasons && item.reportReasons.length > 0) {
+            @for (reason of item.reportReasons; track $index) {
+            <li>• {{ reason }}</li>
+            }
+            } @else if (item.violationReason) {
+            <li>• {{ item.violationReason }}</li>
+            } @else {
+            <li>• Spam quảng cáo dịch vụ</li>
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Thông tin tác giả (Screenshot 5) -->
+    <div class="author-info-section mb-4">
+      <h4 class="section-title fw-bold text-dark mb-2 fs-6">
+        Thông tin {{ activeTab() === 'posts' ? 'tác giả' : 'người bình luận' }}
+      </h4>
+      <div class="d-flex align-items-center gap-3 p-2">
+        <div class="author-avatar-lg">
+          @if (item.author.avatar) {
+          <img [src]="item.author.avatar" [alt]="item.author.fullName" />
+          } @else {
+          <i class="bi bi-person text-muted fs-3"></i>
+          }
+        </div>
+        <div>
+          <div class="author-name-lg fw-bold text-dark">{{ item.author.fullName || 'Người dùng' }}</div>
+          <div class="author-email-lg text-muted small mb-1">{{ item.author.email }}</div>
+          <span class="badge-role-tag">{{ item.author.role || 'USER' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Actions (Screenshot 5) -->
+    <div class="d-flex align-items-center justify-content-end gap-2 pt-3 border-top">
+      <app-button label="Đóng" variant="outline" size="sm" [customStyle]="{
+          height: '40px',
+          minWidth: '80px',
+          borderRadius: '8px',
+          borderColor: '#e2e8f0',
+          color: '#1e293b',
+          fontWeight: '500'
+        }" (btnClick)="closeDetailModal()">
+      </app-button>
+
+      @if (item.isActive) {
+      <button type="button" class="btn-footer-deactivate" (click)="openDeactivateModal(item)">
+        Vô hiệu hóa
+      </button>
+      } @else {
+      <button type="button" class="btn-footer-reactivate" (click)="reactivateItem(item)">
+        Kích hoạt lại
+      </button>
+      }
+    </div>
+  </div>
+  }
+</lib-modal-custom>
+
+<!-- ======================================================= -->
+<!-- Modal: Lý do vô hiệu hóa (Yêu cầu khi vô hiệu hóa)      -->
+<!-- ======================================================= -->
+<lib-modal-custom [isOpen]="isReasonModalOpen()" [title]="''" [showCloseIcon]="false" [showFooter]="false" size="sm"
+  class="reason-modal" (closeDialog)="closeDeactivateModal()">
+
+  <div class="reason-modal-body">
+    <!-- Header -->
+    <div class="d-flex align-items-start justify-content-between mb-3">
+      <div>
+        <h3 class="modal-title-custom fw-bold mb-1 text-danger d-flex align-items-center gap-2">
+          <i class="bi bi-shield-x"></i>
+          <span>Vô hiệu hóa nội dung</span>
+        </h3>
+        <p class="modal-subtitle-custom text-muted mb-0 small">
+          Vui lòng nhập hoặc chọn lý do vô hiệu hóa {{ activeTab() === 'posts' ? 'bài viết' : 'bình luận' }} này
+        </p>
+      </div>
+      <button type="button" class="btn-modal-close" (click)="closeDeactivateModal()" aria-label="Đóng">
+        <i class="bi bi-x-lg text-muted"></i>
+      </button>
+    </div>
+
+    <!-- Quick Presets -->
+    <div class="mb-3">
+      <label class="form-label fw-bold text-dark small mb-2">Gợi ý lý do phổ biến:</label>
+      <div class="d-flex flex-wrap gap-2">
+        @for (preset of reasonPresets; track preset) {
+        <button type="button" class="badge-preset-btn" [class.active]="deactivateReason === preset"
+          (click)="selectPresetReason(preset)">
+          {{ preset }}
+        </button>
+        }
+      </div>
+    </div>
+
+    <!-- Reason Textarea Input -->
+    <div class="mb-4">
+      <label class="form-label fw-bold text-dark small mb-1">Lý do chi tiết <span class="text-danger">*</span></label>
+      <textarea class="form-control modal-textarea" rows="4" placeholder="Nhập lý do vô hiệu hóa nội dung này..."
+        [(ngModel)]="deactivateReason"></textarea>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="d-flex align-items-center justify-content-end gap-2 pt-2 border-top">
+      <app-button label="Hủy" variant="outline" size="sm" [customStyle]="{
+          height: '38px',
+          minWidth: '80px',
+          borderRadius: '8px',
+          borderColor: '#e2e8f0',
+          color: '#334155'
+        }" (btnClick)="closeDeactivateModal()">
+      </app-button>
+
+      <app-button label="Xác nhận vô hiệu hóa" variant="custom" size="sm" [customStyle]="{
+          backgroundColor: '#dc2626',
+          backgroundColorHover: '#b91c1c',
+          color: '#ffffff',
+          borderRadius: '8px',
+          fontWeight: '600',
+          height: '38px',
+          minWidth: '160px'
+        }" [loading]="isDeactivating()" (btnClick)="confirmDeactivate()">
+      </app-button>
+    </div>
+  </div>
+</lib-modal-custom>
+
+<!-- ======================================================= -->
+<!-- Toast Notification                                      -->
+<!-- ======================================================= -->
+<app-toast-message [visible]="toastVisible" [type]="toastType" [title]="toastTitle" [message]="toastMessage"
+  [duration]="3" (close)="toastVisible = false">
+</app-toast-message>
