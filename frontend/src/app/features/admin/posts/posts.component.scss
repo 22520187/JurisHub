@@ -356,7 +356,7 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Modal Detail Styling (Screenshot 4)
+   Modal Detail Styling
 ───────────────────────────────────────────────────────────── */
 ::ng-deep lib-modal-custom.post-detail-modal {
   .modal-overlay {
@@ -457,6 +457,7 @@
   }
 
   .post-meta-row {
+
     .author-avatar-circle,
     .small-avatar {
       width: 22px !important;

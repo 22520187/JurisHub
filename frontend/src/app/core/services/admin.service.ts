@@ -225,6 +225,149 @@ export class AdminService {
       { withCredentials: true }
     );
   }
+
+  /**
+   * GET /api/admin/categories
+   */
+  getAllCategories(params: {
+    page?: number;
+    size?: number;
+    sortBy?: string;
+    sortDir?: string;
+    search?: string;
+  }): Observable<ApiResponse<SpringPage<PostCategory>>> {
+    let httpParams = new HttpParams();
+    if (params.page !== undefined) httpParams = httpParams.set('page', params.page.toString());
+    if (params.size !== undefined) httpParams = httpParams.set('size', params.size.toString());
+    if (params.sortBy) httpParams = httpParams.set('sortBy', params.sortBy);
+    if (params.sortDir) httpParams = httpParams.set('sortDir', params.sortDir);
+    if (params.search && params.search.trim()) httpParams = httpParams.set('search', params.search.trim());
+
+    return this.http.get<ApiResponse<SpringPage<PostCategory>>>(
+      `${this.apiUrl}/admin/categories`,
+      { params: httpParams, withCredentials: true }
+    );
+  }
+
+  /**
+   * POST /api/admin/categories
+   */
+  createCategory(payload: CategoryCreateRequest): Observable<ApiResponse<PostCategory>> {
+    return this.http.post<ApiResponse<PostCategory>>(
+      `${this.apiUrl}/admin/categories`,
+      payload,
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * PUT /api/admin/categories/{categoryId}
+   */
+  updateCategory(categoryId: number, payload: CategoryUpdateRequest): Observable<ApiResponse<PostCategory>> {
+    return this.http.put<ApiResponse<PostCategory>>(
+      `${this.apiUrl}/admin/categories/${categoryId}`,
+      payload,
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * DELETE /api/admin/categories/{categoryId}
+   */
+  deleteCategory(categoryId: number): Observable<ApiResponse<string>> {
+    return this.http.delete<ApiResponse<string>>(
+      `${this.apiUrl}/admin/categories/${categoryId}`,
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * GET /api/labels/category/{categoryId}
+   */
+  getLabelsByCategory(categoryId: number): Observable<PostLabel[]> {
+    return this.http.get<PostLabel[]>(
+      `${this.apiUrl}/labels/category/${categoryId}`,
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * POST /api/labels
+   */
+  createLabel(payload: Partial<PostLabel>): Observable<PostLabel> {
+    return this.http.post<PostLabel>(
+      `${this.apiUrl}/labels`,
+      payload,
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * PUT /api/labels/{id}
+   */
+  updateLabel(id: number, payload: Partial<PostLabel>): Observable<PostLabel> {
+    return this.http.put<PostLabel>(
+      `${this.apiUrl}/labels/${id}`,
+      payload,
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * DELETE /api/labels/{id}
+   */
+  deleteLabel(id: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/labels/${id}`,
+      { withCredentials: true }
+    );
+  }
+}
+
+export interface PostLabel {
+  id?: number;
+  name: string;
+  slug: string;
+  description?: string;
+  color?: string;
+  isActive?: boolean;
+  categoryId?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface PostCategory {
+  id: number;
+  slug: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  displayOrder?: number;
+  isActive?: boolean;
+  postCount?: number;
+  threadCount?: number;
+  labels?: PostLabel[];
+  createdAt?: string;
+  updatedAt?: string;
+  [key: string]: unknown;
+}
+
+export interface CategoryCreateRequest {
+  name: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+  displayOrder?: number;
+  isActive?: boolean;
+}
+
+export interface CategoryUpdateRequest {
+  name: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+  displayOrder?: number;
+  isActive?: boolean;
 }
 
 export interface PostAuthor {
