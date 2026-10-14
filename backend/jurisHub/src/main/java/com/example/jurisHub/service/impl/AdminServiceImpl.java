@@ -163,13 +163,23 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public void updatePostStatus(Long postId, Boolean isActive) {
+        updatePostStatus(postId, isActive, null);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    @Transactional
+    public void updatePostStatus(Long postId, Boolean isActive, String reason) {
         Post post = forumRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
         post.setIsActive(isActive);
+        if (reason != null && !reason.trim().isEmpty()) {
+            post.setViolationReason(reason.trim());
+        }
         forumRepository.save(post);
 
-        log.info("Post {} status updated to: {}", postId, isActive ? "active" : "inactive");
+        log.info("Post {} status updated to: {}, reason: {}", postId, isActive ? "active" : "inactive", reason);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

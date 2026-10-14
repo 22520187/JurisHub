@@ -23,6 +23,7 @@ public interface AdminService {
     void updateUserStatus(Long userId, Boolean isEnabled);
 
     void updatePostStatus(Long postId, Boolean isActive);
+    void updatePostStatus(Long postId, Boolean isActive, String reason);
 
     void approveLawyerApplication(Long applicationId, String adminNotes);
 

@@ -104,9 +104,10 @@ public class AdminController {
     @PutMapping("/posts/{postId}/status")
     public ResponseEntity<ApiResponse<String>> updatePostStatus(
             @PathVariable Long postId,
-            @RequestParam Boolean isActive) {
+            @RequestParam Boolean isActive,
+            @RequestParam(required = false) String reason) {
 
-        adminService.updatePostStatus(postId, isActive);
+        adminService.updatePostStatus(postId, isActive, reason);
 
         return ResponseEntity.ok(ApiResponse.<String>builder()
                 .success(true)
