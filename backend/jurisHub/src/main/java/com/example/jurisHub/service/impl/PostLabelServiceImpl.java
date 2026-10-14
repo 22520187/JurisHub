@@ -128,6 +128,7 @@ public class PostLabelServiceImpl implements PostLabelService {
         if (!postLabelRepository.existsById(id)) {
             throw new RuntimeException("Label not found with id: " + id);
         }
+        postLabelRepository.deletePostLabelMappingsByLabelId(id);
         postLabelRepository.deleteById(id);
     }
 
