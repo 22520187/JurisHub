@@ -1,0 +1,659 @@
+<div class="categories-container py-2">
+  <!-- Page Header -->
+  <div class="categories-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h1 class="categories-title mb-1">Quản lý danh mục</h1>
+      <p class="categories-subtitle text-muted mb-0">Quản lý các danh mục bài viết trong hệ thống</p>
+    </div>
+
+    <!-- Header Actions (Screenshot 1) -->
+    <div class="d-flex align-items-center gap-2">
+      <!-- Làm mới Button -->
+      <app-button
+        label="Làm mới"
+        variant="outline"
+        size="sm"
+        iconLeft='<i class="bi bi-arrow-clockwise me-1"></i>'
+        [customStyle]="{
+          height: '40px',
+          borderRadius: '8px',
+          borderColor: '#e2e8f0',
+          color: '#334155',
+          backgroundColor: '#ffffff'
+        }"
+        [loading]="isLoading()"
+        (btnClick)="refresh()">
+      </app-button>
+
+      <!-- + Tạo danh mục mới Button -->
+      <app-button
+        label="Tạo danh mục mới"
+        variant="custom"
+        size="sm"
+        iconLeft='<i class="bi bi-plus-lg me-1"></i>'
+        [customStyle]="{
+          backgroundColor: '#08544e',
+          backgroundColorHover: '#06423d',
+          color: '#ffffff',
+          borderRadius: '8px',
+          fontWeight: '600',
+          height: '40px',
+          boxShadow: '0 2px 6px rgba(8, 84, 78, 0.2)'
+        }"
+        (btnClick)="openCreateModal()">
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Search & Total Info Row (Screenshot 1) -->
+  <div class="search-info-bar d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+    <!-- Search Input -->
+    <div class="search-input-wrapper position-relative" style="max-width: 320px; width: 100%;">
+      <i class="bi bi-search search-icon position-absolute text-muted"></i>
+      <input
+        type="text"
+        class="form-control search-input"
+        placeholder="Tìm kiếm danh mục..."
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="onSearch()" />
+    </div>
+
+    <!-- Total count text -->
+    <div class="total-categories-text text-muted small fw-medium">
+      Tổng số: {{ totalElements() }} danh mục
+    </div>
+  </div>
+
+  <!-- Error State -->
+  @if (hasError()) {
+  <div class="error-state-card bg-white rounded-4 border p-5 text-center my-4 shadow-xs">
+    <div class="error-icon-wrapper mb-3 mx-auto">
+      <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
+    </div>
+    <h3 class="h5 fw-bold text-gray-900 mb-2">Không thể tải danh sách danh mục</h3>
+    <p class="text-danger small mb-4">{{ errorMessage() }}</p>
+    <app-button
+      label="Thử lại"
+      variant="primary"
+      size="sm"
+      [loading]="isLoading()"
+      (btnClick)="loadCategories(currentPage())">
+    </app-button>
+  </div>
+  } @else {
+  <!-- Categories List Table Card -->
+  <div class="categories-list-card bg-white rounded-3 border shadow-xs p-3 p-md-4">
+    <div class="mb-3">
+      <h2 class="card-title fw-bold text-gray-900 mb-1 fs-5">Danh sách danh mục</h2>
+      <p class="text-muted small mb-0">Quản lý tất cả danh mục bài viết trong hệ thống</p>
+    </div>
+
+    <!-- 1. Tên danh mục Template -->
+    <ng-template #nameTpl let-cat="row">
+      <span class="cat-name fw-bold text-dark">{{ cat['name'] }}</span>
+    </ng-template>
+
+    <!-- 2. Slug Template -->
+    <ng-template #slugTpl let-cat="row">
+      <span class="badge-slug-pill">{{ cat['slug'] }}</span>
+    </ng-template>
+
+    <!-- 3. Mô tả Template -->
+    <ng-template #descTpl let-cat="row">
+      <span class="cat-desc text-muted small text-break" [title]="cat['description'] || ''">
+        {{ cat['description'] || '-' }}
+      </span>
+    </ng-template>
+
+    <!-- 4. Số bài viết Template -->
+    <ng-template #postCountTpl let-cat="row">
+      <div class="d-inline-flex align-items-center gap-1 text-muted small">
+        <i class="bi bi-file-earmark-text"></i>
+        <span>{{ cat['postCount'] ?? 0 }}</span>
+      </div>
+    </ng-template>
+
+    <!-- 5. Thao tác Template (...) (Screenshot 1 & 3) -->
+    <ng-template #actionsTpl let-cat="row">
+      <div class="position-relative d-inline-block">
+        <button
+          type="button"
+          class="btn-action-more"
+          (click)="toggleActionMenu(cat['id'], $event)"
+          aria-label="Thao tác">
+          <i class="bi bi-three-dots"></i>
+        </button>
+
+        <!-- Dropdown Menu (Screenshot 3) -->
+        @if (activeActionCategoryId === cat['id']) {
+        <div
+          class="action-dropdown-menu position-absolute end-0 mt-1 bg-white rounded-2 border shadow-lg py-1 z-3"
+          (click)="$event.stopPropagation()">
+          <!-- Chỉnh sửa -->
+          <button
+            type="button"
+            class="action-item w-100 text-start d-flex align-items-center gap-2 px-3 py-2 border-0 bg-transparent text-dark"
+            (click)="openEditModal(cat, $event)">
+            <i class="bi bi-pencil-square"></i>
+            <span>Chỉnh sửa</span>
+          </button>
+
+          <!-- Xóa -->
+          <button
+            type="button"
+            class="action-item action-item-danger w-100 text-start d-flex align-items-center gap-2 px-3 py-2 border-0 bg-transparent text-danger"
+            (click)="openDeleteConfirm(cat, $event)">
+            <i class="bi bi-trash3 text-danger"></i>
+            <span>Xóa</span>
+          </button>
+        </div>
+        }
+      </div>
+    </ng-template>
+
+    <!-- Custom Data Table Component -->
+    <tellerapp-custom-data-table
+      [columns]="tableColumns"
+      [data]="categories()"
+      [loading]="isLoading()"
+      [bordered]="false"
+      [striped]="false"
+      [selectable]="false"
+      [showIndex]="false"
+      emptyMode="no-results"
+      [pagination]="tablePagination()"
+      [tableStyles]="tableStyles"
+      [cellTemplates]="{
+        name: nameTpl,
+        slug: slugTpl,
+        description: descTpl,
+        postCount: postCountTpl,
+        actions: actionsTpl
+      }"
+      (pageChange)="onPageChange($event)">
+    </tellerapp-custom-data-table>
+  </div>
+  }
+</div>
+
+<!-- ======================================================= -->
+<!-- Modal: Tạo danh mục mới (Screenshot 2)                  -->
+<!-- ======================================================= -->
+<lib-modal-custom
+  [isOpen]="isCreateModalOpen()"
+  [title]="''"
+  [showCloseIcon]="false"
+  [showFooter]="false"
+  size="md"
+  class="category-modal"
+  (closeDialog)="closeCreateModal()">
+
+  <div class="category-modal-body">
+    <!-- Header -->
+    <div class="d-flex align-items-start justify-content-between mb-3">
+      <div>
+        <h3 class="modal-title-custom fw-bold mb-1">Tạo danh mục mới</h3>
+        <p class="modal-subtitle-custom text-muted mb-0 small">Nhập thông tin cho danh mục mới</p>
+      </div>
+      <button type="button" class="btn-modal-close" (click)="closeCreateModal()" aria-label="Đóng">
+        <i class="bi bi-x-lg text-muted"></i>
+      </button>
+    </div>
+
+    <!-- Form Inputs -->
+    <div class="mb-3">
+      <label class="form-label fw-bold text-dark small mb-1">Tên danh mục</label>
+      <input
+        type="text"
+        class="form-control modal-input"
+        placeholder="Nhập tên danh mục..."
+        [(ngModel)]="createForm.name" />
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label fw-bold text-dark small mb-1">Mô tả</label>
+      <textarea
+        class="form-control modal-textarea"
+        rows="4"
+        placeholder="Nhập mô tả danh mục..."
+        [(ngModel)]="createForm.description"></textarea>
+    </div>
+
+    <!-- Modal Footer Actions (Screenshot 2) -->
+    <div class="d-flex align-items-center justify-content-end gap-2 pt-2">
+      <app-button
+        label="Hủy"
+        variant="outline"
+        size="sm"
+        [customStyle]="{
+          height: '38px',
+          minWidth: '80px',
+          borderRadius: '8px',
+          borderColor: '#e2e8f0',
+          color: '#334155'
+        }"
+        (btnClick)="closeCreateModal()">
+      </app-button>
+
+      <app-button
+        label="Tạo danh mục"
+        variant="custom"
+        size="sm"
+        [customStyle]="{
+          backgroundColor: '#08544e',
+          backgroundColorHover: '#06423d',
+          color: '#ffffff',
+          borderRadius: '8px',
+          fontWeight: '600',
+          height: '38px',
+          minWidth: '120px'
+        }"
+        [loading]="isCreating()"
+        (btnClick)="submitCreateCategory()">
+      </app-button>
+    </div>
+  </div>
+</lib-modal-custom>
+
+<!-- ======================================================= -->
+<!-- Modal: Chỉnh sửa danh mục & Quản lý nhãn (Screenshot 4 & 5) -->
+<!-- ======================================================= -->
+<lib-modal-custom
+  [isOpen]="isEditModalOpen()"
+  [title]="''"
+  [showCloseIcon]="false"
+  [showFooter]="false"
+  size="lg"
+  class="category-modal"
+  (closeDialog)="closeEditModal()">
+
+  <div class="category-modal-body">
+    <!-- Header -->
+    <div class="d-flex align-items-start justify-content-between mb-3">
+      <div>
+        <h3 class="modal-title-custom fw-bold mb-1">Chỉnh sửa danh mục</h3>
+        <p class="modal-subtitle-custom text-muted mb-0 small">Cập nhật thông tin danh mục và quản lý nhãn</p>
+      </div>
+      <button type="button" class="btn-modal-close" (click)="closeEditModal()" aria-label="Đóng">
+        <i class="bi bi-x-lg text-muted"></i>
+      </button>
+    </div>
+
+    <!-- Form Inputs (Screenshot 4) -->
+    <div class="mb-3">
+      <label class="form-label fw-bold text-dark small mb-1">Tên danh mục</label>
+      <input
+        type="text"
+        class="form-control modal-input"
+        [(ngModel)]="editForm.name"
+        (input)="onEditNameChange()" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold text-dark small mb-1">Slug</label>
+      <input
+        type="text"
+        class="form-control modal-input"
+        [(ngModel)]="editForm.slug" />
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label fw-bold text-dark small mb-1">Mô tả</label>
+      <textarea
+        class="form-control modal-textarea"
+        rows="3"
+        [(ngModel)]="editForm.description"></textarea>
+    </div>
+
+    <!-- Section: Nhãn (Labels) (Screenshot 4 & 5) -->
+    <div class="labels-section pt-3 border-top mb-4">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h4 class="labels-section-title fw-bold text-dark fs-6 mb-0">Nhãn (Labels)</h4>
+        <app-button
+          label="Thêm nhãn"
+          variant="outline"
+          size="sm"
+          iconLeft='<i class="bi bi-plus-lg me-1"></i>'
+          [customStyle]="{
+            height: '34px',
+            borderRadius: '6px',
+            borderColor: '#e2e8f0',
+            color: '#1e293b',
+            fontSize: '0.8125rem'
+          }"
+          (btnClick)="openCreateLabelModal()">
+        </app-button>
+      </div>
+
+      <!-- Labels List (Matching Screenshot 4 & 5) -->
+      <div class="labels-list d-flex flex-column gap-2">
+        @for (label of activeCategoryLabels(); track label.id; let i = $index) {
+        <div class="label-item-row d-flex align-items-center justify-content-between p-2 px-3 rounded-2 border bg-white">
+          <!-- View Mode for Label -->
+          <div class="d-flex align-items-center gap-3">
+            <span
+              class="badge-label-pill"
+              [style.backgroundColor]="getLabelBgColor(label.color)"
+              [style.color]="getLabelTextColor(label.color)"
+              [class.badge-label-red]="!label.color && i % 2 === 0"
+              [class.badge-label-gray]="!label.color && i % 2 !== 0">
+              {{ label.name }}
+            </span>
+            <span class="label-slug-text text-muted small">{{ label.slug }}</span>
+          </div>
+
+          <div class="d-flex align-items-center gap-2">
+            <!-- Edit Label Icon (Mở modal chỉnh sửa nhãn - Hình 3) -->
+            <button
+              type="button"
+              class="btn-label-action"
+              title="Chỉnh sửa nhãn"
+              (click)="openEditLabelModal(label)">
+              <i class="bi bi-pencil-square"></i>
+            </button>
+            <!-- Delete Label Icon -->
+            <button
+              type="button"
+              class="btn-label-action text-danger"
+              title="Xóa nhãn"
+              (click)="deleteLabel(label.id!)">
+              <i class="bi bi-trash3 text-danger"></i>
+            </button>
+          </div>
+        </div>
+        }
+
+        @if (activeCategoryLabels().length === 0) {
+        <p class="text-muted small py-2 mb-0 fst-italic">Danh mục này chưa có nhãn nào.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Modal Footer Actions (Screenshot 5) -->
+    <div class="d-flex align-items-center justify-content-end gap-2 pt-2 border-top">
+      <app-button
+        label="Hủy"
+        variant="outline"
+        size="sm"
+        [customStyle]="{
+          height: '38px',
+          minWidth: '80px',
+          borderRadius: '8px',
+          borderColor: '#e2e8f0',
+          color: '#334155'
+        }"
+        (btnClick)="closeEditModal()">
+      </app-button>
+
+      <app-button
+        label="Cập nhật"
+        variant="custom"
+        size="sm"
+        [customStyle]="{
+          backgroundColor: '#08544e',
+          backgroundColorHover: '#06423d',
+          color: '#ffffff',
+          borderRadius: '8px',
+          fontWeight: '600',
+          height: '38px',
+          minWidth: '110px'
+        }"
+        [loading]="isUpdating()"
+        (btnClick)="submitUpdateCategory()">
+      </app-button>
+    </div>
+  </div>
+</lib-modal-custom>
+
+<!-- ======================================================= -->
+<!-- Modal: Thêm nhãn mới (Hình 1 & 2)                       -->
+<!-- ======================================================= -->
+<lib-modal-custom
+  [isOpen]="isCreateLabelModalOpen()"
+  [title]="''"
+  [showCloseIcon]="false"
+  [showFooter]="false"
+  size="sm"
+  class="label-modal"
+  (closeDialog)="closeCreateLabelModal()">
+
+  <div class="label-modal-body">
+    <!-- Header -->
+    <div class="d-flex align-items-start justify-content-between mb-3">
+      <div>
+        <h3 class="modal-title-custom fw-bold mb-1">Thêm nhãn mới</h3>
+        <p class="modal-subtitle-custom text-muted mb-0 small">Tạo nhãn mới cho danh mục này</p>
+      </div>
+      <button type="button" class="btn-modal-close" (click)="closeCreateLabelModal()" aria-label="Đóng">
+        <i class="bi bi-x-lg text-muted"></i>
+      </button>
+    </div>
+
+    <!-- Form Inputs -->
+    <div class="mb-3">
+      <label class="form-label fw-bold text-dark small mb-1">Tên nhãn</label>
+      <input
+        type="text"
+        class="form-control modal-input"
+        placeholder="Nhập tên nhãn..."
+        [(ngModel)]="createLabelForm.name"
+        (input)="onCreateLabelNameChange()" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold text-dark small mb-1">Slug</label>
+      <input
+        type="text"
+        class="form-control modal-input"
+        placeholder="auto-generated-slug"
+        [(ngModel)]="createLabelForm.slug" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold text-dark small mb-1">Mô tả</label>
+      <textarea
+        class="form-control modal-textarea"
+        rows="3"
+        placeholder="Nhập mô tả cho nhãn..."
+        [(ngModel)]="createLabelForm.description"></textarea>
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label fw-bold text-dark small mb-1">Màu sắc</label>
+      <div class="d-flex align-items-center gap-2">
+        <div class="color-picker-box position-relative" title="Chọn màu sắc">
+          <div class="color-swatch" [style.backgroundColor]="createLabelForm.color"></div>
+          <input
+            type="color"
+            class="color-input-native"
+            [(ngModel)]="createLabelForm.color" />
+        </div>
+        <input
+          type="text"
+          class="form-control modal-input font-monospace text-uppercase"
+          style="flex: 1;"
+          [(ngModel)]="createLabelForm.color"
+          placeholder="#3B82F6" />
+        <div
+          class="btn-preview-color"
+          [style.backgroundColor]="getLabelBgColor(createLabelForm.color)"
+          [style.color]="getLabelTextColor(createLabelForm.color)">
+          Preview
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer Actions (Hình 1 & 2) -->
+    <div class="d-flex align-items-center justify-content-end gap-2 pt-2">
+      <app-button
+        label="Hủy"
+        variant="outline"
+        size="sm"
+        [customStyle]="{
+          height: '38px',
+          minWidth: '76px',
+          borderRadius: '8px',
+          borderColor: '#e2e8f0',
+          color: '#334155'
+        }"
+        (btnClick)="closeCreateLabelModal()">
+      </app-button>
+
+      <app-button
+        label="Tạo nhãn"
+        variant="custom"
+        size="sm"
+        [customStyle]="{
+          backgroundColor: '#08544e',
+          backgroundColorHover: '#06423d',
+          color: '#ffffff',
+          borderRadius: '8px',
+          fontWeight: '600',
+          height: '38px',
+          minWidth: '106px'
+        }"
+        [loading]="isCreatingLabel()"
+        (btnClick)="submitCreateLabel()">
+      </app-button>
+    </div>
+  </div>
+</lib-modal-custom>
+
+<!-- ======================================================= -->
+<!-- Modal: Chỉnh sửa nhãn (Hình 3)                          -->
+<!-- ======================================================= -->
+<lib-modal-custom
+  [isOpen]="isEditLabelModalOpen()"
+  [title]="''"
+  [showCloseIcon]="false"
+  [showFooter]="false"
+  size="sm"
+  class="label-modal"
+  (closeDialog)="closeEditLabelModal()">
+
+  <div class="label-modal-body">
+    <!-- Header -->
+    <div class="d-flex align-items-start justify-content-between mb-3">
+      <div>
+        <h3 class="modal-title-custom fw-bold mb-1">Chỉnh sửa nhãn</h3>
+        <p class="modal-subtitle-custom text-muted mb-0 small">Cập nhật thông tin nhãn</p>
+      </div>
+      <button type="button" class="btn-modal-close" (click)="closeEditLabelModal()" aria-label="Đóng">
+        <i class="bi bi-x-lg text-muted"></i>
+      </button>
+    </div>
+
+    <!-- Form Inputs -->
+    <div class="mb-3">
+      <label class="form-label fw-bold text-dark small mb-1">Tên nhãn</label>
+      <input
+        type="text"
+        class="form-control modal-input"
+        [(ngModel)]="editLabelForm.name"
+        (input)="onEditLabelNameChange()" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold text-dark small mb-1">Slug</label>
+      <input
+        type="text"
+        class="form-control modal-input"
+        [(ngModel)]="editLabelForm.slug" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold text-dark small mb-1">Mô tả</label>
+      <textarea
+        class="form-control modal-textarea"
+        rows="3"
+        [(ngModel)]="editLabelForm.description"></textarea>
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label fw-bold text-dark small mb-1">Màu sắc</label>
+      <div class="d-flex align-items-center gap-2">
+        <div class="color-picker-box position-relative" title="Chọn màu sắc">
+          <div class="color-swatch" [style.backgroundColor]="editLabelForm.color"></div>
+          <input
+            type="color"
+            class="color-input-native"
+            [(ngModel)]="editLabelForm.color" />
+        </div>
+        <input
+          type="text"
+          class="form-control modal-input font-monospace text-uppercase"
+          style="flex: 1;"
+          [(ngModel)]="editLabelForm.color"
+          placeholder="#3B82F6" />
+        <div
+          class="btn-preview-color"
+          [style.backgroundColor]="getLabelBgColor(editLabelForm.color)"
+          [style.color]="getLabelTextColor(editLabelForm.color)">
+          Preview
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer Actions (Hình 3) -->
+    <div class="d-flex align-items-center justify-content-end gap-2 pt-2">
+      <app-button
+        label="Hủy"
+        variant="outline"
+        size="sm"
+        [customStyle]="{
+          height: '38px',
+          minWidth: '76px',
+          borderRadius: '8px',
+          borderColor: '#e2e8f0',
+          color: '#334155'
+        }"
+        (btnClick)="closeEditLabelModal()">
+      </app-button>
+
+      <app-button
+        label="Cập nhật"
+        variant="custom"
+        size="sm"
+        [customStyle]="{
+          backgroundColor: '#08544e',
+          backgroundColorHover: '#06423d',
+          color: '#ffffff',
+          borderRadius: '8px',
+          fontWeight: '600',
+          height: '38px',
+          minWidth: '106px'
+        }"
+        [loading]="isUpdatingLabel()"
+        (btnClick)="submitEditLabel()">
+      </app-button>
+    </div>
+  </div>
+</lib-modal-custom>
+
+<!-- ======================================================= -->
+<!-- Confirm Delete Modal                                    -->
+<!-- ======================================================= -->
+@if (showDeleteModal() && targetDeleteCategory(); as deleteTarget) {
+<tellerapp-confirm-popup
+  title="Xác nhận xóa danh mục"
+  [prompt]="'Bạn có chắc chắn muốn xóa vĩnh viễn danh mục &quot;' + deleteTarget.name + '&quot; không? Hành động này không thể hoàn tác.'"
+  confirmButtonMode="delete"
+  confirmButtonLabel="Xóa"
+  cancelButtonLabel="Hủy"
+  (confirm)="confirmDeleteCategory()"
+  (cancel)="closeDeleteModal()"
+  (closed)="closeDeleteModal()">
+</tellerapp-confirm-popup>
+}
+
+<!-- ======================================================= -->
+<!-- Toast Notification                                      -->
+<!-- ======================================================= -->
+<app-toast-message
+  [visible]="toastVisible"
+  [type]="toastType"
+  [title]="toastTitle"
+  [message]="toastMessage"
+  [duration]="3"
+  (close)="toastVisible = false">
+</app-toast-message>

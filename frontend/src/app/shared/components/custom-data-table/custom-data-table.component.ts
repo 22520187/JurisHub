@@ -274,6 +274,7 @@ export class CustomDataTableComponent<T extends Record<string, unknown> = Record
     const s: Record<string, string> = {};
     if (col.width) s['width'] = col.width;
     else if (col.minWidth) s['minWidth'] = `${col.minWidth}px`;
+    if (col.align) s['textAlign'] = col.align;
     return s;
   }
 

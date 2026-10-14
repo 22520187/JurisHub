@@ -16,4 +16,19 @@ public interface PostCategoryRepository extends JpaRepository<PostCategory, Long
      * Find all active categories ordered by display order
      */
     List<PostCategory> findByIsActiveTrueOrderByDisplayOrderAsc();
+
+    /**
+     * Check if slug exists (for unique validation)
+     */
+    boolean existsBySlug(String slug);
+
+    /**
+     * Check if slug exists for different category (for update validation)
+     */
+    boolean existsBySlugAndIdNot(String slug, Long id);
+
+    /**
+     * Find category by name (case insensitive)
+     */
+    Optional<PostCategory> findByNameIgnoreCase(String name);
 }

@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CustomInputComponent, CheckboxComponent, ButtonComponent } from '../../../shared/components';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -16,6 +16,7 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -45,7 +46,22 @@ export class LoginComponent {
     this.authService.login({ email, password }).subscribe({
       next: (res) => {
         this.isLoading = false;
-        this.router.navigate(['/']);
+        const role = (res?.data?.role || '').toUpperCase();
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+
+        if (role === 'ADMIN') {
+          if (returnUrl && returnUrl.startsWith('/admin')) {
+            this.router.navigateByUrl(returnUrl);
+          } else {
+            this.router.navigate(['/admin/dashboard']);
+          }
+        } else {
+          if (returnUrl && !returnUrl.startsWith('/admin')) {
+            this.router.navigateByUrl(returnUrl);
+          } else {
+            this.router.navigate(['/']);
+          }
+        }
       },
       error: (err) => {
         this.isLoading = false;
@@ -55,11 +71,17 @@ export class LoginComponent {
           this.errorMessage = err.error.message;
         } else if (err?.status === 0 || err?.status === 404) {
           // If server is not running, log in with mock data for local frontend demo
+          const isMockAdmin = email.toLowerCase().includes('admin');
           this.authService.setMockUser({
             name: email.split('@')[0],
-            email: email
+            email: email,
+            role: isMockAdmin ? 'ADMIN' : 'USER'
           });
-          this.router.navigate(['/']);
+          if (isMockAdmin) {
+            this.router.navigate(['/admin/dashboard']);
+          } else {
+            this.router.navigate(['/']);
+          }
         } else {
           this.errorMessage = 'Email hoặc mật khẩu không chính xác. Vui lòng thử lại.';
         }

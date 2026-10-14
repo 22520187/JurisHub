@@ -3,6 +3,8 @@ package com.example.jurisHub.repository;
 import com.example.jurisHub.entity.Post;
 import com.example.jurisHub.entity.PostReply;
 import com.example.jurisHub.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -74,5 +76,11 @@ public interface PostReplyRepository extends JpaRepository<PostReply, Long> {
     @Query("SELECT r FROM PostReply r WHERE r.sentimentLabel = 'negative' AND r.isActive = true AND r.createdAt >= :since ORDER BY r.sentimentScore DESC")
     java.util.List<PostReply> findTopNegativeReplies(@Param("since") java.time.LocalDateTime since, org.springframework.data.domain.Pageable pageable);
 
+    @Query("SELECT r FROM PostReply r WHERE r.sentimentLabel = :label " +
+            "AND (:isActive IS NULL OR r.isActive = :isActive) " +
+            "AND (:search IS NULL OR :search = '' OR LOWER(CAST(r.content as string)) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<PostReply> findBySentimentLabelAndFilters(@Param("label") String label, @Param("isActive") Boolean isActive, @Param("search") String search, Pageable pageable);
 
+    @Query("SELECT r FROM PostReply r WHERE r.sentimentLabel = :label")
+    Page<PostReply> findBySentimentLabel(@Param("label") String label, Pageable pageable);
 }

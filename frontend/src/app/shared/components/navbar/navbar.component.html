@@ -69,6 +69,16 @@
 
             <div class="dropdown-divider"></div>
 
+            @if (isAdmin) {
+            <!-- Menu Item Admin: Trang quản trị -->
+            <button type="button" class="dropdown-menu-item text-primary" (click)="onNavigate('/admin/dashboard')">
+              <i class="bi bi-shield-lock item-icon text-primary"></i>
+              <span class="item-label fw-semibold">Trang quản trị (Admin)</span>
+            </button>
+
+            <div class="dropdown-divider"></div>
+            }
+
             <!-- Menu Item 1: Hồ sơ cá nhân -->
             <button type="button" class="dropdown-menu-item" (click)="onNavigate('/profile')">
               <i class="bi bi-person item-icon"></i>

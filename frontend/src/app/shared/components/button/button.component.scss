@@ -25,6 +25,7 @@
   --btn-bg-active:    #104593;
   --btn-color:        #ffffff;
   --btn-border-color: transparent;
+  --btn-border-width: 1px;
   --btn-radius:       8px;
   --btn-padding-y:    9px;
   --btn-padding-x:    18px;
@@ -46,7 +47,7 @@
   padding: var(--btn-padding-y) var(--btn-padding-x);
   background: var(--btn-bg);
   color: var(--btn-color);
-  border: var(--btn-border-width) solid var(--btn-border-color);
+  border: var(--btn-border-width, 1px) solid var(--btn-border-color);
   border-radius: var(--btn-radius);
   font-size: var(--btn-font-size);
   font-weight: var(--btn-font-weight);
@@ -285,6 +286,7 @@
     --btn-bg-active:    rgba(239, 68, 68, 0.12);
     --btn-color:        #ef4444;
     --btn-border-color: #ef4444;
+    --btn-border-width: 1px;
     --btn-shadow:       none;
     --btn-shadow-hover: none;
   }

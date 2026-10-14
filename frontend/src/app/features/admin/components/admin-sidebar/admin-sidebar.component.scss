@@ -1,0 +1,147 @@
+.admin-sidebar {
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #ffffff;
+  border-right: 1px solid #eaecf0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.sidebar-header {
+  padding: 22px 20px 20px 24px;
+  border-bottom: 1px solid transparent;
+
+  .brand-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+  }
+
+  .brand-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  .brand-subtitle {
+    font-size: 0.8125rem;
+    color: #64748b;
+    font-weight: 400;
+  }
+}
+
+/* Navigation Menu */
+.sidebar-nav {
+  padding: 12px 12px;
+  overflow-y: auto;
+
+  .nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .nav-link-custom {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #475569;
+    text-decoration: none;
+    transition: all 0.15s ease-in-out;
+    cursor: pointer;
+
+    .item-icon-wrapper {
+      width: 20px;
+      height: 20px;
+      color: #64748b;
+      transition: color 0.15s ease-in-out;
+    }
+
+    &:hover {
+      background-color: #f8fafc;
+      color: #0f172a;
+
+      .item-icon-wrapper {
+        color: #1e293b;
+      }
+    }
+
+    &.active {
+      background-color: #ebf3fe;
+      color: #1d68f0;
+      font-weight: 600;
+
+      .item-icon-wrapper {
+        color: #1d68f0;
+      }
+    }
+  }
+}
+
+/* Footer matching screenshot */
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #eaecf0;
+  background-color: #ffffff;
+  margin-top: auto;
+
+  .footer-avatar-wrapper {
+    width: 36px;
+    height: 36px;
+  }
+
+  .footer-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #ea4335;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .avatar-badge-dot {
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    width: 9px;
+    height: 9px;
+    background-color: #dc2626;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+  }
+
+  .btn-logout {
+    border: 1px solid #fecaca;
+    background-color: #ffffff;
+    color: #dc2626;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+
+    &:hover {
+      background-color: #fef2f2;
+      border-color: #fca5a5;
+      color: #b91c1c;
+    }
+
+    &:active {
+      background-color: #fee2e2;
+    }
+  }
+}

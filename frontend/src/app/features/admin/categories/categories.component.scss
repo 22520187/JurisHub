@@ -1,0 +1,580 @@
+:host {
+  display: block;
+}
+
+.categories-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.categories-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.categories-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 400;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Search & Total Info Bar (Screenshot 1)
+───────────────────────────────────────────────────────────── */
+.search-info-bar {
+  .search-input-wrapper {
+    .search-icon {
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.95rem;
+      pointer-events: none;
+      color: #94a3b8;
+    }
+
+    .search-input {
+      height: 40px;
+      padding-left: 38px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      font-size: 0.875rem;
+      background-color: #ffffff;
+      color: #1e293b;
+      transition: border-color 0.15s, box-shadow 0.15s;
+
+      &:focus {
+        border-color: #08544e;
+        box-shadow: 0 0 0 3px rgba(8, 84, 78, 0.12);
+        outline: none;
+      }
+
+      &::placeholder {
+        color: #94a3b8;
+      }
+    }
+  }
+
+  .total-categories-text {
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Categories List Card & Table (Screenshot 1)
+───────────────────────────────────────────────────────────── */
+.categories-list-card {
+  background-color: #ffffff;
+  border: 1px solid #eaecf0 !important;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
+
+  .card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Table overrides matching JurisHub theme */
+::ng-deep tellerapp-custom-data-table {
+  .tbl-container {
+    border-radius: 8px;
+    border: 1px solid #f1f5f9;
+  }
+
+  .tbl-scroll {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    thead th {
+      background-color: #ffffff !important;
+      color: #64748b !important;
+      font-size: 0.8125rem !important;
+      font-weight: 600 !important;
+      padding: 14px 16px !important;
+      border-bottom: 1px solid #eaecf0 !important;
+      text-transform: none !important;
+      letter-spacing: normal !important;
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 16px 16px !important;
+      border-bottom: 1px solid #f1f5f9 !important;
+      font-size: 0.875rem !important;
+      color: #1e293b !important;
+      vertical-align: middle;
+      background-color: #ffffff;
+      transition: background-color 0.12s ease;
+    }
+
+    tbody tr:hover td {
+      background-color: #fafbfd !important;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none !important;
+    }
+  }
+
+  /* Pagination styling */
+  .tbl-pagination {
+    padding: 14px 16px !important;
+    border-top: 1px solid #eaecf0 !important;
+    background-color: #ffffff !important;
+
+    .tbl-pg-btn {
+      border-radius: 6px !important;
+      border-color: #e2e8f0 !important;
+      color: #334155 !important;
+      height: 32px !important;
+      min-width: 32px !important;
+      font-size: 0.8125rem !important;
+
+      &:hover:not(:disabled):not(.tbl-pg-btn--active) {
+        background: #f8fafc !important;
+        color: #0f172a !important;
+      }
+
+      &--active {
+        background: #08544e !important;
+        color: #ffffff !important;
+        border-color: #08544e !important;
+        font-weight: 600 !important;
+      }
+    }
+  }
+}
+
+.cat-name {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 0.875rem;
+}
+
+.badge-slug-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background-color: #f1f5f9;
+  color: #475569;
+  font-size: 0.8125rem;
+  font-family: inherit;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.cat-desc {
+  color: #475569;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 420px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Actions Menu (...) (Screenshot 1 & 3)
+───────────────────────────────────────────────────────────── */
+.btn-action-more {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+
+  &:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+  }
+}
+
+.action-dropdown-menu {
+  min-width: 145px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  padding: 6px;
+  z-index: 1000;
+  animation: fadeInDown 0.15s ease-out;
+
+  .action-item {
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: background-color 0.12s, color 0.12s;
+    cursor: pointer;
+
+    i {
+      font-size: 0.95rem;
+      color: #475569;
+    }
+
+    &:hover {
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+
+    &.action-item-danger {
+      color: #dc2626;
+
+      i {
+        color: #dc2626;
+      }
+
+      &:hover {
+        background-color: #fef2f2;
+        color: #b91c1c;
+      }
+    }
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Modal Styling (Screenshot 2, 4, 5)
+───────────────────────────────────────────────────────────── */
+::ng-deep lib-modal-custom.category-modal {
+  .modal-overlay {
+    padding: 24px 16px;
+    background-color: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+    z-index: 1050;
+  }
+
+  .modal-container {
+    max-width: 520px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    border: 1px solid #f1f5f9;
+    background-color: #ffffff;
+    overflow: hidden;
+
+    /* Hide default blue modal header */
+    .modal-header {
+      display: none !important;
+    }
+
+    .modal-content {
+      padding: 24px 28px !important;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+  }
+}
+
+.category-modal-body {
+  .btn-modal-close {
+    background: none;
+    border: none;
+    padding: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    line-height: 1;
+    transition: transform 0.15s, color 0.15s;
+
+    &:hover {
+      transform: scale(1.1);
+      color: #0f172a !important;
+    }
+  }
+
+  .modal-title-custom {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+  }
+
+  .modal-subtitle-custom {
+    font-size: 0.8125rem;
+    color: #64748b;
+  }
+
+  .modal-input {
+    height: 42px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 0.875rem;
+    padding: 8px 12px;
+    color: #0f172a;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:focus {
+      border-color: #08544e;
+      box-shadow: 0 0 0 3px rgba(8, 84, 78, 0.12);
+      outline: none;
+    }
+  }
+
+  .modal-textarea {
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 0.875rem;
+    padding: 10px 12px;
+    color: #0f172a;
+    resize: vertical;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:focus {
+      border-color: #08544e;
+      box-shadow: 0 0 0 3px rgba(8, 84, 78, 0.12);
+      outline: none;
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     Labels Section inside Edit Modal (Screenshot 4 & 5)
+  ───────────────────────────────────────────────────────────── */
+  .labels-section {
+    border-color: #f1f5f9 !important;
+
+    .labels-section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .add-label-box {
+      border-color: #cbd5e1 !important;
+      background-color: #f8fafc;
+    }
+
+    .label-item-row {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      transition: border-color 0.15s, background-color 0.15s;
+
+      &:hover {
+        border-color: #cbd5e1;
+        background-color: #fcfcfd;
+      }
+    }
+
+    .badge-label-pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      line-height: 1.2;
+
+      &.badge-label-red {
+        background-color: #fee2e2;
+        color: #b91c1c;
+      }
+
+      &.badge-label-gray {
+        background-color: #f1f5f9;
+        color: #334155;
+      }
+    }
+
+    .label-slug-text {
+      font-size: 0.8125rem;
+      color: #64748b;
+      font-family: inherit;
+    }
+
+    .btn-label-action {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background-color 0.15s, color 0.15s;
+
+      &:hover {
+        background-color: #f1f5f9;
+        color: #0f172a;
+      }
+
+      &.text-danger:hover {
+        background-color: #fef2f2;
+        color: #dc2626 !important;
+      }
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Label Modals (Hình 1, 2, 3)
+───────────────────────────────────────────────────────────── */
+::ng-deep lib-modal-custom.label-modal {
+  .modal-overlay {
+    padding: 24px 16px;
+    background-color: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    z-index: 1100;
+  }
+
+  .modal-container {
+    max-width: 440px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    border: 1px solid #f1f5f9;
+    background-color: #ffffff;
+    overflow: hidden;
+
+    /* Hide default blue modal header */
+    .modal-header {
+      display: none !important;
+    }
+
+    .modal-content {
+      padding: 24px 28px !important;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+  }
+}
+
+.label-modal-body {
+  .btn-modal-close {
+    background: none;
+    border: none;
+    padding: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    line-height: 1;
+    transition: transform 0.15s, color 0.15s;
+
+    &:hover {
+      transform: scale(1.1);
+      color: #0f172a !important;
+    }
+  }
+
+  .modal-title-custom {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+  }
+
+  .modal-subtitle-custom {
+    font-size: 0.8125rem;
+    color: #64748b;
+  }
+
+  .modal-input {
+    height: 42px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 0.875rem;
+    padding: 8px 12px;
+    color: #0f172a;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:focus {
+      border-color: #08544e;
+      box-shadow: 0 0 0 3px rgba(8, 84, 78, 0.12);
+      outline: none;
+    }
+  }
+
+  .modal-textarea {
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 0.875rem;
+    padding: 10px 12px;
+    color: #0f172a;
+    resize: vertical;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:focus {
+      border-color: #08544e;
+      box-shadow: 0 0 0 3px rgba(8, 84, 78, 0.12);
+      outline: none;
+    }
+  }
+
+  .color-picker-box {
+    width: 68px;
+    height: 42px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 5px;
+    background-color: #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:hover {
+      border-color: #94a3b8;
+    }
+
+    .color-swatch {
+      width: 100%;
+      height: 100%;
+      border-radius: 4px;
+      transition: background-color 0.15s;
+    }
+
+    .color-input-native {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      margin: 0;
+    }
+  }
+
+  .btn-preview-color {
+    height: 42px;
+    padding: 0 20px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background-color 0.15s, color 0.15s;
+    user-select: none;
+  }
+}
+
