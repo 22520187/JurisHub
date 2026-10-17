@@ -1,1 +1,11 @@
 <router-outlet></router-outlet>
+@if (toastService.toast(); as currentToast) {
+  <app-toast-message
+    [visible]="currentToast.visible"
+    [type]="currentToast.type"
+    [title]="currentToast.title"
+    [message]="currentToast.message"
+    [duration]="currentToast.duration"
+    (close)="toastService.hide()">
+  </app-toast-message>
+}

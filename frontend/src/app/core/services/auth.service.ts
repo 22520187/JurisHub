@@ -1,7 +1,9 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable, tap, catchError, of, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ToastService } from './toast.service';
 
 export interface UserProfile {
   id: string | number;
@@ -48,8 +50,12 @@ export interface RegisterRequest {
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
   private readonly apiUrl = environment.apiUrl;
   private readonly STORAGE_KEY = 'jurishub_user';
+
+  private isHandlingSessionExpiry = false;
 
   // State signals
   private currentUserSignal = signal<UserProfile | null>(this.getStoredUser());
@@ -122,19 +128,65 @@ export class AuthService {
   }
 
   /**
+   * Handle expired session: clear state, show toast notification, and auto logout/redirect
+   */
+  handleSessionExpired(): void {
+    if (this.isHandlingSessionExpiry) return;
+    this.isHandlingSessionExpiry = true;
+
+    const hadUser = !!this.currentUserSignal();
+    this.clearUserProfile();
+
+    if (hadUser) {
+      this.toastService.warning(
+        'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
+        'Hết phiên làm việc'
+      );
+    }
+
+    // Call backend logout to clear any server-side cookies/session
+    this.http.post(`${this.apiUrl}/auth/logout`, {}, { withCredentials: true }).pipe(
+      catchError(() => of(null))
+    ).subscribe();
+
+    // Redirect to login page if on protected or non-auth route
+    const currentUrl = this.router.url;
+    if (!currentUrl.includes('/login') && !currentUrl.includes('/register')) {
+      this.router.navigate(['/login']);
+    }
+
+    setTimeout(() => {
+      this.isHandlingSessionExpiry = false;
+    }, 1500);
+  }
+
+  /**
    * Check current authenticated session with backend GET /api/auth/me
    */
   checkSession(): void {
+    const hadSession = !!this.currentUserSignal();
+
     this.getMe().subscribe({
       next: (res) => {
         if (res.success && res.data) {
           const profile = this.mapAuthResponseToProfile(res.data);
           this.setUserProfile(profile);
+        } else if (hadSession) {
+          this.handleSessionExpired();
         }
       },
-      error: () => {
-        // If 401 or not authenticated, only clear if we are not in mock demo mode
-        // For development fallback: if backend is not running, we keep the stored user
+      error: (err) => {
+        // If 401 Unauthorized or 403 Forbidden, session has expired on backend
+        if (err.status === 401 || err.status === 403) {
+          if (hadSession) {
+            this.handleSessionExpired();
+          } else {
+            this.clearUserProfile();
+          }
+        } else {
+          // If server is unreachable in dev environment, log warning and preserve offline state
+          console.warn('Backend session check unavailable:', err);
+        }
       }
     });
   }

@@ -23,7 +23,7 @@ export class ToastMessageComponent implements OnChanges, OnDestroy {
   private timer: any;
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['visible'] && this.visible) {
+    if ((changes['visible'] && this.visible) || (this.visible && changes['message'])) {
       this.startAutoClose();
     }
   }

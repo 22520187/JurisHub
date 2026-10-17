@@ -32,7 +32,8 @@
     }
   }
 
-  &.error {
+  &.error,
+  &.warning {
     background-color: #FFF4E5;
     border-color: #D46B08;
     
@@ -42,6 +43,20 @@
 
     .divider {
       background-color: #D46B08;
+      opacity: 0.3;
+    }
+  }
+
+  &.info {
+    background-color: #E6F4FF;
+    border-color: #1677FF;
+
+    .toast-message {
+      color: #0958D9;
+    }
+
+    .divider {
+      background-color: #1677FF;
       opacity: 0.3;
     }
   }
